@@ -1,0 +1,31 @@
+# Java / Spring Boot
+target/
+*.class
+*.jar
+*.war
+*.iml
+*.log
+logs/
+bin/
+
+# IntelliJ IDEA
+.idea/
+*.ipr
+*.iws
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# Node / React
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
