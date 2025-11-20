@@ -13,7 +13,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login").permitAll()   // allow public access
+                        .requestMatchers("/auth/register", "/auth/login", "/auth/verify").permitAll()   // allow public access
                         .anyRequest().authenticated()                                  // everything else requires login
                 );
 
