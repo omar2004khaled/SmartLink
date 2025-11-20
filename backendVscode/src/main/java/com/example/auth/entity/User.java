@@ -33,7 +33,7 @@ public class User {
 
     private boolean enabled = false;
 
-    private String role = "USER";
+    private String role = "USER"; // USER or ADMIN
 
     // Constructors
     public User() {}
