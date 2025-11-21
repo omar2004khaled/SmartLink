@@ -39,6 +39,9 @@ class AuthServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private com.example.auth.config.JwtService jwtService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -153,5 +156,62 @@ class AuthServiceTest {
                 () -> authService.register(validRequest));
         // Match whatever your actual service returns
         assertTrue(exception.getMessage().contains("age") || exception.getMessage().contains("birth date"));
+    }
+
+    // --- Login related tests ---
+    @Test
+    void login_WithValidCredentials_ShouldReturnToken() {
+        // Arrange
+        String email = "john@example.com";
+        String rawPassword = "Pass123!";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("encoded");
+        user.setEnabled(true);
+        user.setRole("USER");
+
+        when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, "encoded")).thenReturn(true);
+
+        when(jwtService.generateToken(email, "USER")).thenReturn("jwt-token-123");
+
+        // Act
+        String token = authService.login(email, rawPassword);
+
+        // Assert
+        assertEquals("jwt-token-123", token);
+    }
+
+    @Test
+    void login_WithInvalidPassword_ShouldThrow() {
+        String email = "john@example.com";
+        String rawPassword = "WrongPass";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("encoded");
+        user.setEnabled(true);
+
+        when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, "encoded")).thenReturn(false);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.login(email, rawPassword));
+        assertEquals("Invalid password", ex.getMessage());
+    }
+
+    @Test
+    void login_WithUnverifiedEmail_ShouldThrow() {
+        String email = "john@example.com";
+        String rawPassword = "Pass123!";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("encoded");
+        user.setEnabled(false);
+
+        when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.login(email, rawPassword));
+        assertEquals("Please verify your email first", ex.getMessage());
     }
 }
