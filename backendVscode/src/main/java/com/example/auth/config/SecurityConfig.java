@@ -1,6 +1,7 @@
 package com.example.auth.config;
 
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,9 +23,11 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()     // Public auth endpoints
+                        .requestMatchers("/auth/**",
+                                "/api/**")
+                        .permitAll() // Public auth endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN") // Admin only
-                        .anyRequest().authenticated()                // All other endpoints require auth
+                        .anyRequest().authenticated() // All other endpoints require auth
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
