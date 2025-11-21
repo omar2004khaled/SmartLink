@@ -1,15 +1,16 @@
 package com.example.auth.config;
 
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     private final JwtService jwtService;
 
     public SecurityConfig(JwtService jwtService) {
@@ -21,10 +22,14 @@ public class SecurityConfig {
         JwtAuthFilter jwtFilter = new JwtAuthFilter(jwtService);
 
         http.csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()     // Public auth endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // Admin only
-                        .anyRequest().authenticated()                // All other endpoints require auth
+                        .requestMatchers("/auth/**").permitAll()          // Public auth endpoints
+                        .requestMatchers("/api/public").permitAll()       // Public API endpoint
+                        .requestMatchers("/admin/**").hasRole("ADMIN")    // ADMIN role required
+                        .anyRequest().authenticated()                     // All other endpoints require any authentication
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
