@@ -22,12 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AuthControllerTest {
+class AuthControllerRegisterTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean // NEW: Replaces @MockBean
+    @MockitoBean
     private AuthService authService;
 
     @Autowired
@@ -35,11 +35,9 @@ class AuthControllerTest {
 
     @Test
     void register_WithValidRequest_ShouldReturnSuccess() throws Exception {
-        // Arrange
         RegisterRequest request = createValidRegisterRequest();
         doNothing().when(authService).register(any(RegisterRequest.class));
 
-        // Act & Assert
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -49,12 +47,10 @@ class AuthControllerTest {
 
     @Test
     void register_WithInvalidRequest_ShouldReturnBadRequest() throws Exception {
-        // Arrange
         RegisterRequest request = createValidRegisterRequest();
         doThrow(new IllegalArgumentException("Email already exists"))
                 .when(authService).register(any(RegisterRequest.class));
 
-        // Act & Assert
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

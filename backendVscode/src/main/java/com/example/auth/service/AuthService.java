@@ -7,6 +7,7 @@ import com.example.auth.repository.VerificationTokenRepository;
 import com.example.auth.entity.User;
 import com.example.auth.entity.VerificationToken;
 import com.example.auth.dto.RegisterRequest;
+import com.example.auth.config.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -19,15 +20,18 @@ public class AuthService {
     private final VerificationTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtService jwtService;
 
     public AuthService(UserRepository userRepo,
                        VerificationTokenRepository tokenRepo,
                        PasswordEncoder passwordEncoder,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       JwtService jwtService) {
         this.userRepo = userRepo;
         this.tokenRepo = tokenRepo;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.jwtService = jwtService;
     }
 
     @Transactional
@@ -82,5 +86,29 @@ public class AuthService {
 
         // 8. Send verification email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
+
+
+    }
+    public String login(String email, String password) {
+        // 1. Find user by email
+        var userOptional = userRepo.findByEmail(email.toLowerCase());
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User user = userOptional.get();
+
+        // 2. Check if email is verified
+        if (!user.isEnabled()) {
+            throw new IllegalArgumentException("Please verify your email first");
+        }
+
+        // 3. Check if password matches
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid password");
+        }
+
+        // 4. Generate JWT token
+        return jwtService.generateToken(user.getEmail(), user.getRole());
     }
 }
