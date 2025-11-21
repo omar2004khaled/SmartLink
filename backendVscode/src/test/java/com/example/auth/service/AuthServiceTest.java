@@ -214,4 +214,94 @@ class AuthServiceTest {
                 () -> authService.login(email, rawPassword));
         assertEquals("Please verify your email first", ex.getMessage());
     }
+
+    // ========== GET USER ROLE TESTS ==========
+
+    @Test
+    void getUserRole_WithValidEmail_ShouldReturnUserRole() {
+        // Arrange
+        String email = "john@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setRole("USER");
+
+        when(userRepository.findByEmail(email.toLowerCase())).thenReturn(java.util.Optional.of(user));
+
+        // Act
+        String role = authService.getUserRole(email);
+
+        // Assert
+        assertEquals("USER", role);
+        verify(userRepository).findByEmail(email.toLowerCase());
+    }
+
+    @Test
+    void getUserRole_WithAdminRole_ShouldReturnAdminRole() {
+        // Arrange
+        String email = "admin@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setRole("ADMIN");
+
+        when(userRepository.findByEmail(email.toLowerCase())).thenReturn(java.util.Optional.of(user));
+
+        // Act
+        String role = authService.getUserRole(email);
+
+        // Assert
+        assertEquals("ADMIN", role);
+    }
+
+    @Test
+    void getUserRole_WithNonexistentEmail_ShouldThrow() {
+        // Arrange
+        String email = "nonexistent@example.com";
+        when(userRepository.findByEmail(email.toLowerCase())).thenReturn(java.util.Optional.empty());
+
+        // Act & Assert
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.getUserRole(email));
+        assertEquals("User not found", ex.getMessage());
+    }
+
+    @Test
+    void getUserRole_ShouldBeCaseInsensitive() {
+        // Arrange
+        String email = "John@Example.com";
+        User user = new User();
+        user.setEmail(email.toLowerCase());
+        user.setRole("USER");
+
+        when(userRepository.findByEmail(email.toLowerCase())).thenReturn(java.util.Optional.of(user));
+
+        // Act
+        String role = authService.getUserRole(email);
+
+        // Assert
+        assertEquals("USER", role);
+        verify(userRepository).findByEmail(email.toLowerCase());
+    }
+
+    @Test
+    void login_ShouldReturnTokenWithCorrectRole() {
+        // Arrange
+        String email = "alice@example.com";
+        String rawPassword = "Pass123!";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("encoded");
+        user.setEnabled(true);
+        user.setRole("ADMIN");
+
+        when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, "encoded")).thenReturn(true);
+        when(jwtService.generateToken(email, "ADMIN")).thenReturn("jwt-token-admin");
+
+        // Act
+        String token = authService.login(email, rawPassword);
+
+        // Assert
+        assertEquals("jwt-token-admin", token);
+        verify(jwtService).generateToken(email, "ADMIN");
+    }
 }
