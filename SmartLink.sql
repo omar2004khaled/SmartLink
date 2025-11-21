@@ -26,7 +26,7 @@ CREATE TABLE Users (
     UserId          BIGINT AUTO_INCREMENT PRIMARY KEY,
     Phone           VARCHAR(20) UNIQUE,
     Name            VARCHAR(100),
-    Role            ENUM('ADMIN','USER'),
+    Role            ENUM('ADMIN','USER','Company'),
     Email           VARCHAR(150) UNIQUE NOT NULL,
     PasswordHash    VARCHAR(255) NOT NULL,
     active          BOOLEAN NOT NULL
@@ -56,7 +56,7 @@ CREATE TABLE JobSeekerProfile (
     Headline        VARCHAR(255),
     Gender          ENUM('MALE','FEMALE'),
     LocationId      BIGINT,
-
+    BirthDate       DATE,
     FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
     FOREIGN KEY (LocationId) REFERENCES Location(LocationId) ON DELETE SET NULL
 );
@@ -71,8 +71,42 @@ CREATE TABLE Education (
     EducationId     BIGINT AUTO_INCREMENT PRIMARY KEY,
     ProfileId       BIGINT NOT NULL,
     School          VARCHAR(200),
-    Degree          VARCHAR(200),
-    FieldOfStudy    VARCHAR(200),
+    ENUM(
+    'Certificate',
+    'Diploma',
+    'Associate',
+    'Bachelor of Arts (BA)',
+    'Bachelor of Science (BSc)',
+    'Bachelor of Engineering (BEng)',
+    'Master of Arts (MA)',
+    'Master of Science (MSc)',
+    'Master of Engineering (MEng)',
+    'Doctor of Philosophy (PhD)',
+    'Professional Doctorate (DBA, EdD, etc.)'
+)
+,
+    FieldOfStudy    ENUM(
+    'Computer Science',
+    'Information Technology',
+    'Software Engineering',
+    'Data Science',
+    'Business Administration',
+    'Accounting',
+    'Finance',
+    'Economics',
+    'Marketing',
+    'Mechanical Engineering',
+    'Electrical Engineering',
+    'Civil Engineering',
+    'Biology',
+    'Chemistry',
+    'Physics',
+    'Mathematics',
+    'Nursing',
+    'Psychology',
+    'Education',
+    'Architecture'
+),
     StartDate       DATE,
     EndDate         DATE,
     Description     TEXT,
@@ -132,7 +166,7 @@ CREATE TABLE Experience (
     ExperienceId    BIGINT AUTO_INCREMENT PRIMARY KEY,
     ProfileId       BIGINT NOT NULL,
     CompanyName     VARCHAR(200)NOT NULL,
-    Title           VARCHAR(200),
+    Title           VARCHAR(50),
     Location        VARCHAR(150) NOT NULL,
     StartDate       DATE NOT NULL,
     EndDate         DATE NOT NULL,
@@ -228,9 +262,8 @@ CREATE TABLE Comments_Attach(
 -- ===================================
 CREATE TABLE Comments_like(
     UserId      BIGINT,
-    CommentsId  BIGINT,
-    PRIMARY KEY (CommentsId, UserId),
-
-    FOREIGN KEY (CommentsId) REFERENCES Comments(CommentsId) ON DELETE CASCADE,
+    CommentId  BIGINT,
+    PRIMARY KEY (CommentId, UserId),
+    FOREIGN KEY (CommentId) REFERENCES Comments(CommentId) ON DELETE CASCADE,
     FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE
 );
