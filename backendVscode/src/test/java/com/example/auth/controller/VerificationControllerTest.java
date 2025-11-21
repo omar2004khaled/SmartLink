@@ -3,7 +3,8 @@ package com.example.auth.controller;
 import com.example.auth.service.VerificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -15,17 +16,18 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(VerificationController.class)
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
 class VerificationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean // NEW: Replaces @MockBean
+    @MockitoBean
     private VerificationService verificationService;
 
     @Test
-    @WithMockUser // NEW: Add mock user to bypass security
+    @WithMockUser
     void verify_WithValidToken_ShouldReturnSuccessMessage() throws Exception {
         // Arrange
         String token = "valid-token-123";
