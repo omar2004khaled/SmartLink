@@ -1,12 +1,17 @@
 package com.example.auth.controller;
 
-import org.springframework.web.bind.annotation.*;
-import com.example.auth.dto.RegisterRequest;
-import com.example.auth.dto.LoginRequest;
-import com.example.auth.dto.AuthResponse;
-import com.example.auth.service.AuthService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.auth.dto.AuthResponse;
+import com.example.auth.dto.LoginRequest;
+import com.example.auth.dto.RegisterRequest;
+import com.example.auth.service.AuthService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -32,12 +37,12 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             String token = authService.login(request.getEmail(), request.getPassword());
+            String role = authService.getUserRole(request.getEmail());
 
             AuthResponse response = new AuthResponse(
                     token,
-                    "USER",  // For now, all users are "USER" role
-                    request.getEmail()
-            );
+                    role,
+                    request.getEmail());
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {

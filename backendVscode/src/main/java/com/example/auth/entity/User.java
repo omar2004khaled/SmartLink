@@ -2,7 +2,7 @@ package com.example.auth.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email"),
@@ -20,6 +20,7 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(name = "birth_date", nullable = false)
@@ -118,5 +119,15 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", role='" + role + '\'' +
+                ", enabled=" + enabled +
+                '}';
     }
 }

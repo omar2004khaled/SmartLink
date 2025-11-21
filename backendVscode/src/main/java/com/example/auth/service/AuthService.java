@@ -111,4 +111,12 @@ public class AuthService {
         // 4. Generate JWT token
         return jwtService.generateToken(user.getEmail(), user.getRole());
     }
+
+    public String getUserRole(String email) {
+        var userOptional = userRepo.findByEmail(email.toLowerCase());
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return userOptional.get().getRole();
+    }
 }
