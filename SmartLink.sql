@@ -71,19 +71,19 @@ CREATE TABLE Education (
     EducationId     BIGINT AUTO_INCREMENT PRIMARY KEY,
     ProfileId       BIGINT NOT NULL,
     School          VARCHAR(200),
-    ENUM(
-    'Certificate',
-    'Diploma',
-    'Associate',
-    'Bachelor of Arts (BA)',
-    'Bachelor of Science (BSc)',
-    'Bachelor of Engineering (BEng)',
-    'Master of Arts (MA)',
-    'Master of Science (MSc)',
-    'Master of Engineering (MEng)',
-    'Doctor of Philosophy (PhD)',
-    'Professional Doctorate (DBA, EdD, etc.)'
-)
+    degree           ENUM(
+                    'Certificate',
+                    'Diploma',
+                    'Associate',
+                    'Bachelor of Arts (BA)',
+                    'Bachelor of Science (BSc)',
+                    'Bachelor of Engineering (BEng)',
+                    'Master of Arts (MA)',
+                    'Master of Science (MSc)',
+                    'Master of Engineering (MEng)',
+                    'Doctor of Philosophy (PhD)',
+                    'Professional Doctorate (DBA, EdD, etc.)'
+                    )
 ,
     FieldOfStudy    ENUM(
     'Computer Science',
