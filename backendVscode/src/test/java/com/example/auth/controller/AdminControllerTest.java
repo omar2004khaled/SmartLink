@@ -85,7 +85,7 @@ class AdminControllerTest {
     @Test
     void adminDashboard_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/admin/dashboard"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
     }
 
     // ========== GET ALL USERS TESTS ==========
@@ -121,7 +121,7 @@ class AdminControllerTest {
     @Test
     void getAllUsers_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/admin/users"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
     }
 
     // ========== GET STATISTICS TESTS ==========
@@ -326,19 +326,19 @@ class AdminControllerTest {
     @Test
     void adminEndpoints_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/admin/dashboard"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
 
         mockMvc.perform(get("/admin/users"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
 
         mockMvc.perform(get("/admin/stats"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
 
         mockMvc.perform(post("/admin/promote/1"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
 
         mockMvc.perform(post("/admin/demote/1"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
     }
 
     @Test
