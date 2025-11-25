@@ -1,15 +1,21 @@
 package com.example.auth.controller;
 
-import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import com.example.auth.repository.UserRepository;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.auth.entity.User;
-import java.util.Optional;
+import com.example.auth.repository.UserRepository;
 
 @RestController
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")  // All endpoints in this controller require ADMIN role
+@PreAuthorize("hasRole('ADMIN')") // All endpoints in this controller require ADMIN role
 public class AdminController {
 
     private final UserRepository userRepository;
@@ -83,7 +89,7 @@ public class AdminController {
         User user = userOptional.get();
 
         // Prevent demoting super admin
-        if ("superadmin@example.com".equals(user.getEmail())) {
+        if ("BigBoss@example.com".equals(user.getEmail())) {
             return ResponseEntity.badRequest().body("Cannot demote super admin");
         }
 
