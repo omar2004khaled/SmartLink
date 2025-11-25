@@ -13,6 +13,20 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 0;
   overflow: hidden;
+  position: relative;
+}
+
+.owner-badge {
+  position: absolute;
+  top: 220px;
+  right: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .company-info-wrapper {
