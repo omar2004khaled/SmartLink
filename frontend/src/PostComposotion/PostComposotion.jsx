@@ -77,7 +77,8 @@ export default function PostComposer() {
 
     setPostText("");
     setMediaFiles([]);
-    setFeeling(null);
+    
+    setFeeling(null); 
   };
 
   return (
