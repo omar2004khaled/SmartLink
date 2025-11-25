@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import CompanyLogo from './CompanyLogo';
-import CompanyHeader from './CompanyHeader';
-import ActionButtons from './ActionButtons';
-import NavigationTabs from './NavigationTabs';
-import OverviewSection from './OverviewSection';
-import LocationsSection from './LocationsSection';
-import PostsTab from './PostsTab';
+import CompanyLogo from '../Logos/CompanyLogo';
+import CompanyHeader from '../Header/CompanyHeader';
+import ActionButtons from '../Buttons/ActionButtons';
+import NavigationTabs from '../Tabs/NavigationTabs';
+import OverviewSection from '../Tabs/OverviewSection';
+import LocationsSection from '../LocationSection/LocationsSection';
+import PostsTab from '../Tabs/PostsTab';
+import './CompanyProfile.css';
 
 export default function CompanyProfile({ companyId,userId }) {
   const [activeTab, setActiveTab] = useState('About');
@@ -13,15 +14,21 @@ export default function CompanyProfile({ companyId,userId }) {
   const [tabData, setTabData] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const tabs = ['About', 'Posts'];
 
   useEffect(() => {
-    fetchCompanyBasicData();
+    const fetchData = async () => {
+      await fetchCompanyBasicData();
+      await fetchTabData('About');
+    };
+    
+    fetchData();
   }, [companyId]);
 
   const fetchCompanyBasicData = async () => {
     try {
-
+      setLoading(true);
       const response = await fetch(`/api/company/${companyId}`);
       if (!response.ok) throw new Error('Failed to fetch company data');
       const data = await response.json();
@@ -29,6 +36,9 @@ export default function CompanyProfile({ companyId,userId }) {
       setIsFollowing(data.isFollowing || false);
     } catch (err) {
       setError(err.message);
+      console.error('Error fetchCompanyBasicData:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,46 +59,78 @@ export default function CompanyProfile({ companyId,userId }) {
       const data = await response.json();
       setTabData(data);
     } catch (err) {
-      console.error(`Error get ${tab}:`, err);
+       console.error(`Error get ${tab}:`, err);
       setError(err.message);
     }
   };
 
   const handleFollow = async () => {
     try{
-        const op=isFollowing?"unfollow":"follow";
-        const response = await fetch(`/api/company/${companyId}/${op}`,{
-            method:"POST",
-            headers:{
-                'Content-Type': 'application/json',
-            },
-            body:JSON.stringify({userId:userId}),
-        });
-        if(!response.ok) throw new Error(`failed in ${op}`);
-        setIsFollowing(!isFollowing);
+      const op=isFollowing?"unfollow":"follow";
+      const response = await fetch(`/api/company/${companyId}/${op}`,{
+        method:"POST",
+        headers:{
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({userId:userId}),
+      });
+      if(!response.ok) throw new Error(`failed in ${op}`);
+      setIsFollowing(!isFollowing);
+      if(op==="follow"){
+        companyData.numberOfFollowers +=1 
+      }else{
+        companyData.numberOfFollowers -=1; 
+      }
+      
 
     } catch(err){
-        setError(err.message);
-
+      setError(err.message);
+      console.error('Error handleFollow:', err);
     }
-   
+
   };
 
   const handleVisitWebsite = () => {
-      window.open(companyData.website, '_blank');  
+    if (companyData?.website) {
+      window.open(companyData.website, '_blank', 'noopener,noreferrer');
+    }
   };
+  if (loading) {
+    return (
+      <div className="company-profile-container">
+        <div className="loading-message">Loading company profile...</div>
+      </div>
+    );
+  }
 
+  // Error state
+  if (error && !companyData) {
+    return (
+      <div className="company-profile-container">
+        <div className="error-message">Error: {error}</div>
+      </div>
+    );
+  }
 
-  
-
-  if(error) return <div>error: {error}</div>
+  // Not found state
+  if (!companyData) {
+    return (
+      <div className="company-profile-container">
+        <div className="error-message">Company not found</div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div>
-        <CompanyLogo logoUrl={companyData.logoUrl} companyName={companyData.companyName} />
+    <div className="company-profile-container">
+      <div className="company-profile-header">
+        <CompanyLogo 
+          logoUrl={companyData.logoUrl} 
+          coverUrl={companyData.coverUrl}
+          companyName={companyData.companyName} 
+        />
         
-        <div>
+        <div className="company-info-wrapper">
           <CompanyHeader
             companyName={companyData.companyName}
             description={companyData.description}
@@ -111,9 +153,7 @@ export default function CompanyProfile({ companyId,userId }) {
         tabs={tabs}
       />
 
-      <div>
-       
-        
+      <div className="company-profile-content">
         {activeTab === 'About' && tabData && (
           <>
             <OverviewSection
@@ -128,6 +168,10 @@ export default function CompanyProfile({ companyId,userId }) {
         
         {activeTab === 'Posts' && tabData && (
           <PostsTab posts={tabData.posts || []} />
+        )}
+        
+        {!tabData && (
+          <div className="loading-message">Loading {activeTab.toLowerCase()} data...</div>
         )}
       </div>
     </div>

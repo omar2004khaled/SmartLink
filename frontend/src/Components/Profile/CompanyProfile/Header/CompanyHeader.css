@@ -1,0 +1,39 @@
+.company-header {
+  padding-top: 50px;
+  margin-bottom: 16px;
+}
+
+.company-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.company-description {
+  font-size: 16px;
+  color: #4a5568;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.company-meta {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .company-header {
+    padding-top: 40px;
+  }
+  
+  .company-name {
+    font-size: 24px;
+  }
+  
+  .company-description {
+    font-size: 15px;
+  }
+}
