@@ -3,6 +3,7 @@ package com.example.smartLink.service;
 import com.example.smartLink.dto.CommentDTO;
 import com.example.smartLink.entity.Attachment;
 import com.example.smartLink.entity.Comment;
+import com.example.smartLink.enums.TypeofAttachments;
 import com.example.smartLink.repository.AttacchmentsRepository;
 import com.example.smartLink.repository.CommentRepo;
 import com.example.smartLink.repository.PostRepository;
@@ -24,19 +25,28 @@ public class CommentService {
     UserRepository userRepository;
     @Autowired
     AttacchmentsRepository attacchmentsRepository;
-    public void RemoveComment(Long ID){
+    public boolean RemoveComment(Long ID){
         commentRepo.deleteById(ID);
+        return true;
     }
-    public Comment addComment(CommentDTO commentDTO)
+    public Long addComment(CommentDTO commentDTO)
     {
-        Comment comment =Comment.builder()
-                .user(userRepository.getById(commentDTO.getUserId()))
-                .post(postRepository.findById(commentDTO.getPostId()))
-                .createdAt(LocalDateTime.now())
-                .content(commentDTO.getText()).build();
-        Arrays.stream(commentDTO.getURL()).map(
-                url-> attacchmentsRepository.save(Attachment.builder().AttachmentURL(url).TypeOfAttachment().build())
-        )
-        return commentRepo.save(comment);
+        try {
+            Comment comment = Comment.builder()
+                    .user(userRepository.getById(commentDTO.getUserId()))
+                    .post(postRepository.findById(commentDTO.getPostId()))
+                    .createdAt(LocalDateTime.now())
+                    .attachment(Attachment.builder()
+                            .AttachmentURL(commentDTO.getURL())
+                            .typeofAttachments(TypeofAttachments.valueOf(commentDTO.getType()))
+                    .build())
+                    .content(commentDTO.getText())
+                    .build();
+            Comment c= commentRepo.save(comment);
+            return c.getCommentId();
+        }
+        catch (Exception e){};
+        return null;
     }
+
 }

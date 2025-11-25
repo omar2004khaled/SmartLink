@@ -1,6 +1,7 @@
 package com.example.smartLink.entity;
 
 import com.example.smartLink.enums.TypeOfAttachments;
+import com.example.smartLink.enums.TypeofAttachments;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,7 @@ public class Attachment {
     private String AttachmentURL;
 
     @Column(name = "Type" , nullable = false)
-    private TypeOfAttachments TypeOfAttachment;
+    @Enumerated(EnumType.STRING)
+    private TypeofAttachments typeofAttachments;
 
 }

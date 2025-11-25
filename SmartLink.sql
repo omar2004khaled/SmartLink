@@ -230,12 +230,13 @@ CREATE TABLE Post_like(
 -- COMMENTS
 -- ===================================
 CREATE TABLE Comments(
-    CommentId      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    CommentId       BIGINT AUTO_INCREMENT PRIMARY KEY,
     UserId          BIGINT NOT NULL,
     PostId          BIGINT NOT NULL,
     Content         VARCHAR(2500) NOT NULL,
     CreatedAt       DATETIME NOT NULL,
-    RepliedTo      BIGINT,
+    RepliedTo       BIGINT,
+    AttachId        BIGINT,
     FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
     FOREIGN KEY (PostId) REFERENCES Posts(PostId) ON DELETE CASCADE,
     FOREIGN KEY (RepliedTo) REFERENCES Comments(CommentId) ON DELETE CASCADE
@@ -243,18 +244,6 @@ CREATE TABLE Comments(
 
 CREATE INDEX CommentsByUser ON Comments(UserId);
 
-
--- ===================================
--- COMMENTS ↔ ATTACHMENT (MANY-TO-MANY)
--- ===================================
-CREATE TABLE Comments_Attach(
-    CommentId      BIGINT,
-    AttachId        BIGINT,
-    PRIMARY KEY     (CommentId, AttachId),
-    
-    FOREIGN KEY (CommentId) REFERENCES Comments(CommentId) ON DELETE CASCADE,
-    FOREIGN KEY (AttachId) REFERENCES Attachment(AttachId) ON DELETE CASCADE
-);
 
 
 -- ===================================

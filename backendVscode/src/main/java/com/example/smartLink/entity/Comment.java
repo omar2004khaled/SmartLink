@@ -38,11 +38,7 @@ public class Comment {
     @JoinColumn(name = "RepliedTo")
     private Comment repliedTo;
 
-    @OneToMany
-    @JoinTable(
-            name = "Comments_Attach",
-            joinColumns = @JoinColumn(name = "CommentId"),
-            inverseJoinColumns = @JoinColumn(name = "AttachId")
-    )
-    private List<Attachment> attachments = new ArrayList<>();
+    @OneToOne
+    @JoinColumn(name = "AttachId")
+    private Attachment attachment;
 }
