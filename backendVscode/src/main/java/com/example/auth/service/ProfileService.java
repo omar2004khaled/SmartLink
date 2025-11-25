@@ -103,8 +103,8 @@ public class ProfileService {
 
         User u = p.getUser();
         if (u != null) {
-            dto.setUserId(u.getUserId());
-            dto.setUserName(u.getName());
+            dto.setUserId(u.getId());
+            dto.setUserName(u.getFullName());
             dto.setUserEmail(u.getEmail());
         }
 
