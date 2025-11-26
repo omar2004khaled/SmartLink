@@ -1,6 +1,5 @@
 package com.example.smartLink.entity;
 
-import com.example.smartLink.enums.TypeOfAttachments;
 import com.example.smartLink.enums.TypeofAttachments;
 import jakarta.persistence.*;
 import lombok.*;

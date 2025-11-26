@@ -243,6 +243,7 @@ CREATE TABLE Comments(
 );
 
 CREATE INDEX CommentsByUser ON Comments(UserId);
+CREATE INDEX CommentsByPost ON Comments(PostId);
 
 
 

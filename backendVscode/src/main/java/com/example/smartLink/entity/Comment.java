@@ -38,7 +38,8 @@ public class Comment {
     @JoinColumn(name = "RepliedTo")
     private Comment repliedTo;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "AttachId")
     private Attachment attachment;
+
 }
