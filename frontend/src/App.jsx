@@ -1,14 +1,20 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import CreatePost from './PostComposotion/PostComposotion'
+import PostCard from './PostCard/PostCard'
+
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  
 
   return (
-    <>
-       <CreatePost></CreatePost>
-    </>
+    <BrowserRouter>
+      <Routes>
+          <Route path="/PostComposation" element={<CreatePost></CreatePost>}></Route>
+          <Route path='/Feed' element={<PostCard></PostCard>}></Route>   
+      </Routes>
+    </BrowserRouter>
   )
 }
 
