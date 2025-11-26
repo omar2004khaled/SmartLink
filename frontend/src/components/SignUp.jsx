@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
+ const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,6 +22,14 @@ const SignUp = () => {
   const [apiError, setApiError] = useState(''); // Add this for API errors
   const [successMessage, setSuccessMessage] = useState(''); // Add this for success
 
+   const handleGoogleLogin = (e) => {
+    e.preventDefault();
+    console.log("Redirecting to Google OAuth2...");
+    // This will redirect to your Spring Boot OAuth2 endpoint
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+  };
+  
+  
   const validateField = (name, value) => {
     switch (name) {
       case 'fullName':
@@ -178,9 +190,11 @@ const SignUp = () => {
         birthDate: ''
       });
 
+    //  Don't redirect automatically - user needs to verify email
+
       // Redirect after 2 seconds
       setTimeout(() => {
-        window.location.href = '/login';
+        window.location.href = '/signup';
       }, 2000);
       
     } catch (error) {
@@ -240,7 +254,12 @@ const SignUp = () => {
           <div className="hidden md:flex flex-col justify-between p-12 bg-[#FFEAEE] dark:bg-[#2C1A1D] text-center">
             <div className="self-start">
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">Connect</span>
+                <img 
+                    src="src/assets/Logo.png" 
+                    alt="Logo"
+                    className="h-12 w-auto object-contain"
+                    />
+                <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">Smart Link</span>
               </div>
             </div>
             <div className="flex flex-col gap-6">
@@ -258,6 +277,31 @@ const SignUp = () => {
           <div className="w-full flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-white dark:bg-[#1a1a1a]">
             <div className="w-full max-w-md">
               <div className="mb-8 text-left">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <svg 
+                  className="w-5 h-5 text-primary"
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  viewBox="0 0 48 48"
+                >
+                  <path 
+                    d="M24 6 C14.058 6 6 14.058 6 24 C 6 33.942 14.058 42 24 42 C 33.942 42 42 33.942 42 24" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                  <path 
+                    d="M30 18 L18 30" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                  <path 
+                    d="M18 18 H30 V30" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
                 <h1 className="text-3xl font-black leading-tight tracking-[-0.033em] text-[#333333] dark:text-[#F5F5F5]">
                   Create Your Professional Account
                 </h1>
@@ -404,63 +448,67 @@ const SignUp = () => {
 
                 {/* Password */}
                 <label className="flex flex-col w-full">
-                  <p className="text-sm font-medium leading-normal pb-2">Password</p>
-                  <div className="relative flex w-full flex-1 items-stretch">
+                <p className="text-sm font-medium leading-normal pb-2">Password</p>
+                <div className="relative flex w-full flex-1 items-stretch">
                     <input
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={formData.password}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
                         errors.password 
-                          ? 'border-red-500'
-                          : 'border-[#CCCCCC] dark:border-[#444444]'
-                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
-                      placeholder="Enter your password"
+                        ? 'border-red-500'
+                        : 'border-[#CCCCCC] dark:border-[#444444]'
+                    } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
+                    placeholder="Enter your password"
                     />
-                    <div
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-gray-400 hover:text-gray-600"
-                      onClick={() => setShowPassword(!showPassword)}
+                    <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-0 top-0 h-12 px-4 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Toggle password visibility"
                     >
-                      <PasswordToggleIcon show={showPassword} />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     8+ characters, one number, one uppercase letter.
-                  </p>
-                  {errors.password && (
+                </p>
+                {errors.password && (
                     <p className="text-xs text-red-500 mt-1">{errors.password}</p>
-                  )}
+                )}
                 </label>
 
                 {/* Confirm Password */}
                 <label className="flex flex-col w-full">
-                  <p className="text-sm font-medium leading-normal pb-2">Confirm Password</p>
-                  <div className="relative flex w-full flex-1 items-stretch">
+                <p className="text-sm font-medium leading-normal pb-2">Confirm Password</p>
+                <div className="relative flex w-full flex-1 items-stretch">
                     <input
-                      name="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
                         errors.confirmPassword 
-                          ? 'border-red-500'
-                          : 'border-[#CCCCCC] dark:border-[#444444]'
-                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
-                      placeholder="Re-enter your password"
+                        ? 'border-red-500'
+                        : 'border-[#CCCCCC] dark:border-[#444444]'
+                    } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
+                    placeholder="Re-enter your password"
                     />
-                    <div
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-gray-400 hover:text-gray-600"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-0 top-0 h-12 px-4 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Toggle confirm password visibility"
                     >
-                      <PasswordToggleIcon show={showConfirmPassword} />
-                    </div>
-                  </div>
-                  {errors.confirmPassword && (
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
+                {errors.confirmPassword && (
                     <p className="text-xs text-red-500 mt-1">{errors.confirmPassword}</p>
-                  )}
+                )}
                 </label>
 
                 {/* Submit Button */}
@@ -506,6 +554,7 @@ const SignUp = () => {
                 {/* Google Sign Up */}
                 <button
                   type="button"
+                  onClick={handleGoogleLogin}
                   className="flex w-full items-center justify-center gap-2 h-12 px-4 rounded-lg border border-[#CCCCCC] dark:border-[#444444] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
