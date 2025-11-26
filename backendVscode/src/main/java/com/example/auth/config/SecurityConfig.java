@@ -27,7 +27,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()          // Public auth endpoints
-                        .requestMatchers("/api/public").permitAll()       // Public API endpoint
+                        .requestMatchers("/api/public","/api/company/**").permitAll()       // Public API endpoint
                         .requestMatchers("/admin/**").hasRole("ADMIN")    // ADMIN role required
                         .anyRequest().authenticated()                     // All other endpoints require any authentication
                 )
