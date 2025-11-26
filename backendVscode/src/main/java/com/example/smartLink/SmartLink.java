@@ -18,6 +18,7 @@ public class SmartLink {
         SpringApplication.run(SmartLink.class, args);
     }
 
+
     @Bean
     CommandLineRunner createSuperAdmin(UserRepository userRepository, PasswordEncoder encoder) {
         return args -> {
