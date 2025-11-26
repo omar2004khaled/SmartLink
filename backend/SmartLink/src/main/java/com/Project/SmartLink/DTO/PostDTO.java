@@ -3,6 +3,7 @@ package com.Project.SmartLink.DTO;
 import com.Project.SmartLink.entity.Attachment;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class PostDTO {
@@ -10,27 +11,31 @@ public class PostDTO {
     private String content;
     private Long userId;
     private List<Attachment> attachments;
+    private Timestamp createdAt;
 
-    public PostDTO(Long id , String content, Long userId, List<Attachment> attachments) { //on creating post
+    public PostDTO(Long id , String content, Long userId, List<Attachment> attachments , Timestamp createdAt) { //on creating post
         this.id = id;
         this.content = content;
         this.userId = userId;
         this.attachments = attachments;
+        this.createdAt = createdAt;
     }
     public PostDTO(){
 
     }
 
-    public PostDTO(String content, Long userId, List<Attachment> attachments) {
+    public PostDTO(String content, Long userId, List<Attachment> attachments, Timestamp createdAt) {
         this.content = content;
         this.userId = userId;
         this.attachments = attachments;
+        this.createdAt = createdAt;
     }
 
-    public PostDTO(Long id, String content, List<Attachment> attachments) { // on modifying post
+    public PostDTO(Long id, String content, List<Attachment> attachments , Timestamp createdAt) { // on modifying post
         this.id = id;
         this.content = content;
         this.attachments = attachments;
+        this.createdAt = createdAt;
     }
 
     public PostDTO(Long id) { // on deleting or searching for a post

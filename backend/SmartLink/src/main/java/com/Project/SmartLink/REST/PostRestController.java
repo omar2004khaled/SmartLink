@@ -40,7 +40,7 @@ public class PostRestController {
                 Optional<Attachment> attachment = attachmentService.findById(attachmentID);
                 if (attachment.isPresent()) attachments.add(attachment.get());
             }
-            PostDTO answer = new PostDTO(post.getPostId() ,  post.getContent(),post.getUserId(), attachments);
+            PostDTO answer = new PostDTO(post.getPostId() ,  post.getContent(),post.getUserId(), attachments , post.getCreatedAt());
             answers.add(answer);
         }
         return answers;
@@ -55,7 +55,7 @@ public class PostRestController {
             Optional<Attachment> attachment= attachmentService.findById(attachmentID);
             if (attachment.isPresent()) attachments.add(attachment.get());
         }
-        PostDTO answer = new PostDTO(post.get().getPostId(), post.get().getContent(), post.get().getUserId(), attachments);
+        PostDTO answer = new PostDTO(post.get().getPostId(), post.get().getContent(), post.get().getUserId(), attachments , post.get().getCreatedAt());
         return answer;
     }
     @PostMapping("/add")
@@ -70,7 +70,7 @@ public class PostRestController {
             PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(post.getPostId(), saved.getAttachId()));
             postAttachmentService.save(postAttchment);
         }
-        PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(),savedAttachments );
+        PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(),savedAttachments , post.getCreatedAt());
         return answer;
     }
     @PutMapping("/update/{id}")
@@ -82,7 +82,7 @@ public class PostRestController {
         if (postDTO.getContent()!=null) {                    ///  update the content of the post
             post.get().setContent(postDTO.getContent());
             int savedpost = postService.updatePost(post.get());
-            answer = new PostDTO(post.get().getPostId(), postDTO.getContent(), postDTO.getAttachments());
+            answer = new PostDTO(post.get().getPostId(), postDTO.getContent(), postDTO.getAttachments(), post.get().getCreatedAt());
         }
         else if (postDTO.getAttachments()!=null){     ///  update the attachments of the post
             System.out.println("ana el attach ya wlaaa");
@@ -99,7 +99,7 @@ public class PostRestController {
                     postAttachmentService.save(postAttchment);
                 }
             }
-            answer = new PostDTO( postDTO.getContent(),post.get().getUserId(),savedAttachments);
+            answer = new PostDTO( postDTO.getContent(),post.get().getUserId(),savedAttachments, post.get().getCreatedAt());
         }
         return answer;
     }
