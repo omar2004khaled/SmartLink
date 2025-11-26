@@ -42,9 +42,6 @@ public class CompanyProfile {
     @Column(name = "numberOfFollowers")
     private Long numberOfFollowers = 0L;
 
-    @Column(name = "LocationId")
-    private Long locationId;
-
     @Column(name = "Founded")
     private Integer founded;
 

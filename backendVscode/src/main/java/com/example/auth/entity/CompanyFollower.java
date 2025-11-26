@@ -9,11 +9,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Company_Followers")
 @IdClass(CompanyFollower.CompanyFollowerId.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "Company_Followers")
 public class CompanyFollower {
 
     @Id

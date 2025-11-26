@@ -48,17 +48,21 @@ public class CompanyProfileService {
         companyDTO.setIndustry(companyProfile.getIndustry());
         companyDTO.setWebsite(companyProfile.getWebsite());
         companyDTO.setNumberOfFollowers(companyProfile.getNumberOfFollowers());
-        companyDTO.setUserId(companyDTO.getUserId());
+        companyDTO.setUserId(companyProfile.getUserId());
         companyDTO.setLogoUrl(companyProfile.getLogoUrl());
         companyDTO.setCoverUrl(companyProfile.getCoverImageUrl());
         return companyDTO;
 
     }
     public CompanyDTO getCompanyProfile(Long companyId,Long userId){
+//        System.out.println(1);
         CompanyProfile companyProfile=companyProfileRepo.findByUserId(companyId).orElseThrow(() -> new RuntimeException("company not found"));
+//        System.out.println(2);
         CompanyDTO companyDTO=getCompanyDTO(companyProfile);
+//        System.out.println(3);
         companyDTO.setIsFollowing(companyFollowerRepo.existsByFollowerIdAndCompanyId(userId,companyId));
         companyDTO.setLocations(getLocations(companyId));
+//        System.out.println(4);
         return companyDTO;
     }
 
