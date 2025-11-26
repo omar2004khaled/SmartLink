@@ -17,8 +17,19 @@ export default function EditModal({
 
   useEffect(() => {
     if (companyData && isOpen) {
+      // Fix: Handle both nested and direct companyData structure
       const data = companyData.companyData || companyData;
-      setFormData(data);
+      setFormData({
+        companyName: data.companyName || '',
+        description: data.description || '',
+        website: data.website || '',
+        industry: data.industry || '',
+        founded: data.founded || null,
+        logoUrl: data.logoUrl || '',
+        coverUrl: data.coverUrl || '',
+        coverImageUrl: data.coverImageUrl || '',
+        locations: data.locations || []
+      });
     }
   }, [companyData, isOpen]);
 
@@ -60,6 +71,7 @@ export default function EditModal({
   const handleImageUpload = async (e, imageType) => {
     const file = e.target.files[0];
     if (!file) return;
+    
     try {
       // Upload to Cloudinary 
       const cloudinaryUrl = 'https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload';
@@ -78,19 +90,70 @@ export default function EditModal({
 
       const cloudinaryData = await cloudinaryResponse.json();
       const imageUrl = cloudinaryData.secure_url;
+      
+      console.log('Image uploaded:', imageType, imageUrl);
 
-      // Update form data with Cloudinary URL
-      setFormData(prev => ({
-        ...prev,
-        [imageType === 'logo' ? 'logoUrl' : 'coverUrl']: imageUrl
-      }));
+      // FIX 1: Update BOTH logoUrl/coverUrl AND coverImageUrl for backend compatibility
+      if (imageType === 'logo') {
+        setFormData(prev => ({
+          ...prev,
+          logoUrl: imageUrl
+        }));
+      } else if (imageType === 'cover') {
+        setFormData(prev => ({
+          ...prev,
+          coverUrl: imageUrl,
+          coverImageUrl: imageUrl  // Backend uses this field name
+        }));
+      }
     } catch (err) {
       console.error('Error uploading image:', err);
+      alert('Failed to upload image. Please try again.');
     }
   };
 
   const handleSubmit = () => {
-    onSave(formData);
+    // Prepare data based on which section is being edited
+    let dataToSave = {};
+
+    if (section === 'logo') {
+      dataToSave = {
+        logoUrl: formData.logoUrl
+      };
+    } else if (section === 'cover') {
+      dataToSave = {
+        coverImageUrl: formData.coverImageUrl || formData.coverUrl
+      };
+    } else if (section === 'description') {
+      dataToSave = {
+        companyName: formData.companyName,
+        description: formData.description
+      };
+    } else if (section === 'overview') {
+      dataToSave = {
+        website: formData.website,
+        industry: formData.industry,
+        founded: formData.founded ? parseInt(formData.founded) : null
+      };
+    } else if (section === 'locations') {
+      // FIX: Send ALL current locations (including empty array if all deleted)
+      // Filter out empty/invalid locations
+      const validLocations = (formData.locations || [])
+        .filter(loc => loc.city && loc.country)
+        .filter(loc => loc.city.trim() !== '' && loc.country.trim() !== '')
+        .map(loc => ({
+          locationId: loc.locationId || null,
+          city: loc.city.trim(),
+          country: loc.country.trim()
+        }));
+      
+      dataToSave = {
+        locations: validLocations
+      };
+    }
+
+    console.log('Saving data for section:', section, dataToSave);
+    onSave(dataToSave);
   };
 
   if (!isOpen) return null;
@@ -116,7 +179,7 @@ export default function EditModal({
 
           {section === 'cover' && (
             <ImageUploadForm
-              imageUrl={formData.coverUrl}
+              imageUrl={formData.coverUrl || formData.coverImageUrl}
               imageType="cover"
               onUpload={handleImageUpload}
             />
