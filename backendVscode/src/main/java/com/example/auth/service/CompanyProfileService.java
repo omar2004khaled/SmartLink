@@ -29,19 +29,19 @@ public class CompanyProfileService {
 
 
     private List<LocationDTO> getLocations(Long companyId){
-        List<CompanyLocation> locations =companyLocationRepo.findByCompanyId(companyId);
-        List<LocationDTO> locationDTOS=new ArrayList<>();
-        for(CompanyLocation location:locations){
+        List<CompanyLocation> locations = companyLocationRepo.findByCompanyId(companyId);
+        List<LocationDTO> locationDTOS = new ArrayList<>();
+        for(CompanyLocation location : locations){
             final Long locationId = location.getLocationId();
-            Location loc= locationRepo.findById(locationId).orElse(null);
-            if(loc==null) continue;
-            locationDTOS.add(new LocationDTO(locationId,loc.getCity(),loc.getCountry()));
+            Location loc = locationRepo.findById(locationId).orElse(null);
+            if(loc == null) continue;
+            locationDTOS.add(new LocationDTO(locationId, loc.getCity(), loc.getCountry()));
         }
         return locationDTOS;
-
     }
+
     private CompanyDTO getCompanyDTO(CompanyProfile companyProfile){
-        CompanyDTO companyDTO=new CompanyDTO();
+        CompanyDTO companyDTO = new CompanyDTO();
         companyDTO.setCompanyName(companyProfile.getCompanyName());
         companyDTO.setFounded(companyProfile.getFounded());
         companyDTO.setDescription(companyProfile.getDescription());
@@ -52,17 +52,16 @@ public class CompanyProfileService {
         companyDTO.setLogoUrl(companyProfile.getLogoUrl());
         companyDTO.setCoverUrl(companyProfile.getCoverImageUrl());
         return companyDTO;
-
     }
-    public CompanyDTO getCompanyProfile(Long companyId,Long userId){
-//        System.out.println(1);
-        CompanyProfile companyProfile=companyProfileRepo.findByUserId(companyId).orElseThrow(() -> new RuntimeException("company not found"));
-//        System.out.println(2);
-        CompanyDTO companyDTO=getCompanyDTO(companyProfile);
-//        System.out.println(3);
-        companyDTO.setIsFollowing(companyFollowerRepo.existsByFollowerIdAndCompanyId(userId,companyId));
+
+    public CompanyDTO getCompanyProfile(Long companyId, Long userId){
+        CompanyProfile companyProfile = companyProfileRepo.findByUserId(companyId)
+                .orElseThrow(() -> new RuntimeException("company not found"));
+
+        CompanyDTO companyDTO = getCompanyDTO(companyProfile);
+        companyDTO.setIsFollowing(companyFollowerRepo.existsByFollowerIdAndCompanyId(userId, companyId));
         companyDTO.setLocations(getLocations(companyId));
-//        System.out.println(4);
+
         return companyDTO;
     }
 
@@ -95,7 +94,8 @@ public class CompanyProfileService {
 
         CompanyProfile updated = companyProfileRepo.save(company);
 
-        if (request.getLocations() != null && !request.getLocations().isEmpty()) {
+        // FIX: Handle location updates properly
+        if (request.getLocations() != null) {
             updateCompanyLocations(companyId, request.getLocations());
         }
 
@@ -104,30 +104,39 @@ public class CompanyProfileService {
 
     @Transactional
     public void updateCompanyLocations(Long companyId, List<LocationDTO> locationUpdates) {
+        // FIX: Delete all existing company-location associations first
+        // This properly handles deletions
+        companyLocationRepo.deleteByCompanyId(companyId);
+
+        // If no locations provided (empty array), we're done - all locations deleted
+        if (locationUpdates == null || locationUpdates.isEmpty()) {
+            return;
+        }
+
+        // Add new locations
         for (LocationDTO loc : locationUpdates) {
             String country = loc.getCountry();
             String city = loc.getCity();
 
-            if (country == null || city == null)
+            if (country == null || city == null ||
+                    country.trim().isEmpty() || city.trim().isEmpty()) {
                 continue;
-            Location location = locationRepo.findByCityAndCountry(city, country)
+            }
+
+            // Find or create the location
+            Location location = locationRepo.findByCityAndCountry(city.trim(), country.trim())
                     .orElseGet(() -> {
                         Location newLoc = new Location();
-                        newLoc.setCountry(country);
-                        newLoc.setCity(city);
+                        newLoc.setCountry(country.trim());
+                        newLoc.setCity(city.trim());
                         return locationRepo.save(newLoc);
                     });
 
-            boolean exist = companyLocationRepo.existsByCompanyIdAndLocationId(
-                    companyId,
-                    location.getLocationId()
-            );
-            if (!exist) {
-                CompanyLocation companyLocation = new CompanyLocation();
-                companyLocation.setCompanyId(companyId);
-                companyLocation.setLocationId(location.getLocationId());
-                companyLocationRepo.save(companyLocation);
-            }
+            // Create new company-location association
+            CompanyLocation companyLocation = new CompanyLocation();
+            companyLocation.setCompanyId(companyId);
+            companyLocation.setLocationId(location.getLocationId());
+            companyLocationRepo.save(companyLocation);
         }
     }
 
@@ -161,9 +170,7 @@ public class CompanyProfileService {
 
         companyFollowerRepo.deleteByFollowerIdAndCompanyId(userId, company.getUserId());
 
-        company.setNumberOfFollowers(company.getNumberOfFollowers()-1);
+        company.setNumberOfFollowers(company.getNumberOfFollowers() - 1);
         companyProfileRepo.save(company);
     }
-
-
 }

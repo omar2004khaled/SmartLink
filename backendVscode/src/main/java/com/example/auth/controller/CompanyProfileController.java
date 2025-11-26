@@ -58,6 +58,7 @@ public class CompanyProfileController {
     @PutMapping("/{companyId}")
     public ResponseEntity<?> updateCompanyProfile(@PathVariable Long companyId, @RequestBody CompanyUpdateDTO request) {
         try {
+            System.out.println(request.toString());
             CompanyDTO updated = companyProfileService.updateCompanyProfile(companyId, request);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {

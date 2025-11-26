@@ -131,12 +131,12 @@ class CompanyProfileServiceTest {
         when(companyFollowerRepo.existsByFollowerIdAndCompanyId(anyLong(), anyLong())).thenReturn(false);
         when(locationRepo.findByCityAndCountry("Alexandria", "Egypt")).thenReturn(Optional.empty());
         when(locationRepo.save(any(Location.class))).thenReturn(testLocation);
-        when(companyLocationRepo.existsByCompanyIdAndLocationId(anyLong(), anyLong())).thenReturn(false);
 
         CompanyDTO result = companyProfileService.updateCompanyProfile(companyId, updateDTO);
 
         assertNotNull(result);
         verify(companyProfileRepo).save(any(CompanyProfile.class));
+        verify(companyLocationRepo).deleteByCompanyId(companyId);
         verify(locationRepo).save(any(Location.class));
         verify(companyLocationRepo).save(any(CompanyLocation.class));
     }
@@ -160,10 +160,10 @@ class CompanyProfileServiceTest {
         Location newLocation = new Location(2L, "Egypt", "Giza");
         when(locationRepo.findByCityAndCountry("Giza", "Egypt")).thenReturn(Optional.empty());
         when(locationRepo.save(any(Location.class))).thenReturn(newLocation);
-        when(companyLocationRepo.existsByCompanyIdAndLocationId(companyId, 2L)).thenReturn(false);
 
         companyProfileService.updateCompanyLocations(companyId, locations);
 
+        verify(companyLocationRepo).deleteByCompanyId(companyId);
         verify(locationRepo).save(any(Location.class));
         verify(companyLocationRepo).save(any(CompanyLocation.class));
     }
@@ -175,10 +175,33 @@ class CompanyProfileServiceTest {
         List<LocationDTO> locations = Arrays.asList(locationDTO);
 
         when(locationRepo.findByCityAndCountry("Cairo", "Egypt")).thenReturn(Optional.of(testLocation));
-        when(companyLocationRepo.existsByCompanyIdAndLocationId(companyId, 1L)).thenReturn(true);
 
         companyProfileService.updateCompanyLocations(companyId, locations);
 
+        verify(companyLocationRepo).deleteByCompanyId(companyId);
+        verify(locationRepo, never()).save(any(Location.class));
+        verify(companyLocationRepo).save(any(CompanyLocation.class));
+    }
+
+    @Test
+    void updateCompanyLocations_EmptyList() {
+        Long companyId = 100L;
+        List<LocationDTO> locations = new ArrayList<>();
+
+        companyProfileService.updateCompanyLocations(companyId, locations);
+
+        verify(companyLocationRepo).deleteByCompanyId(companyId);
+        verify(locationRepo, never()).save(any(Location.class));
+        verify(companyLocationRepo, never()).save(any(CompanyLocation.class));
+    }
+
+    @Test
+    void updateCompanyLocations_NullList() {
+        Long companyId = 100L;
+
+        companyProfileService.updateCompanyLocations(companyId, null);
+
+        verify(companyLocationRepo).deleteByCompanyId(companyId);
         verify(locationRepo, never()).save(any(Location.class));
         verify(companyLocationRepo, never()).save(any(CompanyLocation.class));
     }
