@@ -32,7 +32,7 @@ export default function CompanyProfile({ companyId, userId }) {
   const fetchCompanyBasicData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/company/${companyId}`);
+      const response = await fetch(`/api/company/${companyId}?userId=${userId}`);
       if (!response.ok) throw new Error('Failed to fetch company data');
       const data = await response.json();
       setCompanyData(data);
