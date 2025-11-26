@@ -1,12 +1,11 @@
 package com.example.auth.service;
 
-import com.example.auth.dto.JobSeekerProfileRequest;
-import com.example.auth.dto.JobSeekerProfileResponse;
-import com.example.auth.entity.JobSeekerProfile;
-import com.example.auth.entity.Location;
+import com.example.auth.dto.ProfileDtos.JobSeekerProfileRequest;
+import com.example.auth.dto.ProfileDtos.JobSeekerProfileResponse;
 import com.example.auth.entity.User;
-import com.example.auth.repository.JobSeekerProfileRepository;
-import com.example.auth.repository.LocationRepository;
+import com.example.auth.entity.ProfileEntities.JobSeekerProfile;
+import com.example.auth.entity.ProfileEntities.Location;
+import com.example.auth.repository.ProfileRepositories.*;
 import com.example.auth.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
