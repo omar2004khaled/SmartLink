@@ -1,120 +1,164 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Mail, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 
 const VerifyEmail = () => {
   const location = useLocation();
-  const email = location.state?.email || 'your email';
-  const [resending, setResending] = useState(false);
-  const [resendMessage, setResendMessage] = useState('');
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  
+  const email = location.state?.email || '';
+  const justRegistered = location.state?.justRegistered || false;
 
-  const handleResend = async () => {
-    setResending(true);
-    setResendMessage('');
+  useEffect(() => {
+    if (!email) {
+      navigate('/signup');
+    }
+  }, [email, navigate]);
 
+  const handleResendVerification = async () => {
+    setLoading(true);
+    setError('');
+    setMessage('');
+    
     try {
-      const response = await fetch('http://localhost:8080/auth/resend-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch("http://localhost:8080/auth/resend-verification", {
+        method: "POST",
+        headers: { 
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email })
       });
 
+      const responseText = await response.text();
+      let data;
+      
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        data = { message: responseText };
+      }
+
       if (response.ok) {
-        setResendMessage('Verification email sent successfully!');
+        setMessage('✅ Verification email sent! Please check your inbox.');
       } else {
-        setResendMessage('Failed to resend email. Please try again.');
+        setError(data.message || 'Failed to resend verification email. Please try again.');
       }
     } catch (error) {
-      setResendMessage('An error occurred. Please try again later.');
+      setError('Cannot connect to server. Please try again later.');
     } finally {
-      setResending(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-background via-accent/20 to-background">
-      <div className="w-full max-w-md">
-        <div className="bg-card border border-border rounded-xl shadow-lg p-8">
-          <div className="flex flex-col items-center text-center gap-6">
-            {/* Icon */}
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-              <Mail className="w-10 h-10 text-primary" />
-            </div>
+    <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2">
+      {/* Left Panel - Same as your SignUp */}
+      <div className="hidden md:flex flex-col justify-between p-12 bg-[#FFEAEE] dark:bg-[#2C1A1D] text-center">
+        <div className="self-start">
+          <div className="flex items-center gap-2">
+            <img 
+              src="src/assets/Logo.png" 
+              alt="Logo"
+              className="h-12 w-auto object-contain"
+            />
+            <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">Smart Link</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-6">
+          <h1 className="text-gray-800 dark:text-gray-200 text-5xl font-black leading-tight tracking-[-0.033em]">
+            Verify Your Email
+          </h1>
+          <h2 className="text-gray-700 dark:text-gray-300 text-base font-normal leading-normal">
+            Complete your registration by verifying your email address.
+          </h2>
+        </div>
+        <div></div>
+      </div>
 
-            {/* Heading */}
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-foreground">Check Your Email</h1>
-              <p className="text-muted-foreground">
-                We've sent a verification link to <strong className="text-foreground">{email}</strong>
-              </p>
-            </div>
-
-            {/* Instructions */}
-            <div className="w-full space-y-4 text-left bg-muted/30 rounded-lg p-4">
-              <h3 className="font-semibold text-foreground">Next steps:</h3>
-              <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-                <li>Open the email in your inbox</li>
-                <li>Click the verification link</li>
-                <li>Come back and log in to your account</li>
-              </ol>
-            </div>
-
-            {/* Resend Message */}
-            {resendMessage && (
-              <div className={`w-full p-4 rounded-lg ${
-                resendMessage.includes('success') 
-                  ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800'
-                  : 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800'
-              }`}>
-                <p className={`text-sm ${
-                  resendMessage.includes('success')
-                    ? 'text-green-800 dark:text-green-200'
-                    : 'text-red-800 dark:text-red-200'
-                }`}>
-                  {resendMessage}
+      {/* Right Panel - Verification Content */}
+      <div className="flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-white dark:bg-[#1a1a1a]">
+        <div className="w-full max-w-md">
+          <div className="mb-8 text-left">
+            <h1 className="text-3xl font-black leading-tight tracking-[-0.033em] text-[#333333] dark:text-[#F5F5F5]">
+              Verify Your Email
+            </h1>
+            {justRegistered && (
+              <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  ✅ Registration successful! Please verify your email to continue.
                 </p>
               </div>
             )}
+          </div>
 
-            {/* Note */}
-            <div className="w-full p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <span className="font-semibold">Didn't receive an email?</span><br />
-                Check your spam folder or request a new verification email.
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="w-full flex flex-col gap-3 mt-4">
-              <Link
-                to="/login"
-                className="h-12 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                Go to Login
-                <ArrowRight size={18} />
-              </Link>
-              
-              <button
-                onClick={handleResend}
-                disabled={resending}
-                className="h-12 w-full border border-border hover:bg-accent text-foreground font-medium rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {resending ? 'Sending...' : 'Resend Verification Email'}
-              </button>
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  Check Your Email
+                </h3>
+                <p className="text-blue-800 dark:text-blue-200 text-sm">
+                  We've sent a verification link to:
+                </p>
+                <p className="font-medium text-blue-900 dark:text-blue-100 mt-1">
+                  {email}
+                </p>
+                <p className="text-blue-800 dark:text-blue-200 text-sm mt-2">
+                  Click the link in the email to verify your account and start using Smart Link.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Back to signup link */}
-        <div className="text-center mt-6">
-          <Link 
-            to="/signup" 
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to sign up
-          </Link>
+          {/* Success/Error Messages */}
+          {message && (
+            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg mb-4">
+              <p className="text-sm text-green-800 dark:text-green-200">{message}</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="space-y-4">
+            <button
+              onClick={handleResendVerification}
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                'Resend Verification Email'
+              )}
+            </button>
+
+            <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Need help?{' '}
+                <Link to="/contact" className="font-semibold text-blue-600 hover:underline">
+                  Contact Support
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

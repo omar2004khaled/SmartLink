@@ -12,57 +12,102 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (error) setError('');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const response = await fetch("http://localhost:8080/auth/login", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        mode: 'cors',
-        body: JSON.stringify({
-          email: formData.email.toLowerCase().trim(),
-          password: formData.password
-        })
-      });
+  try {
+    const response = await fetch("http://localhost:8080/auth/login", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      mode: 'cors',
+      body: JSON.stringify({
+        email: formData.email.toLowerCase().trim(),
+        password: formData.password
+      })
+    });
 
-      const data = await response.json();
+    console.log("Response status:", response.status);
+    console.log("Content-Type:", response.headers.get('content-type'));
 
-      if (!response.ok) {
-        const errorMessage = typeof data.message === 'string' 
-          ? data.message 
-          : 'Login failed. Please check your credentials.';
-        setError(errorMessage);
-        return;
+    // Get response as text first
+    const responseText = await response.text();
+    console.log("Raw response:", responseText);
+
+    let data;
+    
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError);
+        // If JSON parsing fails but we have text, use the text as message
+        data = { message: responseText };
       }
-
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
-      }
-
-      navigate('/dashboard'); 
-    } catch (error) {
-      console.error("Login Error:", error);
-      if (error.message === 'Failed to fetch') {
-        setError('Cannot connect to server. Please try again later.');
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+    } else {
+      // Response is not JSON, use the text as the error message
+      data = { message: responseText };
     }
-  };
+
+    console.log("Processed data:", data);
+
+    if (!response.ok) {
+      // Extract error message safely
+      let errorMessage = 'Login failed. Please check your credentials.';
+      
+      if (data && typeof data.message === 'string') {
+        errorMessage = data.message;
+      } else if (responseText && typeof responseText === 'string') {
+        errorMessage = responseText;
+      } else if (data && data.error) {
+        errorMessage = data.error;
+      }
+
+      // Handle specific error cases
+      if (errorMessage.includes('verify') || errorMessage.includes('verified')) {
+        errorMessage = 'Please verify your email before logging in. Check your inbox for the verification link.';
+      } else if (response.status === 401) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (response.status === 403) {
+        errorMessage = 'Account not verified. Please check your email for verification link.';
+      }
+
+      setError(errorMessage);
+      return;
+    }
+
+    // Success case - response should be JSON
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+      console.log("Login successful, token stored");
+    }
+
+    navigate('/dashboard'); 
+  } catch (error) {
+    console.error("Login Error:", error);
+    if (error.message === 'Failed to fetch') {
+      setError('Cannot connect to server. Please try again later.');
+    } else {
+      setError('An unexpected error occurred. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2">
@@ -136,6 +181,11 @@ const Login = () => {
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
+          {successMessage && (
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <p className="text-sm text-green-800 dark:text-green-200">{successMessage}</p>
+        </div>
+        )}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">

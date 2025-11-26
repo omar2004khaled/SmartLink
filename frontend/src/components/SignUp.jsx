@@ -107,108 +107,83 @@ const SignUp = () => {
   };
 
   const registerUser = async () => {
-    setLoading(true);
-    setApiError(''); // Clear previous errors
-    setSuccessMessage(''); // Clear previous success
+  setLoading(true);
+  setApiError('');
+  setSuccessMessage('');
 
+  try {
+    const response = await fetch("http://localhost:8080/auth/register", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      mode: 'cors',
+      body: JSON.stringify({
+        fullName: formData.fullName.trim(),
+        email: formData.email.toLowerCase().trim(),
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        phoneNumber: formData.phone.replace(/\D/g, ''),
+        gender: formData.gender,
+        birthDate: formData.birthDate
+      })
+    });
+
+    const responseText = await response.text();
+    let data;
     try {
-      console.log("Sending registration request...");
-      
-      const response = await fetch("http://localhost:8080/auth/register", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        mode: 'cors',
-        body: JSON.stringify({
-          fullName: formData.fullName.trim(),
-          email: formData.email.toLowerCase().trim(),
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-          phoneNumber: formData.phone.replace(/\D/g, ''),
-          gender: formData.gender,
-          birthDate: formData.birthDate
-        })
-      });
-
-      console.log("Response status:", response.status);
-
-      // Get response as text first
-      const responseText = await response.text();
-      console.log("Response text:", responseText);
-
-      // Try to parse as JSON, fallback to plain text
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        data = { 
-          message: responseText || 'No response from server',
-          success: response.ok 
-        };
-      }
-
-      console.log("Parsed data:", data);
-
-      if (!response.ok) {
-        // Extract error message
-        let errorMessage = 'Registration failed';
-        
-        if (typeof data === 'string') {
-          errorMessage = data;
-        } else if (data.message) {
-          errorMessage = data.message;
-        } else if (data.error) {
-          errorMessage = data.error;
-        }
-
-        // Handle specific error codes
-        if (response.status === 409) {
-          setApiError('This email is already registered. Please use a different email or try logging in.');
-        } else if (response.status === 400) {
-          setApiError(errorMessage);
-        } else {
-          setApiError(`${errorMessage} (Status: ${response.status})`);
-        }
-        
-        return; // Don't throw, just return
-      }
-
-      // Success!
-      console.log("Registration successful:", data);
-      setSuccessMessage('Registration successful! Redirecting to login...');
-      
-      // Clear form
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-        gender: '',
-        birthDate: ''
-      });
-
-    //  Don't redirect automatically - user needs to verify email
-
-      // Redirect after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/signup';
-      }, 2000);
-      
-    } catch (error) {
-      console.error("Registration Error:", error);
-      
-      if (error.message === 'Failed to fetch') {
-        setApiError('Cannot connect to server. Please check if the backend is running and try again.');
-      } else {
-        setApiError(`An unexpected error occurred: ${error.message}`);
-      }
-    } finally {
-      setLoading(false);
+      data = JSON.parse(responseText);
+    } catch (e) {
+      data = { 
+        message: responseText || 'No response from server',
+        success: response.ok 
+      };
     }
-  };
+
+    if (!response.ok) {
+      let errorMessage = 'Registration failed';
+      
+      if (typeof data === 'string') {
+        errorMessage = data;
+      } else if (data.message) {
+        errorMessage = data.message;
+      } else if (data.error) {
+        errorMessage = data.error;
+      }
+
+      if (response.status === 409) {
+        setApiError('This email is already registered. Please use a different email or try logging in.');
+      } else if (response.status === 400) {
+        setApiError(errorMessage);
+      } else {
+        setApiError(`${errorMessage} (Status: ${response.status})`);
+      }
+      
+      return;
+    }
+
+    // SUCCESS: Redirect to verification page immediately
+    console.log("Registration successful, redirecting to verification...");
+    navigate('/verify-email', { 
+      state: { 
+        email: formData.email,
+        justRegistered: true // Flag to show success message
+      } 
+    });
+      
+  } catch (error) {
+    console.error("Registration Error:", error);
+    
+    if (error.message === 'Failed to fetch') {
+      setApiError('Cannot connect to server. Please check if the backend is running and try again.');
+    } else {
+      setApiError(`An unexpected error occurred: ${error.message}`);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
