@@ -1,11 +1,14 @@
-package com.Project.SmartLink.Services;
+package com.Project.SmartLink.Services.PostService;
 
 import com.Project.SmartLink.Repository.PostRepository;
 import com.Project.SmartLink.entity.Post;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
+@Service
 public class PostServiceImp implements PostService{
     private PostRepository postRepository;
 
@@ -15,16 +18,18 @@ public class PostServiceImp implements PostService{
     }
     @Override
     public List<Post> findAll() {
+
         return postRepository.findAll();
     }
 
     @Override
-    public Post findById(int theId) {
+    public Optional<Post> findById(Long theId) {
         return postRepository.findById(theId);
     }
 
     @Override
-    public void deleteById(int theId) {
+    public void deleteById(Long theId) {
+
         postRepository.deleteById(theId);
     }
 
@@ -34,7 +39,7 @@ public class PostServiceImp implements PostService{
     }
 
     @Override
-    public List<Post> findByUserId(int theId) {
+    public List<Post> findByUserId(Long theId) {
         return postRepository.findByUserId(theId);
     }
 
@@ -44,7 +49,7 @@ public class PostServiceImp implements PostService{
     }
 
     @Override
-    public Post updatePost(Post post) {
-        return postRepository.updatePost(post);
+    public int updatePost(Post post) {
+        return postRepository.updateContent(post.getPostId(), post.getContent());
     }
 }
