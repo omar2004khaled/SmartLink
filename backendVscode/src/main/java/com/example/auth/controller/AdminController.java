@@ -15,7 +15,7 @@ import com.example.auth.repository.UserRepository;
 
 @RestController
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')") // All endpoints in this controller require ADMIN role
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final UserRepository userRepository;
@@ -49,7 +49,6 @@ public class AdminController {
                 totalUsers, enabledUsers, adminUsers);
     }
 
-    // PROMOTION ENDPOINT - This is what you asked for!
     @PostMapping("/promote/{userId}")
     public ResponseEntity<?> promoteToAdmin(@PathVariable Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
@@ -77,7 +76,6 @@ public class AdminController {
         return ResponseEntity.ok("User " + user.getEmail() + " promoted to ADMIN successfully!");
     }
 
-    // DEMOTE endpoint (optional)
     @PostMapping("/demote/{userId}")
     public ResponseEntity<?> demoteToUser(@PathVariable Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
