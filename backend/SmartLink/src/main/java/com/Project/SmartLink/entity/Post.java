@@ -10,7 +10,7 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PostId")
-    private Long PostId;
+    private Long postId;
 
     @Column(name = "UserId" , nullable = false)
     private Long UserId;
@@ -22,11 +22,11 @@ public class Post {
     private Timestamp CreatedAt ;
 
     public Long getPostId() {
-        return PostId;
+        return postId;
     }
 
     public void setPostId(Long postId) {
-        PostId = postId;
+        this.postId = postId;
     }
 
     public Long getUserId() {
@@ -57,7 +57,7 @@ public class Post {
     }
 
     public Post(Long postId, Long userId, String content) {
-        this.PostId = postId;
+        this.postId = postId;
         this.UserId = userId;
         this.content = content;
     }

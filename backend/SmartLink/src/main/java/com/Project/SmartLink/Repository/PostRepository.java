@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAll();
 
@@ -23,7 +25,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Post p SET p.content = :content WHERE p.PostId = :id")
+    @Query("UPDATE Post p SET p.content = :content WHERE p.postId = :id")
     int updateContent(@Param("id") Long id, @Param("content") String content);
 
 }

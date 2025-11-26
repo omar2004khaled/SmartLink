@@ -9,6 +9,10 @@ import com.Project.SmartLink.entity.Attachment;
 import com.Project.SmartLink.entity.PostAttachmentKey;
 import com.Project.SmartLink.entity.PostAttchment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -29,11 +33,16 @@ public class PostRestController {
         this.postAttachmentService = postAttachmentService;
     }
     @GetMapping("/all")
-    public List<PostDTO> findAll() {
-        List<Post> posts = postService.findAll();
-        if (posts.size()==0) return null;
+    public List<PostDTO> findAll(@RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(defaultValue = "5") int size,
+                                 @RequestParam(defaultValue = "PostId") String sortBy,
+                                 @RequestParam(defaultValue = "true") boolean ascending) {
+        Sort sort = ascending ? Sort.by(Sort.Direction.ASC, sortBy) : Sort.by(Sort.Direction.DESC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Post> posts = postService.findAll(pageable);
+        if (posts.getContent().size()==0) return null;
         List<PostDTO> answers = new ArrayList<>();
-        for (Post post : posts){
+        for (Post post : posts.getContent()){
             List<Long> attachmentIDs = postAttachmentService.findAttachmentsByIdOfPost(post.getPostId());
             List<Attachment> attachments = new ArrayList<>();
             for (Long attachmentID : attachmentIDs) {

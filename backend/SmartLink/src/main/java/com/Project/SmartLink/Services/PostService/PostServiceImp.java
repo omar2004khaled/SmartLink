@@ -5,6 +5,7 @@ import com.Project.SmartLink.entity.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +18,9 @@ public class PostServiceImp implements PostService{
         this.postRepository = postRepository;
     }
     @Override
-    public List<Post> findAll() {
+    public Page<Post> findAll(Pageable pageable) {
 
-        return postRepository.findAll();
+        return postRepository.findAll(pageable);
     }
 
     @Override

@@ -5,14 +5,14 @@ import com.Project.SmartLink.DTO.PostDTO;
 import com.Project.SmartLink.Services.AttachmentService.AttachmentService;
 import com.Project.SmartLink.Services.PostAttachmentService.PostAttachmentService;
 import com.Project.SmartLink.Services.PostService.PostService;
-import com.Project.SmartLink.entity.Attachment;
 import com.Project.SmartLink.entity.Post;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import static org.mockito.ArgumentMatchers.any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import org.springframework.data.domain.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -45,8 +45,8 @@ public class PostRestControllerIntegrationTest {
     void testFindAll() throws Exception {
         Post post = new Post(1L, "Hello world");
         post.setPostId(1L);
-
-        when(postService.findAll()).thenReturn(List.of(post));
+        Page<Post> postsPage = new PageImpl<>(List.of(post));
+        when(postService.findAll(any(Pageable.class))).thenReturn(postsPage);
         when(postAttachmentService.findAttachmentsByIdOfPost(1L)).thenReturn(List.of());
 
         mockMvc.perform(get("/Post/all"))
