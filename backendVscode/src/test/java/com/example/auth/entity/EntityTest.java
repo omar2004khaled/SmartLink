@@ -84,4 +84,55 @@ class EntityTest {
         assertEquals(user, token.getUser());
         assertEquals(expiresAt, token.getExpiresAt());
     }
+
+    @Test
+    void user_OAuthConstructor_ShouldSetDefaults() {
+        // Act
+        User user = new User("John Doe", "john@example.com", "GOOGLE", "google123");
+
+        // Assert
+        assertEquals("John Doe", user.getFullName());
+        assertEquals("john@example.com", user.getEmail());
+        assertEquals("GOOGLE", user.getProvider());
+        assertEquals("google123", user.getProviderId());
+        assertTrue(user.isEnabled());
+        assertEquals(LocalDate.of(1990, 1, 1), user.getBirthDate());
+        assertEquals("N/A", user.getPhoneNumber());
+        assertEquals("OAUTH_USER", user.getPassword());
+    }
+
+    @Test
+    void user_ProviderSettersAndGetters_ShouldWork() {
+        // Arrange
+        User user = new User();
+
+        // Act
+        user.setProvider("FACEBOOK");
+        user.setProviderId("fb456");
+
+        // Assert
+        assertEquals("FACEBOOK", user.getProvider());
+        assertEquals("fb456", user.getProviderId());
+    }
+
+    @Test
+    void user_ToString_ShouldContainKeyFields() {
+        // Arrange
+        User user = new User();
+        user.setId(1L);
+        user.setFullName("John Doe");
+        user.setEmail("john@example.com");
+        user.setRole("ADMIN");
+        user.setEnabled(true);
+
+        // Act
+        String result = user.toString();
+
+        // Assert
+        assertTrue(result.contains("id=1"));
+        assertTrue(result.contains("fullName='John Doe'"));
+        assertTrue(result.contains("email='john@example.com'"));
+        assertTrue(result.contains("role='ADMIN'"));
+        assertTrue(result.contains("enabled=true"));
+    }
 }
