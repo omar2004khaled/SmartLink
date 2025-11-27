@@ -11,7 +11,7 @@ const REACTIONS = [
     { key: 'angry', Icon: Angry, label: 'ANGRY', color: '#dc2626' }, // Red
 ];
 
-function Footer() {
+function Footer({ onCommentClick, onToggleInline }) {
     const [selectedReaction, setSelectedReaction] = useState(null);
     const [showReactions, setShowReactions] = useState(false);
     const reactionsRef = useRef(null);
@@ -41,7 +41,7 @@ function Footer() {
     };
 
     return (
-        <div className="post-card-footer">
+        <div className="post-card-footer ">
             <div
                 className="reaction-container"
                 ref={reactionsRef}
@@ -57,7 +57,6 @@ function Footer() {
                     } : {}}
                 >
                     <CurrentIcon className="reaction-icon" size={24} color={selectedReaction ? currentColor: 'currentColor'} />
-                    <br/>
                     <span className="reaction-label">{currentLabel}</span>
                 </button>
 
@@ -94,15 +93,28 @@ function Footer() {
                 )}
             </div>
 
-            <button className="comment-icon-button">
-                <MessageCircle />
-                <span>Comment</span>
-            </button>
+            <div style={{ display: 'flex', gap: 12, flex: 1 }}>
+                <button
+                    className="comment-icon-button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        if (typeof onToggleInline === 'function') {
+                            onToggleInline();
+                        } else if (typeof onCommentClick === 'function') {
+                            onCommentClick(true);
+                        }
+                    }}
+                    aria-label="Comment"
+                >
+                    <MessageCircle />
+                    <span>Comment</span>
+                </button>
 
-            <button className="share-icon-button">
-                <Forward />
-                Share
-            </button>
+                <button className="share-icon-button">
+                    <Forward />
+                    Share
+                </button>
+            </div>
         </div>
     );
 }

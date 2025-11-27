@@ -90,8 +90,11 @@ function App() {
         <Route path="/PostComposation" element={<CreatePost />} />
         <Route path='/' element={
           <div>
-            <PostCard Posts={posts} />
-            
+            {/* Render one PostCard per post so each has its own composer + comments modal */}
+            {posts.map(p => (
+              <PostCard key={p.id} post={p} />
+            ))}
+
             {/* Show load more button only if we have posts and might have more */}
             {posts.length > 0 && posts.length % pageSize === 0 && (
               <div className="load-more-container" style={{  alignItems:'center' , marginTop:'20px', marginBottom:'20px', display:'flex', justifyContent:'center' , paddingBottom:'15px' }}>
@@ -104,7 +107,7 @@ function App() {
                 </button>
               </div>
             )}
-            
+
             {/* Show message when no posts at all */}
             {posts.length === 0 && !loading && (
               <div className="no-posts">

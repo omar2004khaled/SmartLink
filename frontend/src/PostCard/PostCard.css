@@ -1,6 +1,6 @@
 .post-card {
   max-width: 850px;
-  margin: 1rem auto;
+  margin: 1.25rem auto 1.75rem; /* more vertical space between posts */
   background: linear-gradient(180deg, #ffffff 0%, #fbfdfa 100%);
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(2,6,23,0.06);
@@ -55,6 +55,7 @@
 
 .post-content {
   margin-top: 0.9rem;
+  margin-bottom: 0.85rem;
   color: #0f172a;
   line-height: 1.55;
   font-size: 0.96rem;
@@ -190,6 +191,7 @@
     gap: 0.8rem;
     padding: 0.8rem 0;
     margin-top: 0.8rem;
+    margin-bottom: 0.5rem;
     background-color: transparent;
     border-top: 1px solid rgba(15,23,42,0.06);
 }
@@ -329,5 +331,190 @@
 .share-icon-button svg {
     width: 20px;
     height: 20px;
+}
+
+/* Visual refresh appended: modernized card, header, composer, buttons, and modal */
+
+.post-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfa 100%);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(12, 18, 32, 0.06);
+  padding: 1rem;
+  border: 1px solid rgba(15,23,42,0.04);
+  transition: transform 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease;
+}
+
+.post-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 50px rgba(12,18,32,0.09);
+}
+
+.user-header {
+  display:flex;
+  gap:0.9rem;
+  align-items:center;
+}
+
+.user-avatar {
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  object-fit:cover;
+  border: 2px solid rgba(59,130,246,0.08);
+}
+
+.user-info { display:flex; flex-direction:column; }
+.user-username { font-weight:700; color:#0f172a; font-size:1rem; }
+.user-bio { color:#64748b; font-size:0.86rem; }
+.post-timestamp { color:#94a3b8; font-size:0.82rem; }
+
+.post-content {
+  margin-top:0.85rem; color:#0f172a; line-height:1.6; font-size:0.98rem;
+}
+
+.attachment-image, .attachment-video {
+  width:100%;
+  border-radius:12px;
+  overflow:hidden;
+  display:block;
+  margin-top:0.9rem;
+  border: 1px solid rgba(2,6,23,0.04);
+}
+
+.attachment-image img, .attachment-video img { width:100%; height:auto; object-fit:cover; border-radius:inherit; display:block; }
+
+.post-card-footer {
+  display:flex; align-items:center; gap:0.75rem; padding-top:0.9rem; margin-top:0.9rem; border-top:1px solid rgba(15,23,42,0.04); margin-bottom: 0.5rem;
+}
+
+/* Reaction and action buttons */
+.reaction-button, .comment-icon-button, .share-icon-button {
+  height:56px; border-radius:10px; padding:0.5rem 0.8rem; background:transparent; border:1px solid rgba(2,6,23,0.04);
+  display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; color:#0f172a; font-weight:700;
+}
+
+.reaction-button:hover, .comment-icon-button:hover, .share-icon-button:hover {
+  background: rgba(59,130,246,0.04);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.03);
+}
+
+/* Composer refresh */
+.comment-composer {
+  display:flex; gap:1rem; padding:1rem; align-items:flex-start; border-top:1px solid rgba(15,23,42,0.03); margin-top:0.6rem; background:#ffffff;
+  width: 100%;
+  box-sizing: border-box;
+}
+.composer-avatar { width:40px; height:40px; border-radius:10px; }
+.composer-input { width:100%; resize:none; padding:0.6rem; border-radius:10px; border:1px solid #eef2f6; font-size:0.95rem; }
+.composer-body {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.attach-button { width:40px; height:40px; display:inline-grid; place-items:center; background:#f8fafc; border-radius:8px; border:1px solid #eef2f6; cursor:pointer; }
+.attach-preview { width:72px; height:72px; border-radius:8px; overflow:hidden; position:relative; margin-left: 8px; }
+.remove-attach { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.55); color:#fff; border:none; width:22px; height:22px; border-radius:6px; cursor:pointer; }
+.send-btn { background:#2563eb; color:#fff; border:none; padding:0.5rem 0.9rem; border-radius:10px; cursor:pointer; font-weight:700; margin-left: auto; }
+.send-btn:hover { filter:brightness(0.96); }
+
+/* Modal polish */
+.comments-modal { border-radius:12px; }
+.comments-modal-header { padding:1rem 1.1rem; }
+.comments-modal-body { padding:1rem 1.1rem; }
+.comments-modal-footer { padding:0.75rem 1.1rem; }
+
+.comment-item { display:flex; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid #f1f5f9; }
+.comment-avatar { width:44px; height:44px; border-radius:10px; }
+.comment-author { font-weight:700; }
+.comment-text { color:#334155; }
+
+/* small responsive tweaks */
+@media (max-width: 640px) {
+  .post-card { margin:0.6rem; padding:0.85rem; }
+  .reaction-button, .comment-icon-button, .share-icon-button { height:52px; }
+}
+
+/* ensure the file input control is hidden (no "No file chosen" text) */
+.comment-composer input[type="file"] {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+/* make the clickable attach label look like a button */
+.attach-button {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+/* underline subtle separation between footer and composer */
+.post-card-footer { margin-bottom: 0.5rem; }
+
+/* Slightly larger load-more spacing */
+.load-more-container { margin-top: 28px; margin-bottom: 28px; }
+
+/* Make post cards use full available width within the feed */
+.post-card.full-width {
+  max-width: none;
+  width: 100%;
+  border-radius: 12px;
+}
+
+/* disabled attach style */
+.attach-button.disabled { opacity: 0.6; cursor: not-allowed; }
+
+.uploading-indicator {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* ensure compose area flows nicely on small screens */
+@media (max-width: 640px) {
+  .comment-composer { flex-direction: column; gap: 0.6rem; }
+  .composer-actions { width: 100%; }
+  .composer-send { display:flex; justify-content:flex-end; }
+}
+
+/* Make reaction container same size as other action buttons */
+.reaction-container {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reaction-button {
+  height: 56px;
+  padding: 0 12px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reactions-picker { z-index: 60; }
+
+/* Ensure icons don't increase button height */
+.reaction-icon, .reaction-option svg {
+  display: block;
+  line-height: 1;
 }
 

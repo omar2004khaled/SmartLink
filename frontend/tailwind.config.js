@@ -1,19 +1,7 @@
-module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  darkMode: 'class',
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {
-      colors: {
-        primary: "#00A6F2",
-        secondary: "#FFEAEE",
-      },
-      fontFamily: {
-        display: ["Inter", "sans-serif"]
-      },
-    },
+    extend: {},
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [],  // ← Empty array or remove the plugins property entirely
 }
