@@ -32,7 +32,6 @@ public class AuthController {
         }
     }
 
-    // ADD THIS LOGIN ENDPOINT
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {

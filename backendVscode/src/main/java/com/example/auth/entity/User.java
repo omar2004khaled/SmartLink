@@ -19,15 +19,21 @@ public class User {
     @Column(length = 40, nullable = false)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     @JsonIgnore
     private String password;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "phone_number", length = 20, nullable = false)
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
+
+    @Column(name = "provider")
+    private String provider = "LOCAL";
+
+    @Column(name = "provider_id")
+    private String providerId;
 
     @Enumerated(EnumType.STRING)
     private com.example.auth.enums.Gender gender;
@@ -46,6 +52,17 @@ public class User {
         this.birthDate = birthDate;
         this.phoneNumber = phoneNumber;
         this.gender = gender;
+    }
+
+    public User(String fullName, String email, String provider, String providerId) {
+        this.fullName = fullName;
+        this.email = email;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.enabled = true;
+        this.birthDate = LocalDate.of(1990, 1, 1);
+        this.phoneNumber = "N/A";
+        this.password = "OAUTH_USER"; // Placeholder for OAuth users
     }
 
     // Getters and Setters
@@ -120,6 +137,23 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
     @Override
     public String toString() {
         return "User{" +
