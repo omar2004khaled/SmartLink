@@ -13,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class JobSeekerProfileEntityTest {
 
     private JobSeekerProfile profile;
-    private Location location;
+    private com.example.auth.entity.ProfileEntities.Location location;
 
     @BeforeEach
     void setUp() {
         profile = new JobSeekerProfile();
-        location = new Location(1L, "USA", "New York");
+        location = new com.example.auth.entity.ProfileEntities.Location(1L, "USA", "New York");
     }
 
     @Test
