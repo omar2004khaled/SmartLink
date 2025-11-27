@@ -71,7 +71,7 @@ CREATE TABLE Education (
     EducationId     BIGINT AUTO_INCREMENT PRIMARY KEY,
     ProfileId       BIGINT NOT NULL,
     School          VARCHAR(200),
-    ENUM(
+    degree          ENUM(
     'Certificate',
     'Diploma',
     'Associate',
@@ -230,11 +230,13 @@ CREATE TABLE Post_like(
 -- COMMENTS
 -- ===================================
 CREATE TABLE Comments(
-    CommentId      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    CommentId       BIGINT AUTO_INCREMENT PRIMARY KEY,
     UserId          BIGINT NOT NULL,
     PostId          BIGINT NOT NULL,
     Content         VARCHAR(2500) NOT NULL,
     CreatedAt       DATETIME NOT NULL,
+    RepliedTo       BIGINT,
+    AttachId        BIGINT,
     RepliedTo      BIGINT,
     FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
     FOREIGN KEY (PostId) REFERENCES Posts(PostId) ON DELETE CASCADE,
@@ -242,6 +244,9 @@ CREATE TABLE Comments(
 );
 
 CREATE INDEX CommentsByUser ON Comments(UserId);
+CREATE INDEX CommentsByPost ON Comments(PostId);
+
+
 
 
 -- ===================================
