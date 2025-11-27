@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,14 +14,39 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const location = useLocation();
 
   const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
 
+  const handleGoogleLogin = () => {
+   window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+};
+
+
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const errorParam = params.get("error");
+
+  if (errorParam === "not_registered") {
+    setError("This Google account is not registered. Please sign up first.");
+    setSuccessMessage('');
+
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, "", cleanUrl);
+  }
+}, [location]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (error) setError('');
   };
+
+  useEffect(() => {
+  if (successMessage) {
+    const timer = setTimeout(() => setSuccessMessage(''), 3000);
+    return () => clearTimeout(timer);
+  }
+}, [successMessage]);
 
  const handleSubmit = async (e) => {
   e.preventDefault();
@@ -177,15 +205,17 @@ const Login = () => {
 
           {/* Error Message */}
           {error && (
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-sm text-destructive">{error}</p>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
             </div>
-          )}
-          {successMessage && (
-        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <p className="text-sm text-green-800 dark:text-green-200">{successMessage}</p>
-        </div>
-        )}
+            )}
+
+            {/* Success Message */}
+            {successMessage && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-700">{successMessage}</p>
+            </div>
+            )}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -268,10 +298,10 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Google Sign Up */}
+          {/* Google login */}
                 <button
                   type="button"
-                 
+                 onClick={handleGoogleLogin}
                   className="flex w-full items-center justify-center gap-2 h-12 px-4 rounded-lg border border-[#CCCCCC] dark:border-[#444444] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

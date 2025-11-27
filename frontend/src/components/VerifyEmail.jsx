@@ -10,6 +10,7 @@ const VerifyEmail = () => {
   
   const email = location.state?.email || '';
   const justRegistered = location.state?.justRegistered || false;
+  
 
   useEffect(() => {
     if (!email) {
@@ -17,40 +18,24 @@ const VerifyEmail = () => {
     }
   }, [email, navigate]);
 
-  const handleResendVerification = async () => {
-    setLoading(true);
-    setError('');
-    setMessage('');
-    
-    try {
-      const response = await fetch("http://localhost:8080/auth/resend-verification", {
-        method: "POST",
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email })
-      });
-
-      const responseText = await response.text();
-      let data;
-      
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        data = { message: responseText };
+   const handleGoToLogin = () => {
+    navigate('/login', { 
+      state: { 
+        email: email,
+       
       }
-
-      if (response.ok) {
-        setMessage('✅ Verification email sent! Please check your inbox.');
-      } else {
-        setError(data.message || 'Failed to resend verification email. Please try again.');
-      }
-    } catch (error) {
-      setError('Cannot connect to server. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
+  useEffect(() => {
+    if (message || error) {
+      const timer = setTimeout(() => {
+        setMessage('');
+        setError('');
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [message, error]);
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2">
@@ -87,7 +72,7 @@ const VerifyEmail = () => {
             {justRegistered && (
               <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <p className="text-sm text-green-800 dark:text-green-200">
-                  ✅ Registration successful! Please verify your email to continue.
+                  Registration successful! Please verify your email to continue.
                 </p>
               </div>
             )}
@@ -133,7 +118,7 @@ const VerifyEmail = () => {
           {/* Action Buttons */}
           <div className="space-y-4">
             <button
-              onClick={handleResendVerification}
+               onClick={handleGoToLogin}
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center"
             >
@@ -146,18 +131,11 @@ const VerifyEmail = () => {
                   Sending...
                 </>
               ) : (
-                'Resend Verification Email'
+                ' Go to Login'
               )}
             </button>
 
-            <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Need help?{' '}
-                <Link to="/contact" className="font-semibold text-blue-600 hover:underline">
-                  Contact Support
-                </Link>
-              </p>
-            </div>
+            
           </div>
         </div>
       </div>

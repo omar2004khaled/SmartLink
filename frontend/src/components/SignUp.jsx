@@ -22,10 +22,9 @@ const SignUp = () => {
   const [apiError, setApiError] = useState(''); // Add this for API errors
   const [successMessage, setSuccessMessage] = useState(''); // Add this for success
 
-   const handleGoogleLogin = (e) => {
+   const handleGoogleSignup = (e) => {
     e.preventDefault();
     console.log("Redirecting to Google OAuth2...");
-    // This will redirect to your Spring Boot OAuth2 endpoint
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   };
   
@@ -529,7 +528,7 @@ const SignUp = () => {
                 {/* Google Sign Up */}
                 <button
                   type="button"
-                  onClick={handleGoogleLogin}
+                  onClick={handleGoogleSignup}
                   className="flex w-full items-center justify-center gap-2 h-12 px-4 rounded-lg border border-[#CCCCCC] dark:border-[#444444] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
