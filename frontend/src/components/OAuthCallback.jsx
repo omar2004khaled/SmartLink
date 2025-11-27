@@ -37,7 +37,7 @@ const OAuthCallback = () => {
 
         
         setTimeout(() => {
-          navigate('/dashboard'); 
+          navigate('/PostComposotion'); 
         }, 2000);
 
       } catch (error) {

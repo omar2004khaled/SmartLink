@@ -1,21 +1,13 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import CreatePost from './PostComposotion/PostComposotion'
-import PostCard from './PostCard/PostCard'
-import { GetPosts } from './FetchData/FetchData';
+import React, { useState, useEffect } from 'react';
+import PostCard from '../PostCard/PostCard';
+import { GetPosts } from '../FetchData/FetchData';
 
-import './App.css'
-
-function App() {
+export default function Posts() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const pageSize = 5;
 
-  // Calculate if there are more posts based on current state
-  const hasMore = posts.length === (currentPage + 1) * pageSize && posts.length > 0;
-
-  // Initial load
   useEffect(() => {
     loadInitialPosts();
   }, []);
@@ -25,7 +17,7 @@ function App() {
       setLoading(true);
       const postsData = await GetPosts(0, pageSize, 'PostId', false);
       
-      if (postsData !== null) {
+      if (postsData !== null && Array.isArray(postsData)) {
         const transformedPosts = transformPosts(postsData);
         setPosts(transformedPosts);
         setCurrentPage(0);
@@ -45,12 +37,11 @@ function App() {
       const nextPage = currentPage + 1;
       const postsData = await GetPosts(nextPage, pageSize, 'PostId', false);
       
-      // If service returns null, stop loading more
       if (postsData === null) {
         return;
       }
       
-      if (postsData && postsData.length > 0) {
+      if (postsData && Array.isArray(postsData) && postsData.length > 0) {
         const transformedPosts = transformPosts(postsData);
         setPosts(prevPosts => [...prevPosts, ...transformedPosts]);
         setCurrentPage(nextPage);
@@ -85,40 +76,28 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/PostComposation" element={<CreatePost />} />
-        <Route path='/' element={
-          <div>
-            {/* Render one PostCard per post so each has its own composer + comments modal */}
-            {posts.map(p => (
-              <PostCard key={p.id} post={p} />
-            ))}
+    <div>
+      {posts.map(p => (
+        <PostCard key={p.id} post={p} />
+      ))}
 
-            {/* Show load more button only if we have posts and might have more */}
-            {posts.length > 0 && posts.length % pageSize === 0 && (
-              <div className="load-more-container" style={{  alignItems:'center' , marginTop:'20px', marginBottom:'20px', display:'flex', justifyContent:'center' , paddingBottom:'15px' }}>
-                <button 
-                  className="load-more-btn"
-                  onClick={loadMorePosts}
-                  disabled={loading}
-                >
-                  {loading ? 'Loading...' : 'Load More Posts'}
-                </button>
-              </div>
-            )}
+      {posts.length > 0 && posts.length % pageSize === 0 && (
+        <div className="load-more-container" style={{ alignItems:'center', marginTop:'20px', marginBottom:'20px', display:'flex', justifyContent:'center', paddingBottom:'15px' }}>
+          <button 
+            className="load-more-btn"
+            onClick={loadMorePosts}
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Load More Posts'}
+          </button>
+        </div>
+      )}
 
-            {/* Show message when no posts at all */}
-            {posts.length === 0 && !loading && (
-              <div className="no-posts">
-                No posts available. Create the first post!
-              </div>
-            )}
-          </div>
-        } />   
-      </Routes>
-    </BrowserRouter>
-  )
+      {posts.length === 0 && !loading && (
+        <div className="no-posts">
+          No posts available. Create the first post!
+        </div>
+      )}
+    </div>
+  );
 }
-
-export default App;

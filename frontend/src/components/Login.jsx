@@ -124,7 +124,7 @@ useEffect(() => {
       console.log("Login successful, token stored");
     }
 
-    navigate('/dashboard'); 
+    navigate('/PostComposotion'); 
   } catch (error) {
     console.error("Login Error:", error);
     if (error.message === 'Failed to fetch') {
