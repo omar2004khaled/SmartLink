@@ -32,4 +32,32 @@ public class EmailService {
             System.out.println("==========================\n");
         }
     }
+
+
+    public void sendPasswordResetEmail(String to, String token) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject("SmartLink - Password Reset");
+
+            // Frontend URL (where React handles the token)
+            String resetLink = "http://localhost:5175/reset-password?token=" + token;
+
+            message.setText(
+                    "You requested a password reset.\n\n" +
+                            "Click the link below to reset your password:\n" + resetLink + "\n\n" +
+                            "This link expires in 1 hour."
+            );
+
+            mailSender.send(message);
+            System.out.println("Password reset email sent to: " + to);
+        } catch (Exception e) {
+            System.out.println("Failed to send password reset email: " + e.getMessage());
+            System.out.println("\n=== PASSWORD RESET EMAIL ===");
+            System.out.println("To: " + to);
+            System.out.println("Reset Link: " + token);
+            System.out.println("============================\n");
+        }
+    }
 }
+
