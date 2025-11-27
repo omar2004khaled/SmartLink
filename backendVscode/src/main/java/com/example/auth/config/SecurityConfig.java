@@ -12,9 +12,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
     private final JwtService jwtService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(JwtService jwtService) {
+    public SecurityConfig(JwtService jwtService, OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwtService = jwtService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
@@ -26,10 +28,13 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()          // Public auth endpoints
-                        .requestMatchers("/api/public","/api/company/**").permitAll()       // Public API endpoint
-                        .requestMatchers("/admin/**").hasRole("ADMIN")    // ADMIN role required
-                        .anyRequest().authenticated()                     // All other endpoints require any authentication
+                        .requestMatchers("/auth/**", "/api/public", "/oauth2/**", "/login/oauth2/**","/api/profiles/**","/api/company/**")
+                        .permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2SuccessHandler)
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
