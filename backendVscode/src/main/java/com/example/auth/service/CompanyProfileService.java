@@ -41,17 +41,17 @@ public class CompanyProfileService {
     }
 
     private CompanyDTO getCompanyDTO(CompanyProfile companyProfile){
-        CompanyDTO companyDTO = new CompanyDTO();
-        companyDTO.setCompanyName(companyProfile.getCompanyName());
-        companyDTO.setFounded(companyProfile.getFounded());
-        companyDTO.setDescription(companyProfile.getDescription());
-        companyDTO.setIndustry(companyProfile.getIndustry());
-        companyDTO.setWebsite(companyProfile.getWebsite());
-        companyDTO.setNumberOfFollowers(companyProfile.getNumberOfFollowers());
-        companyDTO.setUserId(companyProfile.getUserId());
-        companyDTO.setLogoUrl(companyProfile.getLogoUrl());
-        companyDTO.setCoverUrl(companyProfile.getCoverImageUrl());
-        return companyDTO;
+        return CompanyDTO.builder()
+                .companyName(companyProfile.getCompanyName())
+                .founded(companyProfile.getFounded())
+                .description(companyProfile.getDescription())
+                .industry(companyProfile.getIndustry())
+                .website(companyProfile.getWebsite())
+                .numberOfFollowers(companyProfile.getNumberOfFollowers())
+                .logoUrl(companyProfile.getLogoUrl())
+                .coverUrl(companyProfile.getCoverImageUrl())
+                .userId(companyProfile.getUserId())
+                .build();
     }
 
     public CompanyDTO getCompanyProfile(Long companyId, Long userId){
@@ -70,31 +70,18 @@ public class CompanyProfileService {
         CompanyProfile company = companyProfileRepo.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        if (request.getCompanyName() != null) {
-            company.setCompanyName(request.getCompanyName());
-        }
-        if (request.getDescription() != null) {
-            company.setDescription(request.getDescription());
-        }
-        if (request.getWebsite() != null) {
-            company.setWebsite(request.getWebsite());
-        }
-        if (request.getIndustry() != null) {
-            company.setIndustry(request.getIndustry());
-        }
-        if (request.getFounded() != null) {
-            company.setFounded(request.getFounded());
-        }
-        if (request.getLogoUrl() != null) {
-            company.setLogoUrl(request.getLogoUrl());
-        }
-        if (request.getCoverImageUrl() != null) {
-            company.setCoverImageUrl(request.getCoverImageUrl());
-        }
+        CompanyProfile updated = company.toBuilder()
+                .companyName(request.getCompanyName() != null ? request.getCompanyName() : company.getCompanyName())
+                .description(request.getDescription() != null ? request.getDescription() : company.getDescription())
+                .website(request.getWebsite() != null ? request.getWebsite() : company.getWebsite())
+                .industry(request.getIndustry() != null ? request.getIndustry() : company.getIndustry())
+                .founded(request.getFounded() != null ? request.getFounded() : company.getFounded())
+                .logoUrl(request.getLogoUrl() != null ? request.getLogoUrl() : company.getLogoUrl())
+                .coverImageUrl(request.getCoverImageUrl() != null ? request.getCoverImageUrl() : company.getCoverImageUrl())
+                .build();
 
-        CompanyProfile updated = companyProfileRepo.save(company);
+        CompanyProfile saved = companyProfileRepo.save(company);
 
-        // FIX: Handle location updates properly
         if (request.getLocations() != null) {
             updateCompanyLocations(companyId, request.getLocations());
         }
@@ -104,11 +91,9 @@ public class CompanyProfileService {
 
     @Transactional
     public void updateCompanyLocations(Long companyId, List<LocationDTO> locationUpdates) {
-        // FIX: Delete all existing company-location associations first
-        // This properly handles deletions
+
         companyLocationRepo.deleteByCompanyId(companyId);
 
-        // If no locations provided (empty array), we're done - all locations deleted
         if (locationUpdates == null || locationUpdates.isEmpty()) {
             return;
         }
