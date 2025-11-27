@@ -1,7 +1,6 @@
-package com.Project.SmartLink.Services.PostAttachmentService;
+package com.example.auth.service.PostAttachmentService;
 
-
-import com.Project.SmartLink.entity.PostAttchment;
+import com.example.auth.entity.PostAttchment;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;

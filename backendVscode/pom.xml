@@ -17,10 +17,10 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <java.version>22</java.version>
+        <java.version>17</java.version>
         <jjwt.version>0.11.5</jjwt.version>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version> <!-- or latest -->
+            <version>1.18.42</version> <!-- or latest -->
             <scope>provided</scope>
         </dependency>
 
@@ -137,6 +137,15 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

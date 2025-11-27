@@ -1,7 +1,7 @@
-package com.Project.SmartLink.Services.PostService;
+package com.example.auth.service.PostService;
 
-import com.Project.SmartLink.DTO.PostDTO;
-import com.Project.SmartLink.entity.Post;
+import com.example.auth.dto.PostDTO;
+import com.example.auth.entity.Post;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,11 +1,16 @@
-package com.Project.SmartLink.DTO;
+package com.example.auth.dto;
 
-import com.Project.SmartLink.entity.Attachment;
+import com.example.auth.entity.Attachment;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.beans.ConstructorProperties;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 
+@AllArgsConstructor
 public class PostDTO {
     private Long id;
     private String content;
@@ -13,30 +18,8 @@ public class PostDTO {
     private List<Attachment> attachments;
     private Timestamp createdAt;
 
-    public PostDTO(Long id , String content, Long userId, List<Attachment> attachments , Timestamp createdAt) { //on creating post
-        this.id = id;
-        this.content = content;
-        this.userId = userId;
-        this.attachments = attachments;
-        this.createdAt = createdAt;
-    }
-    public PostDTO(){
 
-    }
 
-    public PostDTO(String content, Long userId, List<Attachment> attachments, Timestamp createdAt) {
-        this.content = content;
-        this.userId = userId;
-        this.attachments = attachments;
-        this.createdAt = createdAt;
-    }
-
-    public PostDTO(Long id, String content, List<Attachment> attachments , Timestamp createdAt) { // on modifying post
-        this.id = id;
-        this.content = content;
-        this.attachments = attachments;
-        this.createdAt = createdAt;
-    }
 
     public PostDTO(Long id) { // on deleting or searching for a post
         this.id = id;

@@ -1,9 +1,7 @@
-package com.Project.SmartLink.Services.PostAttachmentService;
+package com.example.auth.service.PostAttachmentService;
 
-import com.Project.SmartLink.Repository.PostAttachmentRepository;
-import com.Project.SmartLink.entity.Attachment;
-import com.Project.SmartLink.entity.Post;
-import com.Project.SmartLink.entity.PostAttchment;
+import com.example.auth.repository.PostAttachmentRepository;
+import com.example.auth.entity.PostAttchment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

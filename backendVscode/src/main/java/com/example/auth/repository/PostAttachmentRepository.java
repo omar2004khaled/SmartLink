@@ -1,9 +1,9 @@
-package com.Project.SmartLink.Repository;
+package com.example.auth.repository;  // Updated package
 
-import com.Project.SmartLink.entity.Attachment;
-import com.Project.SmartLink.entity.Post;
-import com.Project.SmartLink.entity.PostAttachmentKey;
-import com.Project.SmartLink.entity.PostAttchment;
+import com.example.auth.entity.Attachment;  // Updated package
+import com.example.auth.entity.Post;  // Updated package
+import com.example.auth.entity.PostAttachmentKey;  // Updated package
+import com.example.auth.entity.PostAttchment;  // Updated package
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -1,13 +1,14 @@
-package com.Project.SmartLink.Services.PostService;
+package com.example.auth.service.PostService;
 
-import com.Project.SmartLink.DTO.PostDTO;
-import com.Project.SmartLink.Repository.PostRepository;
-import com.Project.SmartLink.Services.AttachmentService.AttachmentService;
-import com.Project.SmartLink.Services.PostAttachmentService.PostAttachmentService;
-import com.Project.SmartLink.entity.Attachment;
-import com.Project.SmartLink.entity.Post;
-import com.Project.SmartLink.entity.PostAttachmentKey;
-import com.Project.SmartLink.entity.PostAttchment;
+
+import com.example.auth.dto.PostDTO;
+import com.example.auth.repository.*;
+import com.example.auth.service.AttachmentService.*;
+import com.example.auth.service.PostAttachmentService.*;
+import com.example.auth.entity.Attachment;
+import com.example.auth.entity.Post;
+import com.example.auth.entity.PostAttachmentKey;
+import com.example.auth.entity.PostAttchment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

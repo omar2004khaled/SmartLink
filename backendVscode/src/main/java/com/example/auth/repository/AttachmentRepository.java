@@ -1,7 +1,8 @@
-package com.Project.SmartLink.Repository;
+package com.example.auth.repository;
 
-import com.Project.SmartLink.entity.Attachment;
-import com.Project.SmartLink.entity.TypeOfAttachment;
+
+import com.example.auth.entity.Attachment;
+import com.example.auth.enums.TypeofAttachments;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,7 +22,7 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     void deleteById(Long theId);
     Attachment save(Attachment attachment);
     @Query("SELECT a FROM Attachment a WHERE a.typeOfAttachment = :type")
-    List<Attachment> findByType(@Param("type") TypeOfAttachment type);
+    List<Attachment> findByType(@Param("type") TypeofAttachments type);
     @Modifying
     @Transactional
     @Query("UPDATE Attachment a SET a.attachmentURL = :attachmentURL WHERE a.AttachId = :AttachmentID")
