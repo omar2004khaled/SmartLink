@@ -24,6 +24,18 @@ public class Project {
     @Column(name="EndDate")
     private LocalDate endDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="ProfileId")
+    private JobSeekerProfile profile;
+
+    public JobSeekerProfile getProfile() {
+        return this.profile;
+    }
+
+    public void setProfile(JobSeekerProfile profile) {
+        this.profile = profile;
+    }
+
 
     public Long getProjectId() {
         return this.projectId;

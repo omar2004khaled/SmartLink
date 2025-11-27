@@ -22,11 +22,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public List<ProjectDto> getProjectsForProfile(Long profileId) {
-        JobSeekerProfile profile = profileRepo.findById(profileId)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
-
-        // projects is a Set<Project>
-        return profile.getProjects()
+        return projectRepo.findByProfile_ProfileId(profileId)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -43,7 +39,6 @@ public class ProjectService {
         Project saved = projectRepo.save(project);
 
         profile.getProjects().add(saved); // update link
-        // profileRepo.save(profile); // usually not needed if owning side is JobSeekerProfile; adjust if needed
 
         return toDto(saved);
     }
@@ -56,7 +51,6 @@ public class ProjectService {
         Project project = projectRepo.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        // optionally enforce that project is linked to this profile
         if (!profile.getProjects().contains(project)) {
             throw new RuntimeException("Project is not linked to this profile");
         }

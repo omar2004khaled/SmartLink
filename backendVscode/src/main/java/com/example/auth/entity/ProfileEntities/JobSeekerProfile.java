@@ -50,10 +50,7 @@ public class JobSeekerProfile {
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Experience> experiences = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "Works_On",
-        joinColumns = @JoinColumn(name = "ProfileId"),
-        inverseJoinColumns = @JoinColumn(name = "ProjectId"))
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Project> projects = new HashSet<>();
 
     public enum Gender { MALE, FEMALE }
