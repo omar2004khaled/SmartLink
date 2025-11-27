@@ -23,7 +23,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                                         Authentication authentication) throws IOException {
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String token = oAuth2Service.processOAuth2User(oauth2User, "GOOGLE");
-
+       
         String redirectUrl = "http://localhost:5173/auth/callback?token=" + token;
         response.sendRedirect(redirectUrl);
     }
