@@ -1,8 +1,6 @@
 package com.example.auth.entity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigInteger;
 import java.sql.Timestamp;
 
 @Entity
@@ -17,14 +15,19 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PostId")
-    private BigInteger PostId;
+    private Long postId;
 
     @Column(name = "UserId" , nullable = false)
-    private BigInteger UserId;
+    private Long UserId;
 
     @Column(name = "content" , nullable = false , length = 2500)
     private String content  ;
 
     @Column(name = "CreatedAt")
     private Timestamp CreatedAt ;
+
+    public Post(Long userId, String content) {
+        this.UserId = userId;
+        this.content = content;
+    }
 }
