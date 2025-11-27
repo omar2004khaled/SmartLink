@@ -1,13 +1,13 @@
-package com.Project.SmartLink.REST;
+package com.example.auth.controller;
 
-import com.Project.SmartLink.DTO.PostDTO;
-import com.Project.SmartLink.Services.AttachmentService.AttachmentService;
-import com.Project.SmartLink.Services.PostAttachmentService.PostAttachmentService;
-import com.Project.SmartLink.Services.PostService.PostService;
-import com.Project.SmartLink.entity.Post;
-import com.Project.SmartLink.entity.Attachment;
-import com.Project.SmartLink.entity.PostAttachmentKey;
-import com.Project.SmartLink.entity.PostAttchment;
+import com.example.auth.dto.PostDTO;  // Updated package path
+import com.example.auth.service.AttachmentService.AttachmentService;  // Updated package path
+import com.example.auth.service.PostAttachmentService.PostAttachmentService;  // Updated package path
+import com.example.auth.service.PostService.PostService;  // Updated package path
+import com.example.auth.entity.Post;  // Updated package path
+import com.example.auth.entity.Attachment;  // Updated package path
+import com.example.auth.entity.PostAttachmentKey;  // Updated package path
+import com.example.auth.entity.PostAttchment;  // Updated package path
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,9 +32,9 @@ public class PostRestController {
     }
     @GetMapping("/all")
     public List<PostDTO> findAll(@RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "5") int size,
-                                 @RequestParam(defaultValue = "PostId") String sortBy,
-                                 @RequestParam(defaultValue = "true") boolean ascending) {
+                                                           @RequestParam(defaultValue = "5") int size,
+                                                           @RequestParam(defaultValue = "PostId") String sortBy,
+                                                           @RequestParam(defaultValue = "true") boolean ascending) {
         Sort sort = ascending ? Sort.by(Sort.Direction.ASC, sortBy) : Sort.by(Sort.Direction.DESC, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         return postService.findAll(pageable);

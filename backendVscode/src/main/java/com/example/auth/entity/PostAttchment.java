@@ -1,4 +1,4 @@
-package com.Project.SmartLink.entity;
+package com.example.auth.entity;
 
 import jakarta.persistence.*;
 

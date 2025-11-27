@@ -1,8 +1,9 @@
-package com.Project.SmartLink.Services.AttachmentService;
+package com.example.auth.service.AttachmentService;
+import com.example.auth.entity.Attachment;
+import com.example.auth.enums.TypeofAttachments;
 
-import com.Project.SmartLink.Repository.AttachmentRepository;
-import com.Project.SmartLink.entity.Attachment;
-import com.Project.SmartLink.entity.TypeOfAttachment;
+import com.example.auth.entity.PostAttchment;
+import com.example.auth.repository.AttachmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AttachmentSericeImp implements AttachmentService{
+public class AttachmentSericeImp implements AttachmentService {
     private AttachmentRepository attachmentRepository;
     @Autowired
     public AttachmentSericeImp(AttachmentRepository attachmentRepository) {
@@ -40,7 +41,7 @@ public class AttachmentSericeImp implements AttachmentService{
 
 
     @Override
-    public List<Attachment> findByType(TypeOfAttachment type) {
+    public List<Attachment> findByType(TypeofAttachments type) {
         return attachmentRepository.findByType(type);
     }
 
