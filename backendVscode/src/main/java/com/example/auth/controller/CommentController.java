@@ -22,7 +22,7 @@ public class CommentController {
     }
     @PostMapping("/add")
     public ResponseEntity<Long> addComment(@RequestBody CommentDTO commentDTO) throws Exception{
-
+      
         try {
 
             if(commentDTO.getUrl() == null && commentDTO.getText() ==null) throw new NotEnoughInformationException("There are too many nulls");
