@@ -3,8 +3,8 @@ package com.example.auth.entity.ProfileEntities;
 import jakarta.persistence.*;
 
 
-@Entity
-@Table(name = "Location")
+@Entity(name = "ProfileLocation")
+@Table(name = "profile_location")
 
 public class Location {
     @Id
