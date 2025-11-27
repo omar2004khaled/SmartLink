@@ -12,7 +12,7 @@ const REACTIONS = [
 ];
 
 function Footer() {
-    const [selectedReaction, setSelectedReaction] = useState('like');
+    const [selectedReaction, setSelectedReaction] = useState(null);
     const [showReactions, setShowReactions] = useState(false);
     const reactionsRef = useRef(null);
 
@@ -27,9 +27,9 @@ function Footer() {
     }, []);
 
     const currentReaction = REACTIONS.find(r => r.key === selectedReaction) || REACTIONS[0];
-    const CurrentIcon = currentReaction.Icon;
+    const CurrentIcon = selectedReaction ? currentReaction.Icon : REACTIONS[0].Icon;
     const currentColor = currentReaction?.color || '#0f172a';
-    const currentLabel = currentReaction?.label || 'Like';
+    const currentLabel = selectedReaction ? currentReaction?.label : 'Like';
 
     const handleReactionSelect = (key) => {
         if (key === selectedReaction) {
