@@ -6,6 +6,8 @@ import Upload_button from './upload_button';
 import MediaReviewer from './media_review';
 import TextEditor from './text_editor';
 import SubmitButton from './submit_button';
+import { SavePost } from '../FetchData/FetchData';
+import { Link } from 'react-router-dom';
 
 export default function PostComposer() {
   const [postText, setPostText] = useState('');
@@ -65,8 +67,29 @@ export default function PostComposer() {
   const handleSubmit = () => {
     if (!postText.trim() && mediaFiles.length === 0) return;
 
+    if (mediaFiles.length > 0) {
+      mediaFiles.forEach(async (m) => {
+        if (m.uploadedUrl === null) {
+          const cloudUrl = await uploadFileToCloudinary(m.file);
+          setMediaFiles((prev) =>
+            prev.map((media) => (media.id === m.id ? { ...media, uploadedUrl: cloudUrl } : media))
+          );
+        }
+      });
+    }
+
     const uploadedUrls = mediaFiles.map((m) => m.uploadedUrl);
 
+    SavePost({
+      userId: 1,
+      content: postText,
+      attachments: [
+        ...mediaFiles.map((m) => ({
+          typeOfAttachment: m.type === "image" ? "Image" : "Video",
+          attachmentURL: m.uploadedUrl,
+        }))
+      ],
+    });
     alert(`
       Post Submitted! 
       Text: ${postText}
@@ -77,7 +100,6 @@ export default function PostComposer() {
 
     setPostText("");
     setMediaFiles([]);
-    
     setFeeling(null); 
   };
 

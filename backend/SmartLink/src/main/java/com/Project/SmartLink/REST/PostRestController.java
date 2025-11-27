@@ -22,6 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/Post")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PostRestController {
     private PostService postService;
     @Autowired
