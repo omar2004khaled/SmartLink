@@ -1,11 +1,15 @@
 package com.example.auth.config;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
@@ -33,12 +37,10 @@ public class JwtService {
                 .compact();
     }
 
-    // ADD THIS METHOD - alias for extractEmail
     public String extractUsername(String token) {
         return extractEmail(token);
     }
 
-    // ADD THIS METHOD - the filter expects this
     public boolean isTokenValid(String token, String username) {
         try {
             String tokenUsername = extractUsername(token);

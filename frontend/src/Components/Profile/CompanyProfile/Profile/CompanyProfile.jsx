@@ -20,24 +20,47 @@ export default function CompanyProfile({ companyId, userId }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editSection, setEditSection] = useState(null);
   const tabs = ['About', 'Posts'];
+  const API_BASE_URL ='http://localhost:8080';
 
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchCompanyBasicData();
-    };
-
-    fetchData();
+    if (companyId) {
+      fetchCompanyBasicData();
+    }
   }, [companyId, userId]);
 
   const fetchCompanyBasicData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/company/${companyId}?userId=${userId}`);
-      if (!response.ok) throw new Error('Failed to fetch company data');
+      setError(null);
+
+      const url = userId 
+        ? `${API_BASE_URL}/api/company/${companyId}?userId=${userId}`
+        : `${API_BASE_URL}/api/company/${companyId}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`Failed to fetch company data: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response. Check if API endpoint exists.');
+      }
+      
       const data = await response.json();
+      console.log('Company data received:', data);
       setCompanyData(data);
       setIsFollowing(data.isFollowing || false);
-      setIsOwner(data.ownerId === userId);
+      setIsOwner(data.userId === userId);
       
       setTabData({
         description: data.description,
@@ -72,21 +95,32 @@ export default function CompanyProfile({ companyId, userId }) {
 
   const fetchPostsData = async () => {
     try {
-      const response = await fetch(`/api/company/${companyId}/posts`);
+      const response = await fetch(`${API_BASE_URL}/api/company/${companyId}/posts`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
       if (!response.ok) throw new Error('Failed to fetch posts data');
       
-      const data = await response.json();
-      setTabData(data);
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        setTabData(data);
+      } else {
+        setTabData({ posts: [] });
+      }
     } catch (err) {
       console.error('Error fetching posts:', err);
       setError(err.message);
+      setTabData({ posts: [] });
     }
   };
 
   const handleFollow = async () => {
     try {
       const op = isFollowing ? "unfollow" : "follow";
-      const response = await fetch(`/api/company/${companyId}/${op}`, {
+      const response = await fetch(`${API_BASE_URL}/api/company/${companyId}/${op}`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +128,11 @@ export default function CompanyProfile({ companyId, userId }) {
         body: JSON.stringify({ userId: userId }),
       });
       
-      if (!response.ok) throw new Error(`failed in ${op}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Follow error:', errorText);
+        throw new Error(`Failed to ${op}`);
+      }
       
       setIsFollowing(!isFollowing);
       setCompanyData(prev => ({
@@ -111,7 +149,10 @@ export default function CompanyProfile({ companyId, userId }) {
 
   const handleVisitWebsite = () => {
     if (companyData?.website) {
-      window.open(companyData.website, '_blank', 'noopener,noreferrer');
+      const url = companyData.website.startsWith('http') 
+        ? companyData.website 
+        : `https://${companyData.website}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -122,13 +163,27 @@ export default function CompanyProfile({ companyId, userId }) {
 
   const handleSaveEdit = async (updatedData) => {
     try {
-      const response = await fetch(`/api/company/${companyId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/company/${companyId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyId, ...updatedData}),
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          companyId, 
+          ...updatedData
+        }),
       });
       
-      if (!response.ok) throw new Error('Failed to update company');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Update error:', errorText);
+        throw new Error('Failed to update company');
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
       
       const updated = await response.json();
       setCompanyData(updated);
@@ -163,7 +218,11 @@ export default function CompanyProfile({ companyId, userId }) {
   if (error && !companyData) {
     return (
       <div className="company-profile-container">
-        <div className="error-message">Error: {error}</div>
+        <div className="error-message">
+          <h3>Error Loading Company</h3>
+          <p>{error}</p>
+          <button onClick={fetchCompanyBasicData}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -249,7 +308,7 @@ export default function CompanyProfile({ companyId, userId }) {
         <EditModal
           isOpen={showEditModal}
           section={editSection}
-          companyData={{companyData}}
+          companyData={companyData}
           onClose={() => {
             setShowEditModal(false);
             setEditSection(null);

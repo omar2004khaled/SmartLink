@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import io.jsonwebtoken.Jwts;
 
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
