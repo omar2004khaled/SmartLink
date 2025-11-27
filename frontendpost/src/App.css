@@ -1,0 +1,21 @@
+/* App-level styling to improve overall look */
+html,body,#root { height: 100%; }
+body { background: linear-gradient(180deg,#f8fafc 0%, #ffffff 100%); font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color: #0f172a; margin:0; }
+
+main { display:flex; justify-content:center; padding:2rem 1rem; }
+
+/* feed container (where App renders posts) */
+.load-more-container { margin-top: 24px; }
+.load-more-btn { background:#fff; border:1px solid rgba(2,6,23,0.06); padding:0.6rem 1rem; border-radius:10px; cursor:pointer; font-weight:700; box-shadow:0 8px 20px rgba(12,18,32,0.04); }
+.load-more-btn:disabled { opacity:0.6; cursor:default; }
+
+.no-posts { text-align:center; color:#64748b; padding:2rem; }
+
+/* center feed content by constraining direct child div */
+.router-root > div, .app-root > div { max-width: 900px; margin: 0 auto; width:100%; }
+
+/* small screens */
+@media (max-width: 640px) {
+  main { padding:1rem; }
+}
+
