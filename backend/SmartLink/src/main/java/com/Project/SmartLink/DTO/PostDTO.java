@@ -70,6 +70,12 @@ public class PostDTO {
     public List<Attachment> getAttachments() {
         return attachments;
     }
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public void setAttachments(List<Attachment> attachments) {
         this.attachments = attachments;

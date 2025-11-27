@@ -36,7 +36,7 @@ public class PostRestControllerIntegrationTest {
     @BeforeEach
     void setup() {
         PostRestController controller =
-                new PostRestController(postService, attachmentService, postAttachmentService);
+                new PostRestController(postService);
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
@@ -56,8 +56,8 @@ public class PostRestControllerIntegrationTest {
     @Test
     void testAddPost() throws Exception {
         PostDTO dto = new PostDTO(1L, "content", 1L, new ArrayList<>(), new Timestamp(System.currentTimeMillis()));
-        Post saved = new Post(dto.getUserId(), dto.getContent());
-        saved.setPostId(10L);
+        PostDTO saved = new PostDTO(dto.getContent(),dto.getUserId(),   dto.getAttachments(), dto.getCreatedAt());
+        saved.setId(10L);
 
         when(postService.save(any())).thenReturn(saved);
 

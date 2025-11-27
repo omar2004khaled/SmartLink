@@ -1,5 +1,6 @@
 package com.Project.SmartLink.Services.PostService;
 
+import com.Project.SmartLink.DTO.PostDTO;
 import com.Project.SmartLink.entity.Post;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
@@ -9,12 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostService {
-    Page<Post> findAll(Pageable pageable);
-    Optional<Post> findById(Long theId);
+    List<PostDTO> findAll(Pageable pageable);
+    PostDTO findById(Long theId);
     void deleteById(Long theId);
-    Post save(Post employee);
+    PostDTO save(PostDTO postDTO);
     List<Post> findByUserId(Long theId);
     List<Post> findByContent(String theContent);
-    int updatePost(Post post);
+    PostDTO updatePost(Long id, PostDTO postDTO);
 
 }
