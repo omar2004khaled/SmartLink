@@ -67,21 +67,23 @@ class ProjectServiceTest {
 
     @Test
     void testGetProjectsForProfile() {
-        when(profileRepository.findById(1L)).thenReturn(Optional.of(profile));
+        when(projectRepository.findByProfile_ProfileId(1L)).thenReturn(List.of(project));
 
         List<ProjectDto> result = projectService.getProjectsForProfile(1L);
 
         assertEquals(1, result.size());
         assertEquals("E-Commerce Platform", result.get(0).getTitle());
-        verify(profileRepository, times(1)).findById(1L);
+        verify(projectRepository, times(1)).findByProfile_ProfileId(1L);
     }
 
     @Test
     void testGetProjectsForProfileNotFound() {
-        when(profileRepository.findById(1L)).thenReturn(Optional.empty());
+        when(projectRepository.findByProfile_ProfileId(1L)).thenReturn(List.of());
 
-        assertThrows(RuntimeException.class, () -> projectService.getProjectsForProfile(1L));
-        verify(profileRepository, times(1)).findById(1L);
+        List<ProjectDto> result = projectService.getProjectsForProfile(1L);
+        
+        assertEquals(0, result.size());
+        verify(projectRepository, times(1)).findByProfile_ProfileId(1L);
     }
 
     @Test

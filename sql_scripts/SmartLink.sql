@@ -1,28 +1,28 @@
 -- ===================================
 -- DROP TABLES (in correct dependency order)
 -- ===================================
-DROP TABLE IF EXISTS Comments_like;
-DROP TABLE IF EXISTS Comments_Attach;
-DROP TABLE IF EXISTS Comments;
-DROP TABLE IF EXISTS Post_like;
-DROP TABLE IF EXISTS Post_Attach;
-DROP TABLE IF EXISTS Attachment;
-DROP TABLE IF EXISTS Posts;
+DROP TABLE IF EXISTS comments_like;
+DROP TABLE IF EXISTS comments_attach;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS post_like;
+DROP TABLE IF EXISTS post_attach;
+DROP TABLE IF EXISTS attachment;
+DROP TABLE IF EXISTS posts;
 
-DROP TABLE IF EXISTS Works_On;
-DROP TABLE IF EXISTS Experience;
-DROP TABLE IF EXISTS Projects;
-DROP TABLE IF EXISTS Skills;
-DROP TABLE IF EXISTS Education;
-DROP TABLE IF EXISTS JobSeekerProfile;
-DROP TABLE IF EXISTS Location;
-DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS works_on;
+DROP TABLE IF EXISTS experience;
+DROP TABLE IF EXISTS projects;
+DROP TABLE IF EXISTS skills;
+DROP TABLE IF EXISTS education;
+DROP TABLE IF EXISTS job_seeker_profile;
+DROP TABLE IF EXISTS location;
+DROP TABLE IF EXISTS user;
 
 
 -- ===================================
--- USERS TABLE
+-- USER TABLE
 -- ===================================
-CREATE TABLE Users (
+CREATE TABLE user (
     UserId          BIGINT AUTO_INCREMENT PRIMARY KEY,
     Phone           VARCHAR(20) UNIQUE,
     Name            VARCHAR(100),
@@ -32,13 +32,13 @@ CREATE TABLE Users (
     active          BOOLEAN NOT NULL
 );
 
-CREATE UNIQUE INDEX UserByEmail ON Users(Email);
+CREATE UNIQUE INDEX UserByEmail ON user(Email);
 
 
 -- ===================================
 -- LOCATION TABLE
 -- ===================================
-CREATE TABLE Location(
+CREATE TABLE location(
     LocationId      BIGINT AUTO_INCREMENT PRIMARY KEY,
     Country         VARCHAR(32) NOT NULL,
     City            VARCHAR(16)
@@ -48,7 +48,7 @@ CREATE TABLE Location(
 -- ===================================
 -- USER PROFILE TABLE
 -- ===================================
-CREATE TABLE JobSeekerProfile (
+CREATE TABLE job_seeker_profile (
     ProfileId       BIGINT AUTO_INCREMENT PRIMARY KEY,
     UserId          BIGINT NOT NULL UNIQUE,
     ProfilePicUrl   TEXT,
@@ -57,17 +57,17 @@ CREATE TABLE JobSeekerProfile (
     Gender          ENUM('MALE','FEMALE'),
     LocationId      BIGINT,
     BirthDate       DATE,
-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
-    FOREIGN KEY (LocationId) REFERENCES Location(LocationId) ON DELETE SET NULL
+    FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE,
+    FOREIGN KEY (LocationId) REFERENCES location(LocationId) ON DELETE SET NULL
 );
 
-CREATE UNIQUE INDEX ProfileByUser ON JobSeekerProfile(UserId);
+CREATE UNIQUE INDEX ProfileByUser ON job_seeker_profile(UserId);
 
 
 -- ===================================
 -- EDUCATION TABLE
 -- ===================================
-CREATE TABLE Education (
+CREATE TABLE education (
     EducationId     BIGINT AUTO_INCREMENT PRIMARY KEY,
     ProfileId       BIGINT NOT NULL,
     School          VARCHAR(200),
@@ -111,31 +111,31 @@ CREATE TABLE Education (
     EndDate         DATE,
     Description     TEXT,
 
-    FOREIGN KEY (ProfileId) REFERENCES JobSeekerProfile(ProfileId) ON DELETE CASCADE
+    FOREIGN KEY (ProfileId) REFERENCES job_seeker_profile(ProfileId) ON DELETE CASCADE
 );
 
-CREATE INDEX EduByProf ON Education(ProfileId);
+CREATE INDEX EduByProf ON education(ProfileId);
 
 
 -- ===================================
 -- SKILLS TABLE
 -- ===================================
-CREATE TABLE Skills (
+CREATE TABLE skills (
     SkillId         BIGINT AUTO_INCREMENT PRIMARY KEY,
     ProfileId       BIGINT NOT NULL,
     SkillName       VARCHAR(100) NOT NULL,
     Proficiency     ENUM ('BEGINER','INTERMEDIATE','PROFECIENT'),
 
-    FOREIGN KEY (ProfileId) REFERENCES JobSeekerProfile(ProfileId) ON DELETE CASCADE
+    FOREIGN KEY (ProfileId) REFERENCES job_seeker_profile(ProfileId) ON DELETE CASCADE
 );
 
-CREATE INDEX SkillsByProf ON Skills(ProfileId);
+CREATE INDEX SkillsByProf ON skills(ProfileId);
 
 
 -- ===================================
 -- PROJECTS TABLE (NO DIRECT USER)
 -- ===================================
-CREATE TABLE Projects (
+CREATE TABLE projects (
     ProjectId       BIGINT AUTO_INCREMENT PRIMARY KEY,
     Title           VARCHAR(200) NOT NULL,
     Description     TEXT,
@@ -148,21 +148,21 @@ CREATE TABLE Projects (
 -- ===================================
 -- WORKS_ON — linking Profile ↔ Project (MANY-TO-MANY)
 -- ===================================
-CREATE TABLE Works_On (
+CREATE TABLE works_on (
     ProfileId BIGINT NOT NULL,
     ProjectId BIGINT NOT NULL,
 
     PRIMARY KEY (ProfileId, ProjectId),
 
-    FOREIGN KEY (ProfileId) REFERENCES JobSeekerProfile(ProfileId) ON DELETE CASCADE,
-    FOREIGN KEY (ProjectId) REFERENCES Projects(ProjectId) ON DELETE CASCADE
+    FOREIGN KEY (ProfileId) REFERENCES job_seeker_profile(ProfileId) ON DELETE CASCADE,
+    FOREIGN KEY (ProjectId) REFERENCES projects(ProjectId) ON DELETE CASCADE
 );
 
 
 -- ===================================
 -- EXPERIENCE TABLE
 -- ===================================
-CREATE TABLE Experience (
+CREATE TABLE experience (
     ExperienceId    BIGINT AUTO_INCREMENT PRIMARY KEY,
     ProfileId       BIGINT NOT NULL,
     CompanyName     VARCHAR(200)NOT NULL,
@@ -172,30 +172,30 @@ CREATE TABLE Experience (
     EndDate         DATE NOT NULL,
     Description     TEXT,
 
-    FOREIGN KEY (ProfileId) REFERENCES JobSeekerProfile(ProfileId) ON DELETE CASCADE
+    FOREIGN KEY (ProfileId) REFERENCES job_seeker_profile(ProfileId) ON DELETE CASCADE
 );
 
-CREATE INDEX ExperienceByProf ON Experience(ProfileId);
+CREATE INDEX ExperienceByProf ON experience(ProfileId);
 
 
 -- ===================================
 -- POSTS TABLE
 -- ===================================
-CREATE TABLE Posts(
+CREATE TABLE posts(
     PostId          BIGINT AUTO_INCREMENT PRIMARY KEY,
     UserId          BIGINT NOT NULL,
     Content         VARCHAR(2500) NOT NULL,
     CreatedAt       DATETIME,
-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE
+    FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE
 );
 
-CREATE INDEX PostsByUser ON Posts(UserId);
+CREATE INDEX PostsByUser ON posts(UserId);
 
 
 -- ===================================
 -- ATTACHMENT TABLE (ONE DEFINITION)
 -- ===================================
-CREATE TABLE Attachment(
+CREATE TABLE attachment(
     AttachId    BIGINT AUTO_INCREMENT PRIMARY KEY,
     URL         VARCHAR(150) NOT NULL,
     Type        ENUM('Video','Image','Audio','Files')
@@ -204,32 +204,32 @@ CREATE TABLE Attachment(
 -- ===================================
 -- POST ↔ ATTACHMENT (MANY-TO-MANY)
 -- ===================================
-CREATE TABLE Post_Attach(
+CREATE TABLE post_attach(
     PostId      BIGINT,
     AttachId    BIGINT,
     PRIMARY KEY (PostId, AttachId),
-    FOREIGN KEY (PostId) REFERENCES Posts(PostId) ON DELETE CASCADE,
-    FOREIGN KEY (AttachId) REFERENCES Attachment(AttachId) ON DELETE CASCADE
+    FOREIGN KEY (PostId) REFERENCES posts(PostId) ON DELETE CASCADE,
+    FOREIGN KEY (AttachId) REFERENCES attachment(AttachId) ON DELETE CASCADE
 );
 
 
 -- ===================================
 -- POST LIKES
 -- ===================================
-CREATE TABLE Post_like(
+CREATE TABLE post_like(
     UserId      BIGINT,
     PostId      BIGINT,
     PRIMARY KEY (PostId, UserId),
 
-    FOREIGN KEY (PostId) REFERENCES Posts(PostId) ON DELETE CASCADE,
-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE
+    FOREIGN KEY (PostId) REFERENCES posts(PostId) ON DELETE CASCADE,
+    FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE
 );
 
 
 -- ===================================
 -- COMMENTS
 -- ===================================
-CREATE TABLE Comments(
+CREATE TABLE comments(
     CommentId       BIGINT AUTO_INCREMENT PRIMARY KEY,
     UserId          BIGINT NOT NULL,
     PostId          BIGINT NOT NULL,
@@ -238,13 +238,13 @@ CREATE TABLE Comments(
     RepliedTo       BIGINT,
     AttachId        BIGINT,
     RepliedTo      BIGINT,
-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
-    FOREIGN KEY (PostId) REFERENCES Posts(PostId) ON DELETE CASCADE,
-    FOREIGN KEY (RepliedTo) REFERENCES Comments(CommentId) ON DELETE CASCADE
+    FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE,
+    FOREIGN KEY (PostId) REFERENCES posts(PostId) ON DELETE CASCADE,
+    FOREIGN KEY (RepliedTo) REFERENCES comments(CommentId) ON DELETE CASCADE
 );
 
-CREATE INDEX CommentsByUser ON Comments(UserId);
-CREATE INDEX CommentsByPost ON Comments(PostId);
+CREATE INDEX CommentsByUser ON comments(UserId);
+CREATE INDEX CommentsByPost ON comments(PostId);
 
 
 
@@ -252,23 +252,23 @@ CREATE INDEX CommentsByPost ON Comments(PostId);
 -- ===================================
 -- COMMENTS ↔ ATTACHMENT (MANY-TO-MANY)
 -- ===================================
-CREATE TABLE Comments_Attach(
+CREATE TABLE comments_attach(
     CommentId      BIGINT,
     AttachId        BIGINT,
     PRIMARY KEY     (CommentId, AttachId),
     
-    FOREIGN KEY (CommentId) REFERENCES Comments(CommentId) ON DELETE CASCADE,
-    FOREIGN KEY (AttachId) REFERENCES Attachment(AttachId) ON DELETE CASCADE
+    FOREIGN KEY (CommentId) REFERENCES comments(CommentId) ON DELETE CASCADE,
+    FOREIGN KEY (AttachId) REFERENCES attachment(AttachId) ON DELETE CASCADE
 );
 
 
 -- ===================================
 -- COMMENT LIKES
 -- ===================================
-CREATE TABLE Comments_like(
+CREATE TABLE comments_like(
     UserId      BIGINT,
     CommentId  BIGINT,
     PRIMARY KEY (CommentId, UserId),
-    FOREIGN KEY (CommentId) REFERENCES Comments(CommentId) ON DELETE CASCADE,
-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE
+    FOREIGN KEY (CommentId) REFERENCES comments(CommentId) ON DELETE CASCADE,
+    FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE
 );
