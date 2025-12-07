@@ -1,0 +1,60 @@
+.location-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+
+.location-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .location-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.location-field {
+  display: flex;
+  flex-direction: column;
+}
+#country{
+    margin-left:22px;
+}
+
+.location-field label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.location-field .form-input {
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.btn-remove-location {
+  padding: 8px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #e74c3c;
+  transition: all 0.3s;
+  margin-top: 18px;
+  margin-left: 22px;
+}
+
+.btn-remove-location:hover {
+  background-color: #fdd;
+  border-color: #f99;
+}

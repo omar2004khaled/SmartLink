@@ -44,7 +44,7 @@ public class CommentService {
 
         // Fetch entities with proper error handling
         User user = userRepository.findById(commentDTO.getUserId()).get();
-        Post post = postRepository.findById((commentDTO.getPostId());
+        Post post = postRepository.findById(commentDTO.getPostId()).get();
 
 
         Attachment attachment =null;

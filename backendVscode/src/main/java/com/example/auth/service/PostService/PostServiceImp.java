@@ -81,7 +81,7 @@ public class PostServiceImp implements PostService{
         for (Attachment attachment : attachments) {
             Attachment saved = attachmentService.save(attachment);
             savedAttachments.add(saved);
-            PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(post.getPostId(), saved.getAttachId()));
+            PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(post.getPostId(), saved.getAttachId().longValue()));
             postAttachmentService.save(postAttchment);
         }
         PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(),savedAttachments , post.getCreatedAt());
@@ -119,11 +119,11 @@ public class PostServiceImp implements PostService{
                 }else { // no id is added so it is a new attachment
                     Attachment saved = attachmentService.save(attachment);
                     savedAttachments.add(saved);
-                    PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(id, saved.getAttachId()));
+                    PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(id, saved.getAttachId().longValue()));
                     postAttachmentService.save(postAttchment);
                 }
             }
-            answer = new PostDTO( savedPostDTO.getContent(),savedPostDTO.getUserId(),savedAttachments, savedPostDTO.getCreatedAt());
+            answer = new PostDTO(savedPostDTO.getId(), savedPostDTO.getContent(),savedPostDTO.getUserId(),savedAttachments, savedPostDTO.getCreatedAt());
         }
         return answer;
     }
