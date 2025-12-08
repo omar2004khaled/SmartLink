@@ -4,7 +4,6 @@ import Content from './Content';
 import Attachment from './Attachment';
 import Footer from './Footer';
 import CommentsPanel from './CommentsPanel';
-import commentsSeed from '../data/commentsSeed';
 import './PostCard.css';
 
 // PostItem handles one post card and its composer/modal

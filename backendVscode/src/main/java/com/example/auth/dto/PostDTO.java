@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
 public class PostDTO {
     private Long id;
     private String content;
@@ -25,6 +26,12 @@ public class PostDTO {
         this.id = id;
     }
 
+    public PostDTO(String content, Long userId, List<Attachment> attachments, Timestamp createdAt) {
+        this.content = content;
+        this.userId = userId;
+        this.attachments = attachments;
+        this.createdAt = createdAt;
+    }
 
     public Long getId() {
         return id;

@@ -17,6 +17,6 @@ public class CommentDTO {
     String url;
     String type;
     @NotNull
-    int postId;
+    Long postId;
 
 }

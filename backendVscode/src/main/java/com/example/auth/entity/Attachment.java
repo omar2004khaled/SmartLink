@@ -18,7 +18,7 @@ public class Attachment {
     @Column(name = "AttachId")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private BigInteger AttachId;
+    private Long AttachId;
 
     @Column(name = "URL" , length = 150 , nullable = false)
     private String AttachmentURL;
