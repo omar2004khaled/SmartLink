@@ -5,6 +5,9 @@ import com.example.auth.dto.LoginRequest;
 import com.example.auth.dto.RegisterRequest;
 import com.example.auth.dto.PasswordResetRequest;
 import com.example.auth.dto.ResetPasswordRequest;
+import com.example.auth.dto.UserInfoResponse;
+import com.example.auth.entity.User;
+import com.example.auth.repository.UserRepository;
 import com.example.auth.service.AuthService;
 import org.springframework.http.HttpStatus;
 import com.example.auth.service.PasswordResetService;
@@ -20,10 +23,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+    private final UserRepository userRepository;
 
-    public AuthController(AuthService authService,PasswordResetService passwordResetService) {
+    public AuthController(AuthService authService, PasswordResetService passwordResetService, UserRepository userRepository) {
         this.authService = authService;
         this.passwordResetService = passwordResetService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/register")
@@ -43,12 +48,13 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             String token = authService.login(request.getEmail(), request.getPassword());
-            String role = authService.getUserRole(request.getEmail());
+            User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
             AuthResponse response = new AuthResponse(
                     token,
-                    role,
-                    request.getEmail());
+                    user.getRole(),
+                    user.getEmail(),
+                    user.getId());
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {
@@ -78,5 +84,21 @@ public class AuthController {
         }
     }
 
-
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUserInfo(@PathVariable Long userId) {
+        return userRepository.findById(userId)
+            .map(user -> {
+                UserInfoResponse response = new UserInfoResponse();
+                response.setFullName(user.getFullName());
+                response.setEmail(user.getEmail());
+                response.setBirthDate(user.getBirthDate());
+                response.setPhoneNumber(user.getPhoneNumber());
+                response.setProvider(user.getProvider());
+                response.setGender(user.getGender() != null ? user.getGender().toString() : null);
+                response.setEnabled(user.isEnabled());
+                response.setRole(user.getRole());
+                return ResponseEntity.ok(response);
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
 }

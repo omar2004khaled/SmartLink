@@ -30,12 +30,13 @@ class DtoUnitTest {
     @Test
     void authResponse_Constructor_WorksCorrectly() {
         // Act
-        AuthResponse response = new AuthResponse("jwt-token", "USER", "test@example.com");
+        AuthResponse response = new AuthResponse("jwt-token", "USER", "test@example.com", 1L);
         
         // Assert
         assertEquals("jwt-token", response.token());
         assertEquals("USER", response.role());
         assertEquals("test@example.com", response.email());
+        assertEquals(1L, response.userId());
     }
 
     @Test
@@ -91,12 +92,13 @@ class DtoUnitTest {
     @Test
     void authResponse_WithNullValues_WorksCorrectly() {
         // Act
-        AuthResponse response = new AuthResponse(null, null, null);
+        AuthResponse response = new AuthResponse(null, null, null, null);
         
         // Assert
         assertNull(response.token());
         assertNull(response.role());
         assertNull(response.email());
+        assertNull(response.userId());
     }
 
     @Test
