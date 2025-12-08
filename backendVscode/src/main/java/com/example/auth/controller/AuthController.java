@@ -45,12 +45,13 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             String token = authService.login(request.getEmail(), request.getPassword());
-            String role = authService.getUserRole(request.getEmail());
+            User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
             AuthResponse response = new AuthResponse(
                     token,
-                    role,
-                    request.getEmail());
+                    user.getRole(),
+                    user.getEmail(),
+                    user.getId());
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {
