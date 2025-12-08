@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ProfileInfo from "./ProfileInfo";
 import ExperienceSection from "./ExperienceSection";
 import SkillsSection from "./SkillsSection";
@@ -14,7 +15,10 @@ import "./UserProfile.css";
 
 const API_BASE = "http://localhost:8080/api/profiles";
 
-export default function UserProfile({ profileId = 1 }) {
+export default function UserProfile() {
+  const navigate = useNavigate();
+  const userId = localStorage.getItem('userId');
+  const [profileId, setProfileId] = useState(null);
   const [profile, setProfile] = useState(null);
   const [locations, setLocations] = useState([]);
   const [experience, setExperience] = useState([]);
@@ -32,7 +36,29 @@ export default function UserProfile({ profileId = 1 }) {
   const [editEducationId, setEditEducationId] = useState(null);
 
   useEffect(() => {
+    async function fetchProfileId() {
+      if (!userId) {
+        navigate('/login');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/user/${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setProfileId(data.profileId);
+        } else {
+          setError("Profile not found");
+        }
+      } catch (err) {
+        setError("Failed to fetch profile");
+      }
+    }
+    fetchProfileId();
+  }, [userId, navigate]);
+
+  useEffect(() => {
     async function fetchAll() {
+      if (!profileId) return;
       setLoading(true);
       try {
         const [profileRes, expRes, skillRes, projRes, eduRes, locRes] = await Promise.all([
@@ -68,7 +94,7 @@ export default function UserProfile({ profileId = 1 }) {
     try {
       let locationId = profile.locationId;
       // If location changed, find or create location
-      if (form.country !== profile.country || form.city !== profile.city) {
+      if (form.country && form.city && (form.country !== profile.country || form.city !== profile.city)) {
         // Try to find existing location
         let loc = locations.find(l => l.country === form.country && l.city === form.city);
         if (!loc) {
@@ -78,7 +104,10 @@ export default function UserProfile({ profileId = 1 }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ country: form.country, city: form.city })
           });
-          if (!locRes.ok) throw new Error('Failed to create location');
+          if (!locRes.ok) {
+            const errorText = await locRes.text();
+            throw new Error('Failed to create location: ' + errorText);
+          }
           loc = await locRes.json();
           // Refresh locations
           const allLocRes = await fetch(`http://localhost:8080/api/locations`);
@@ -86,18 +115,34 @@ export default function UserProfile({ profileId = 1 }) {
         }
         locationId = loc.locationId;
       }
-      // Update profile with new locationId
-      const profilePayload = { ...form, locationId };
+      // Update profile with only backend-expected fields
+      const profilePayload = {
+        profilePicUrl: form.profilePicUrl,
+        bio: form.bio,
+        headline: form.headline,
+        gender: form.gender,
+        birthDate: form.birthDate,
+        userId: userId,
+        locationId: locationId
+      };
+      console.log('Sending profile update:', profilePayload);
+      console.log('URL:', `${API_BASE}/${profileId}`);
       const res = await fetch(`${API_BASE}/${profileId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profilePayload)
       });
-      if (!res.ok) throw new Error('Failed to update profile');
+      console.log('Response status:', res.status);
+      console.log('Response ok:', res.ok);
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error('Failed to update profile: ' + errorText);
+      }
       const updated = await res.json();
       setProfile(updated);
       setEditProfile(false);
     } catch (err) {
+      console.error('Profile update error:', err);
       alert(err.message);
     }
   };
@@ -252,6 +297,14 @@ export default function UserProfile({ profileId = 1 }) {
 
   return (
     <div className="up-page" style={{ fontFamily: "system-ui", maxWidth: 980, margin: "2rem auto" }}>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+        <button 
+          onClick={() => navigate('/PostComposotion')}
+          style={{ padding: '0.5rem 1rem', background: '#0066cc', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+        >
+          Go to Posts
+        </button>
+      </div>
       <div className="profile-container" style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 16px #0002", padding: 24 }}>
         <ProfileInfo profile={profile} onEdit={handleEditProfile} />
 

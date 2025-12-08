@@ -4,8 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.repository.VerificationTokenRepository;
+import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository;
 import com.example.auth.entity.User;
 import com.example.auth.entity.VerificationToken;
+import com.example.auth.entity.ProfileEntities.JobSeekerProfile;
 import com.example.auth.dto.RegisterRequest;
 import com.example.auth.config.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,21 +23,24 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtService jwtService;
+    private final JobSeekerProfileRepository profileRepo;
 
     public AuthService(UserRepository userRepo,
                        VerificationTokenRepository tokenRepo,
                        PasswordEncoder passwordEncoder,
                        EmailService emailService,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       JobSeekerProfileRepository profileRepo) {
         this.userRepo = userRepo;
         this.tokenRepo = tokenRepo;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.jwtService = jwtService;
+        this.profileRepo = profileRepo;
     }
 
     @Transactional
-    public void register(RegisterRequest request) {
+    public Long register(RegisterRequest request) {
         // 1. Check if email already exists
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
@@ -80,14 +85,21 @@ public class AuthService {
 
         userRepo.save(user);
 
-        // 7. Create verification token
+        // 7. Create JobSeekerProfile for the user
+        JobSeekerProfile profile = new JobSeekerProfile();
+        profile.setUser(user);
+        profile.setBirthDate(request.getBirthDate());
+        profile.setGender(request.getGender().equals("MALE") ? JobSeekerProfile.Gender.MALE : JobSeekerProfile.Gender.FEMALE);
+        profileRepo.save(profile);
+
+        // 8. Create verification token
         VerificationToken verificationToken = new VerificationToken(user, LocalDateTime.now().plusDays(1));
         tokenRepo.save(verificationToken);
 
-        // 8. Send verification email
+        // 9. Send verification email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
 
-
+        return user.getId();
     }
     public String login(String email, String password) {
         // 1. Find user by email

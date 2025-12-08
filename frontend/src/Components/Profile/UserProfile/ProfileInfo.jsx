@@ -7,6 +7,7 @@ export default function ProfileInfo({ profile, onEdit }) {
       <img
         src={profile.profilePicUrl || "https://via.placeholder.com/120"}
         alt="Profile"
+        onError={(e) => { e.target.src = "https://via.placeholder.com/120"; }}
         style={{
           width: 120,
           height: 120,

@@ -29,8 +29,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
-            authService.register(request);
-            return ResponseEntity.ok().body("Registration successful. Check console for verification email.");
+            Long userId = authService.register(request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Registration successful. Check console for verification email.");
+            response.put("userId", userId);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
