@@ -109,7 +109,16 @@ const SignUp = () => {
   setLoading(true);
   setApiError('');
   setSuccessMessage('');
-
+  console.log(formData)
+  console.log(
+     formData.fullName.trim(),
+ formData.email.toLowerCase().trim(),
+         formData.password,
+         formData.confirmPassword,
+        formData.phone.replace(/\D/g, ''),
+     formData.gender,
+        formData.birthDate
+  )
   try {
     const response = await fetch("http://localhost:8080/auth/register", {
       method: "POST",
@@ -130,6 +139,7 @@ const SignUp = () => {
     });
 
     const responseText = await response.text();
+    console.log(response)
     let data;
     try {
       data = JSON.parse(responseText);
@@ -184,28 +194,23 @@ const SignUp = () => {
   }
 };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    // Clear previous messages
-    setApiError('');
-    setSuccessMessage('');
 
-    const newErrors = {};
-    Object.keys(formData).forEach(key => {
-      const error = validateField(key, formData[key]);
-      if (error) newErrors[key] = error;
-    });
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      registerUser();
-    } else {
-      // Scroll to top to see errors
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+  try {
+    // Call REGISTER, not Google login
+    await registerUser(formData); // NOT initiateGoogleLogin()
+    
+    setSuccessMessage('Registration successful! Please check your email to verify your account.');
+    setTimeout(() => navigate('/login'), 3000);
+  } catch (error) {
+    console.error("Registration Error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const PasswordToggleIcon = ({ show }) => (
     show ? (

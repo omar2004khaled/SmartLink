@@ -30,9 +30,13 @@ public class AuthController {
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
             authService.register(request);
-            return ResponseEntity.ok().body("Registration successful. Check console for verification email.");
+            Map<String, String> successResponse = new HashMap<>();
+            successResponse.put("message", "Registration successful. Check console for verification email.");
+            return ResponseEntity.ok(successResponse);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 
@@ -45,14 +49,17 @@ public class AuthController {
             AuthResponse response = new AuthResponse(
                     token,
                     role,
-                    request.getEmail());
+                    request.getEmail()
+            );
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(401).body(ex.getMessage());
+            // Return JSON instead of plain text
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
     }
-
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody PasswordResetRequest request) {
         try {

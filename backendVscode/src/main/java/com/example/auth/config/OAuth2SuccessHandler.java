@@ -12,19 +12,32 @@ import java.io.IOException;
 
 @Component
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-    private final OAuth2Service oAuth2Service;
 
-    public OAuth2SuccessHandler(OAuth2Service oAuth2Service) {
-        this.oAuth2Service = oAuth2Service;
+    private final JwtService jwtService;
+
+    public OAuth2SuccessHandler(JwtService jwtService) {
+        this.jwtService = jwtService;
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-        String token = oAuth2Service.processOAuth2User(oauth2User, "GOOGLE");
-       
-        String redirectUrl = "http://localhost:5173/auth/callback?token=" + token;
-        response.sendRedirect(redirectUrl);
+
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String email = oAuth2User.getAttribute("email");
+
+        // Generate JWT
+        String token = jwtService.generateToken(email,"user");
+
+        // ✅ Make sure you're redirecting with the token
+        String redirectUrl = String.format(
+                "http://localhost:5173/login?token=%s",
+                token
+        );
+
+        System.out.println("Redirecting to: " + redirectUrl); // Debug log
+
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

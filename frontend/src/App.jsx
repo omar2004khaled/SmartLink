@@ -6,25 +6,24 @@ import EmailVerified from "./components/EmailVerified";
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import OAuthCallback from "./components/OAuthCallback";
-import Dashboard from "./components/Dashboard";
-import PostComposotion from './PostComposotion/PostComposotion';
-import PostCard from './PostCard/PostCard';
-import Posts from './components/Posts';
+import PostComposotion from './components/PostComposotion/PostComposotion';
+import PostCard from './components/PostCard/PostCard';
+import ProtectedRoute from './pages/protected';
+
 
 function App() {
   return (
     <Routes>
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
-      <Route path="/email-verified" element={<EmailVerified />} />
-      <Route path="/auth/callback" element={<OAuthCallback />} />
-       <Route path="/PostComposotion" element={<PostComposotion />} />
-      <Route path="/posts" element={<Posts />} />
-      <Route path="/" element={<Login />} />
-      <Route path="/post" element={<PostCard />} />
+      <Route path="/forgot-password" element={<ProtectedRoute><ForgotPassword /></ProtectedRoute>} />
+      <Route path="/reset-password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
+      <Route path="/verify-email" element={<ProtectedRoute><VerifyEmail /></ProtectedRoute>} />
+      <Route path="/email-verified" element={<ProtectedRoute><EmailVerified /></ProtectedRoute>} />
+      <Route path="/auth/callback" element={<ProtectedRoute><OAuthCallback /></ProtectedRoute>} />
+      <Route path="/PostComposation" element={<ProtectedRoute><PostComposotion /></ProtectedRoute>} />
+      <Route path="/post" element={<ProtectedRoute><PostCard /></ProtectedRoute>} />
+      {/* <Route path="/" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> */}
     </Routes>
   );
 }
