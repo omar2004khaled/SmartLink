@@ -16,46 +16,50 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final JwtService jwtService;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+        private final JwtService jwtService;
+        private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(JwtService jwtService, OAuth2SuccessHandler oAuth2SuccessHandler) {
-        this.jwtService = jwtService;
-        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-    }
+        public SecurityConfig(JwtService jwtService, OAuth2SuccessHandler oAuth2SuccessHandler) {
+                this.jwtService = jwtService;
+                this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        JwtAuthFilter jwtFilter = new JwtAuthFilter(jwtService);
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                JwtAuthFilter jwtFilter = new JwtAuthFilter(jwtService);
 
-        http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ADD THIS LINE
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/api/public", "/oauth2/**", "/login/oauth2/**", "/verify/**").permitAll()
-                        .requestMatchers("/api/company/**", "/api/profiles/**", "/api/locations/**", "/api/users/**", "/Post/**", "/api/attachments/**").authenticated()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2SuccessHandler))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                http.csrf(csrf -> csrf.disable())
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/auth/**", "/auth/company/**", "/api/public",
+                                                                "/oauth2/**", "/login/oauth2/**",
+                                                                "/api/profiles/**", "/api/locations/**",
+                                                                "/api/company/**", "/api/users/**", "/Post/add/**",
+                                                                "/Post/**")
+                                                .permitAll()
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                .anyRequest().authenticated())
+                                .oauth2Login(oauth2 -> oauth2
+                                                .successHandler(oAuth2SuccessHandler))
+                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    // ADD THIS BEAN
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5175", "http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        // ADD THIS BEAN
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(Arrays.asList("http://localhost:5175", "http://localhost:5173"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+                configuration.setAllowedHeaders(Arrays.asList("*"));
+                configuration.setAllowCredentials(true);
+                configuration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 }

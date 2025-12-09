@@ -42,7 +42,10 @@ export default function UserProfile() {
         return;
       }
       try {
-        const res = await fetch(`${API_BASE}/user/${userId}`);
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`${API_BASE}/user/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (res.ok) {
           const data = await res.json();
           setProfileId(data.profileId);
@@ -61,13 +64,15 @@ export default function UserProfile() {
       if (!profileId) return;
       setLoading(true);
       try {
+        const token = localStorage.getItem('authToken');
+        const headers = { 'Authorization': `Bearer ${token}` };
         const [profileRes, expRes, skillRes, projRes, eduRes, locRes] = await Promise.all([
-          fetch(`${API_BASE}/${profileId}`),
-          fetch(`${API_BASE}/${profileId}/experience`),
-          fetch(`${API_BASE}/${profileId}/skills`),
-          fetch(`${API_BASE}/${profileId}/projects`),
-          fetch(`${API_BASE}/${profileId}/education`),
-          fetch(`http://localhost:8080/api/locations`)
+          fetch(`${API_BASE}/${profileId}`, { headers }),
+          fetch(`${API_BASE}/${profileId}/experience`, { headers }),
+          fetch(`${API_BASE}/${profileId}/skills`, { headers }),
+          fetch(`${API_BASE}/${profileId}/projects`, { headers }),
+          fetch(`${API_BASE}/${profileId}/education`, { headers }),
+          fetch(`http://localhost:8080/api/locations`, { headers })
         ]);
         setProfile(await profileRes.json());
         setExperience(await expRes.json());
@@ -92,6 +97,7 @@ export default function UserProfile() {
   const handleEditProfile = () => setEditProfile(true);
   const handleSaveProfile = async (form) => {
     try {
+      const token = localStorage.getItem('authToken');
       let locationId = profile.locationId;
       // If location changed, find or create location
       if (form.country && form.city && (form.country !== profile.country || form.city !== profile.city)) {
@@ -101,7 +107,10 @@ export default function UserProfile() {
           // Create new location
           const locRes = await fetch(`http://localhost:8080/api/locations`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ country: form.country, city: form.city })
           });
           if (!locRes.ok) {
@@ -110,7 +119,9 @@ export default function UserProfile() {
           }
           loc = await locRes.json();
           // Refresh locations
-          const allLocRes = await fetch(`http://localhost:8080/api/locations`);
+          const allLocRes = await fetch(`http://localhost:8080/api/locations`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
           setLocations(await allLocRes.json());
         }
         locationId = loc.locationId;
@@ -129,7 +140,10 @@ export default function UserProfile() {
       console.log('URL:', `${API_BASE}/${profileId}`);
       const res = await fetch(`${API_BASE}/${profileId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(profilePayload)
       });
       console.log('Response status:', res.status);
@@ -152,6 +166,7 @@ export default function UserProfile() {
   const handleAddExperience = () => setEditExperienceId("new");
   const handleSaveExperience = async (form) => {
     try {
+      const token = localStorage.getItem('authToken');
       let url = `${API_BASE}/${profileId}/experience`;
       let method = 'POST';
       if (editExperienceId && editExperienceId !== 'new') {
@@ -160,12 +175,17 @@ export default function UserProfile() {
       }
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(form)
       });
       if (!res.ok) throw new Error('Failed to save experience');
       // Refresh experience list
-      const expRes = await fetch(`${API_BASE}/${profileId}/experience`);
+      const expRes = await fetch(`${API_BASE}/${profileId}/experience`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setExperience(await expRes.json());
       setEditExperienceId(null);
     } catch (err) {
@@ -175,9 +195,15 @@ export default function UserProfile() {
   const handleCancelExperience = () => setEditExperienceId(null);
   const handleDeleteExperience = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/${profileId}/experience/${id}`, { method: 'DELETE' });
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE}/${profileId}/experience/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!res.ok) throw new Error('Failed to delete experience');
-      const expRes = await fetch(`${API_BASE}/${profileId}/experience`);
+      const expRes = await fetch(`${API_BASE}/${profileId}/experience`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setExperience(await expRes.json());
     } catch (err) {
       alert(err.message);
@@ -188,6 +214,7 @@ export default function UserProfile() {
   const handleAddSkill = () => setEditSkillId("new");
   const handleSaveSkill = async (form) => {
     try {
+      const token = localStorage.getItem('authToken');
       let url = `${API_BASE}/${profileId}/skills`;
       let method = 'POST';
       if (editSkillId && editSkillId !== 'new') {
@@ -196,11 +223,16 @@ export default function UserProfile() {
       }
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(form)
       });
       if (!res.ok) throw new Error('Failed to save skill');
-      const skillRes = await fetch(`${API_BASE}/${profileId}/skills`);
+      const skillRes = await fetch(`${API_BASE}/${profileId}/skills`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setSkills(await skillRes.json());
       setEditSkillId(null);
     } catch (err) {
@@ -210,9 +242,15 @@ export default function UserProfile() {
   const handleCancelSkill = () => setEditSkillId(null);
   const handleDeleteSkill = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/${profileId}/skills/${id}`, { method: 'DELETE' });
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE}/${profileId}/skills/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!res.ok) throw new Error('Failed to delete skill');
-      const skillRes = await fetch(`${API_BASE}/${profileId}/skills`);
+      const skillRes = await fetch(`${API_BASE}/${profileId}/skills`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setSkills(await skillRes.json());
     } catch (err) {
       alert(err.message);
@@ -223,6 +261,7 @@ export default function UserProfile() {
   const handleAddProject = () => setEditProjectId("new");
   const handleSaveProject = async (form) => {
     try {
+      const token = localStorage.getItem('authToken');
       let url = `${API_BASE}/${profileId}/projects`;
       let method = 'POST';
       if (editProjectId && editProjectId !== 'new') {
@@ -237,11 +276,16 @@ export default function UserProfile() {
       };
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error('Failed to save project');
-      const projRes = await fetch(`${API_BASE}/${profileId}/projects`);
+      const projRes = await fetch(`${API_BASE}/${profileId}/projects`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setProjects(await projRes.json());
       setEditProjectId(null);
     } catch (err) {
@@ -251,9 +295,15 @@ export default function UserProfile() {
   const handleCancelProject = () => setEditProjectId(null);
   const handleDeleteProject = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/${profileId}/projects/${id}`, { method: 'DELETE' });
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE}/${profileId}/projects/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!res.ok) throw new Error('Failed to delete project');
-      const projRes = await fetch(`${API_BASE}/${profileId}/projects`);
+      const projRes = await fetch(`${API_BASE}/${profileId}/projects`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setProjects(await projRes.json());
     } catch (err) {
       alert(err.message);
@@ -264,6 +314,7 @@ export default function UserProfile() {
   const handleAddEducation = () => setEditEducationId("new");
   const handleSaveEducation = async (form) => {
     try {
+      const token = localStorage.getItem('authToken');
       let url = `${API_BASE}/${profileId}/education`;
       let method = 'POST';
       if (editEducationId && editEducationId !== 'new') {
@@ -272,11 +323,16 @@ export default function UserProfile() {
       }
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(form)
       });
       if (!res.ok) throw new Error('Failed to save education');
-      const eduRes = await fetch(`${API_BASE}/${profileId}/education`);
+      const eduRes = await fetch(`${API_BASE}/${profileId}/education`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setEducation(await eduRes.json());
       setEditEducationId(null);
     } catch (err) {
@@ -286,9 +342,15 @@ export default function UserProfile() {
   const handleCancelEducation = () => setEditEducationId(null);
   const handleDeleteEducation = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/${profileId}/education/${id}`, { method: 'DELETE' });
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE}/${profileId}/education/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!res.ok) throw new Error('Failed to delete education');
-      const eduRes = await fetch(`${API_BASE}/${profileId}/education`);
+      const eduRes = await fetch(`${API_BASE}/${profileId}/education`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setEducation(await eduRes.json());
     } catch (err) {
       alert(err.message);
