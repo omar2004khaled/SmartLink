@@ -21,9 +21,10 @@ export default function CompanyHeader({
           </button>
         )}
       </div>
-      <p className="company-meta">
-        {industry} ·{followers} followers
-      </p>
+      <div className="company-meta">
+        <div>{industry}</div>
+        <div>{followers} followers</div>
+      </div>
     </div>
   );
 }

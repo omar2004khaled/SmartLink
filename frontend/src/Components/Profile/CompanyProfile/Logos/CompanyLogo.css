@@ -1,11 +1,7 @@
-/* ========================================
-   CompanyLogo.css - Improved Version
-   ======================================== */
-
 .company-logo-wrapper {
   position: relative;
   width: 100%;
-  margin-bottom: 60px; /* Space for overlapping logo */
+  margin-bottom: 60px; 
 }
 
 /* Cover Image Container */
@@ -154,7 +150,7 @@
     height: 28px;
     bottom: 6px;
     right: 6px;
-    opacity: 1; /* Always visible on mobile */
+    opacity: 1; 
   }
 }
 
