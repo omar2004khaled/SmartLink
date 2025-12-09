@@ -63,6 +63,11 @@ public class AuthController {
             String token = authService.login(request.getEmail(), request.getPassword());
             User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
+            // Check if user is a company - they should use company login
+            if ("COMPANY".equals(user.getUserType())) {
+                return ResponseEntity.status(403).body("This is a company account. Please use company login.");
+            }
+
             AuthResponse response = new AuthResponse(
                     token,
                     user.getRole(),

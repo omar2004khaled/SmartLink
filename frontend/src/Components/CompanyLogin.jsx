@@ -86,38 +86,9 @@ const CompanyLogin = () => {
       if (data.token) {
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userEmail', data.email);
+        localStorage.setItem('userId', data.userId);
         localStorage.setItem('userType', 'COMPANY');
         console.log("Company login successful, token stored");
-        
-        // Fetch userId
-        try {
-          const userResponse = await fetch(`http://localhost:8080/api/users/email/${data.email}`, {
-            headers: {
-              'Authorization': `Bearer ${data.token}`
-            }
-          });
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            localStorage.setItem('userId', userData.id);
-          }
-        } catch (err) {
-          console.error('Failed to fetch user data:', err);
-        }
-      }
-
-      // Get company profile ID
-      try {
-        const companyResponse = await fetch(`http://localhost:8080/api/company/user/${userData.id}`, {
-          headers: {
-            'Authorization': `Bearer ${data.token}`
-          }
-        });
-        if (companyResponse.ok) {
-          const companyData = await companyResponse.json();
-          localStorage.setItem('companyId', companyData.companyProfileId);
-        }
-      } catch (err) {
-        console.error('Failed to fetch company data:', err);
       }
 
       navigate('/company-profile');

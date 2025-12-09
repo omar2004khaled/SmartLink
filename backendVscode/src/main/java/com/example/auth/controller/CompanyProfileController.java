@@ -12,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/company")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CompanyProfileController {
 
     private final CompanyProfileService companyProfileService;
