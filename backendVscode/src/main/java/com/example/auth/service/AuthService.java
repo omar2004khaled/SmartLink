@@ -24,19 +24,77 @@ public class AuthService {
     private final EmailService emailService;
     private final JwtService jwtService;
     private final JobSeekerProfileRepository profileRepo;
+    private final com.example.auth.repository.CompanyProfileRepo companyRepo;
 
     public AuthService(UserRepository userRepo,
                        VerificationTokenRepository tokenRepo,
                        PasswordEncoder passwordEncoder,
                        EmailService emailService,
                        JwtService jwtService,
-                       JobSeekerProfileRepository profileRepo) {
+                       JobSeekerProfileRepository profileRepo,
+                       com.example.auth.repository.CompanyProfileRepo companyRepo) {
         this.userRepo = userRepo;
         this.tokenRepo = tokenRepo;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.jwtService = jwtService;
         this.profileRepo = profileRepo;
+        this.companyRepo = companyRepo;
+    }
+
+    @Transactional
+    public Long registerCompany(com.example.auth.dto.CompanyRegisterRequest request) {
+        // 1. Check if email already exists
+        if (userRepo.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        // 2. Check if phone number already exists
+        if (userRepo.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new IllegalArgumentException("Phone number already exists");
+        }
+
+        // 3. Check if passwords match
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+
+        // 4. Check password complexity
+        String password = request.getPassword();
+        if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
+            throw new IllegalArgumentException("Password must contain at least one digit, one lowercase, one uppercase, one special character, and be 8-20 characters long");
+        }
+
+        // 5. Create and save user
+        User user = new User();
+        user.setFullName(request.getCompanyName().trim());
+        user.setEmail(request.getEmail().toLowerCase());
+        user.setPassword(passwordEncoder.encode(password));
+        user.setBirthDate(LocalDate.now()); // Not applicable for companies
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setEnabled(false);
+        user.setRole("USER");
+        user.setUserType("COMPANY");
+
+        userRepo.save(user);
+
+        // 6. Create CompanyProfile
+        com.example.auth.entity.CompanyProfile companyProfile = new com.example.auth.entity.CompanyProfile();
+        companyProfile.setUserId(user.getId());
+        companyProfile.setCompanyName(request.getCompanyName());
+        companyProfile.setWebsite(request.getWebsite());
+        companyProfile.setIndustry(request.getIndustry());
+        companyProfile.setFounded(request.getFounded());
+        companyRepo.save(companyProfile);
+
+        // 7. Create verification token
+        VerificationToken verificationToken = new VerificationToken(user, LocalDateTime.now().plusDays(1));
+        tokenRepo.save(verificationToken);
+
+        // 8. Send verification email
+        emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
+
+        return user.getId();
     }
 
     @Transactional
@@ -82,6 +140,7 @@ public class AuthService {
         user.setGender(request.getGender());
         user.setEnabled(false); // User must verify email first
         user.setRole("USER");
+        user.setUserType("JOB_SEEKER");
 
         userRepo.save(user);
 
@@ -89,7 +148,11 @@ public class AuthService {
         JobSeekerProfile profile = new JobSeekerProfile();
         profile.setUser(user);
         profile.setBirthDate(request.getBirthDate());
-        profile.setGender(request.getGender().equals("MALE") ? JobSeekerProfile.Gender.MALE : JobSeekerProfile.Gender.FEMALE);
+        if (request.getGender().name().equals("MALE")) {
+            profile.setGender(JobSeekerProfile.Gender.MALE);
+        } else if (request.getGender().name().equals("FEMALE")) {
+            profile.setGender(JobSeekerProfile.Gender.FEMALE);
+        }
         profileRepo.save(profile);
 
         // 8. Create verification token

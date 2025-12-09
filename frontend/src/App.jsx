@@ -11,12 +11,31 @@ import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
 import Posts from './components/Posts';
 import UserProfile from './Components/Profile/UserProfile/UserProfile';
+import UserTypeSelection from './Components/UserTypeSelection';
+import LoginTypeSelection from './Components/LoginTypeSelection';
+import CompanySignUp from './Components/CompanySignUp';
+import CompanyLogin from './Components/CompanyLogin';
+import CompanyProfilePage from './Components/CompanyProfilePage';
 
 function App() {
   return (
     <Routes>
+      {/* User Type Selection */}
+      <Route path="/" element={<UserTypeSelection />} />
+      <Route path="/signup-select" element={<UserTypeSelection />} />
+      <Route path="/login-select" element={<LoginTypeSelection />} />
+      
+      {/* Job Seeker Routes */}
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/profile" element={<UserProfile />} />
+      
+      {/* Company Routes */}
+      <Route path="/company/signup" element={<CompanySignUp />} />
+      <Route path="/company/login" element={<CompanyLogin />} />
+      <Route path="/company-profile" element={<CompanyProfilePage />} />
+      
+      {/* Common Routes */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
@@ -24,8 +43,6 @@ function App() {
       <Route path="/auth/callback" element={<OAuthCallback />} />
       <Route path="/PostComposotion" element={<PostComposotion />} />
       <Route path="/posts" element={<Posts />} />
-      <Route path="/profile" element={<UserProfile />} />
-      <Route path="/" element={<Login />} />
       <Route path="/post" element={<PostCard />} />
     </Routes>
   );

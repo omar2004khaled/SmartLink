@@ -54,6 +54,17 @@ public class CompanyProfileService {
                 .build();
     }
 
+    public CompanyDTO getCompanyByUserId(Long userId) {
+        CompanyProfile companyProfile = companyProfileRepo.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Company profile not found for user"));
+        
+        CompanyDTO companyDTO = getCompanyDTO(companyProfile);
+        companyDTO.setCompanyProfileId(companyProfile.getCompanyProfileId());
+        companyDTO.setLocations(getLocations(companyProfile.getCompanyProfileId()));
+        
+        return companyDTO;
+    }
+
     public CompanyDTO getCompanyProfile(Long companyId, Long userId){
         CompanyProfile companyProfile = companyProfileRepo.findByUserId(companyId)
                 .orElseThrow(() -> new RuntimeException("company not found"));

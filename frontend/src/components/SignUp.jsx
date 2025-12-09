@@ -560,6 +560,12 @@ const SignUp = () => {
                       Log In
                     </a>
                   </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    Are you a company?{' '}
+                    <a className="font-bold text-[#00A6F2] hover:underline" href="/company/signup">
+                      Company Sign Up
+                    </a>
+                  </p>
                 </div>
               </form>
             </div>

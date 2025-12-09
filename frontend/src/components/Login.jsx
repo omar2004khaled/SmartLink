@@ -353,6 +353,15 @@ useEffect(() => {
                 Sign Up
               </Link>
             </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Are you a company?{' '}
+              <Link 
+                to="/company/login" 
+                className="font-semibold text-primary hover:underline"
+              >
+                Company Login
+              </Link>
+            </p>
           </div>
         </div>
       </div>

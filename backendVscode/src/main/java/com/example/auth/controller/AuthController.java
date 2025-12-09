@@ -44,11 +44,47 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/company/register")
+    public ResponseEntity<?> registerCompany(@Valid @RequestBody com.example.auth.dto.CompanyRegisterRequest request) {
+        try {
+            Long userId = authService.registerCompany(request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Company registration successful. Check email for verification.");
+            response.put("userId", userId);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             String token = authService.login(request.getEmail(), request.getPassword());
             User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+
+            AuthResponse response = new AuthResponse(
+                    token,
+                    user.getRole(),
+                    user.getEmail(),
+                    user.getId());
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(401).body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/company/login")
+    public ResponseEntity<?> companyLogin(@Valid @RequestBody LoginRequest request) {
+        try {
+            String token = authService.login(request.getEmail(), request.getPassword());
+            User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+
+            // Verify user is a company
+            if (!"COMPANY".equals(user.getUserType())) {
+                return ResponseEntity.status(403).body("This account is not registered as a company");
+            }
 
             AuthResponse response = new AuthResponse(
                     token,

@@ -17,6 +17,16 @@ public class CompanyProfileController {
 
     private final CompanyProfileService companyProfileService;
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId) {
+        try {
+            CompanyDTO company = companyProfileService.getCompanyByUserId(userId);
+            return ResponseEntity.ok(company);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found for user");
+        }
+    }
+
     @GetMapping("/{companyId}")
     public ResponseEntity<?> getCompanyProfile(@PathVariable Long companyId, @RequestParam(required = false) Long userId) {
         try {
