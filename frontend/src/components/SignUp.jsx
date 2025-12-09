@@ -19,8 +19,8 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState(''); // Add this for API errors
-  const [successMessage, setSuccessMessage] = useState(''); // Add this for success
+  const [apiError, setApiError] = useState(''); 
+  const [successMessage, setSuccessMessage] = useState(''); 
 
    const handleGoogleSignup = (e) => {
     e.preventDefault();

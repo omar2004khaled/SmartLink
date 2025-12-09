@@ -4,9 +4,10 @@
 
 .form-group label {
   display: block;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 8px;
-  color: #333;
+  color: #1a1a1a;
+  font-size: 14px;
 }
 
 .image-upload {
@@ -28,17 +29,17 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background-color: #3498db;
+  background-color: #1976d2;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.3s;
+  transition: all 0.2s;
 }
 
 .upload-btn:hover:not(:disabled) {
-  background-color: #2980b9;
+  background-color: #1565c0;
 }
 
 .upload-btn:disabled {
