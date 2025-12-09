@@ -7,7 +7,6 @@ import CommentsPanel from './CommentsPanel';
 import commentsSeed from '../data/commentsSeed';
 import './PostCard.css';
 
-// PostItem handles one post card and its composer/modal
 function PostItem({ post }) {
   const [showComments, setShowComments] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -30,7 +29,6 @@ function PostItem({ post }) {
     };
   }, [attachedFile]);
 
-  // Upload helper for Cloudinary (unsigned preset)
   const uploadToCloudinary = async (file) => {
     try {
       const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
@@ -51,7 +49,6 @@ function PostItem({ post }) {
     }
   };
 
-  // Fetch comments from backend for this post (pageNo 0)
   const fetchCommentsFromServer = async () => {
     if (!post || !post.id) return;
     setLoadingComments(true);
@@ -59,7 +56,6 @@ function PostItem({ post }) {
       const res = await fetch(`/comment/getAll/${post.id}/0`);
       if (!res.ok) throw new Error('Failed to fetch comments');
       const data = await res.json();
-      // data is List<CommentDTO> with fields: commentId, userId, text, url, type, postId
       const mapped = data.map((c) => ({
         commentId: c.commentId,
         author: c.userId ? `User${c.userId}` : 'Anonymous',
@@ -80,7 +76,6 @@ function PostItem({ post }) {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
 
-    // only allow one attachment at a time
     if (attachedFile) {
       alert('Only one attachment is allowed. Remove the current attachment first.');
       e.target.value = null;
@@ -91,7 +86,6 @@ function PostItem({ post }) {
     setAttachedFile({ file: f, preview, uploading: true, uploadedUrl: null });
     e.target.value = null;
 
-    // upload immediately
     const uploadedUrl = await uploadToCloudinary(f);
     setAttachedFile((prev) => ({
       ...prev,
@@ -111,7 +105,6 @@ function PostItem({ post }) {
     setAttachedFile(null);
   };
 
-  // Save comment to backend
   const saveCommentToServer = async (commentDTO) => {
     const res = await fetch('/comment/add', {
       method: 'POST',
@@ -122,7 +115,6 @@ function PostItem({ post }) {
       const text = await res.text();
       throw new Error(text || 'Failed to save comment');
     }
-    // server returns Long id
     const id = await res.json();
     return id;
   };
@@ -183,7 +175,6 @@ function PostItem({ post }) {
     const newVal = !inlineVisible;
     setInlineVisible(newVal);
     if (newVal) {
-      // load from server when opening inline
       await fetchCommentsFromServer();
     }
   };
@@ -199,7 +190,6 @@ function PostItem({ post }) {
 
       <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} />
 
-      {/* inline comments list */}
       {inlineVisible && (
         <div className="inline-comments">
           {loadingComments && <div className="no-comments">Loading comments…</div>}
@@ -221,7 +211,6 @@ function PostItem({ post }) {
         </div>
       )}
 
-      {/* composer below actions */}
       <div className="comment-composer">
         <img src="/src/PostCard/avatar.png" alt="me" className="composer-avatar" />
         <div className="composer-body">

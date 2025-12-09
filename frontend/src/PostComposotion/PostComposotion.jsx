@@ -7,12 +7,13 @@ import MediaReviewer from './media_review';
 import TextEditor from './text_editor';
 import SubmitButton from './submit_button';
 import { SavePost } from '../FetchData/FetchData';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function PostComposer() {
   const [postText, setPostText] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
   const [feeling, setFeeling] = useState("None");
+  const navigate = useNavigate();
 
   const fileInputRef = useRef(null);
 
@@ -100,7 +101,9 @@ export default function PostComposer() {
 
     setPostText("");
     setMediaFiles([]);
-    setFeeling(null); 
+    setFeeling(null);
+    //navigate to post page
+    navigate('/posts');
   };
 
   return (

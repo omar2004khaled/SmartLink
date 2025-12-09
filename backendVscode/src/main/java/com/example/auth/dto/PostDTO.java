@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
 public class PostDTO {
     private Long id;
     private String content;

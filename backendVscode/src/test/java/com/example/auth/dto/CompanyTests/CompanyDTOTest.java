@@ -13,6 +13,7 @@ public class CompanyDTOTest {
     @Test
     void testCompanyDTOCreation() {
         CompanyDTO dto = new CompanyDTO();
+        dto.setCompanyProfileId(1L);
         dto.setUserId(100L);
         dto.setCompanyName("Test Company");
         dto.setWebsite("https://test.com");
@@ -24,6 +25,7 @@ public class CompanyDTOTest {
         dto.setFounded(2020);
         dto.setIsFollowing(true);
 
+        assertEquals(1L, dto.getCompanyProfileId());
         assertEquals(100L, dto.getUserId());
         assertEquals("Test Company", dto.getCompanyName());
         assertEquals("https://test.com", dto.getWebsite());
@@ -57,11 +59,12 @@ public class CompanyDTOTest {
         List<LocationDTO> locations = Arrays.asList(location);
 
         CompanyDTO dto = new CompanyDTO(
-                100L, "Test Company", "https://test.com", "Technology",
+                1L, 100L, "Test Company", "https://test.com", "Technology",
                 "Description", "logo.png", "cover.png", 10L, 2020,
                 locations, true
         );
 
+        assertEquals(1L, dto.getCompanyProfileId());
         assertEquals(100L, dto.getUserId());
         assertEquals("Test Company", dto.getCompanyName());
         assertEquals(1, dto.getLocations().size());
@@ -72,6 +75,7 @@ public class CompanyDTOTest {
     void testCompanyDTONoArgsConstructor() {
         CompanyDTO dto = new CompanyDTO();
 
+        assertNull(dto.getCompanyProfileId());
         assertNull(dto.getUserId());
         assertNull(dto.getCompanyName());
         assertNull(dto.getIsFollowing());
