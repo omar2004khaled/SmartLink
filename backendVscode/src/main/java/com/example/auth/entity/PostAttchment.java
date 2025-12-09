@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.math.BigInteger;
 
 @Entity
-@Table(name="Post_Attach")
+@Table(name="post_attach")
 public class PostAttchment {
     @EmbeddedId
     private PostAttachmentKey id;

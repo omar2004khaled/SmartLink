@@ -8,7 +8,7 @@ import com.example.auth.entity.User;
 
 
 @Entity
-@Table(name = "JobSeekerProfile")
+@Table(name = "job_seeker_profile")
 
 public class JobSeekerProfile {
 

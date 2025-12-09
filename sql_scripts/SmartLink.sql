@@ -237,7 +237,6 @@ CREATE TABLE comments(
     CreatedAt       DATETIME NOT NULL,
     RepliedTo       BIGINT,
     AttachId        BIGINT,
-    RepliedTo      BIGINT,
     FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE,
     FOREIGN KEY (PostId) REFERENCES posts(PostId) ON DELETE CASCADE,
     FOREIGN KEY (RepliedTo) REFERENCES comments(CommentId) ON DELETE CASCADE
@@ -272,3 +271,29 @@ CREATE TABLE comments_like(
     FOREIGN KEY (CommentId) REFERENCES comments(CommentId) ON DELETE CASCADE,
     FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE
 );
+
+CREATE TABLE verification_token (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL,
+    expiresAt DATE NOT NULL,
+    CONSTRAINT fk_verification_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES user(UserId)
+        ON DELETE CASCADE
+);
+
+-- Index for faster token lookups
+CREATE INDEX idx_verification_token_token ON verification_token(token);
+
+-- Index for faster user lookups
+CREATE INDEX idx_verification_token_user_id ON verification_token(user_id);
+
+ALTER TABLE user
+ADD COLUMN birth_date DATE,
+ADD COLUMN gender VARCHAR(20),
+ADD COLUMN provider VARCHAR(50) DEFAULT 'LOCAL',
+ADD COLUMN provider_id VARCHAR(255);
+
+ALTER TABLE user
+ADD COLUMN user_type VARCHAR(50) DEFAULT 'JOB_SEEKER';

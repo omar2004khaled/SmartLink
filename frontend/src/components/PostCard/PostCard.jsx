@@ -7,6 +7,10 @@ import CommentsPanel from './CommentsPanel';
 import commentsSeed from '../data/commentsSeed';
 import './PostCard.css';
 
+<<<<<<<<< Temporary merge branch 1
+// PostItem handles one post card and its composer/modal
+=========
+>>>>>>>>> Temporary merge branch 2
 function PostItem({ post }) {
   const [showComments, setShowComments] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -29,6 +33,10 @@ function PostItem({ post }) {
     };
   }, [attachedFile]);
 
+<<<<<<<<< Temporary merge branch 1
+  // Upload helper for Cloudinary (unsigned preset)
+=========
+>>>>>>>>> Temporary merge branch 2
   const uploadToCloudinary = async (file) => {
     try {
       const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
@@ -49,6 +57,10 @@ function PostItem({ post }) {
     }
   };
 
+<<<<<<<<< Temporary merge branch 1
+  // Fetch comments from backend for this post (pageNo 0)
+=========
+>>>>>>>>> Temporary merge branch 2
   const fetchCommentsFromServer = async () => {
     if (!post || !post.id) return;
     setLoadingComments(true);
@@ -56,6 +68,10 @@ function PostItem({ post }) {
       const res = await fetch(`/comment/getAll/${post.id}/0`);
       if (!res.ok) throw new Error('Failed to fetch comments');
       const data = await res.json();
+<<<<<<<<< Temporary merge branch 1
+      // data is List<CommentDTO> with fields: commentId, userId, text, url, type, postId
+=========
+>>>>>>>>> Temporary merge branch 2
       const mapped = data.map((c) => ({
         commentId: c.commentId,
         author: c.userId ? `User${c.userId}` : 'Anonymous',

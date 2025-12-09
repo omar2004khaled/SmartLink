@@ -123,7 +123,7 @@ public class PostServiceImp implements PostService{
                     postAttachmentService.save(postAttchment);
                 }
             }
-            answer = new PostDTO(savedPostDTO.getId(), savedPostDTO.getContent(),savedPostDTO.getUserId(),savedAttachments, savedPostDTO.getCreatedAt());
+            answer = new PostDTO( savedPostDTO.getContent(),savedPostDTO.getUserId(),savedAttachments, savedPostDTO.getCreatedAt());
         }
         return answer;
     }
