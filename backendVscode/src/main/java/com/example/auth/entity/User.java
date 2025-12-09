@@ -3,30 +3,32 @@ package com.example.auth.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
-@Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email"),
-        @UniqueConstraint(columnNames = "phone_number")
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "Email"),
+        @UniqueConstraint(columnNames = "Phone")
 })
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "UserId")
     private Long id;
 
-    @Column(name = "full_name", length = 50, nullable = false)
+    @Column(name = "Name", length = 100)
     private String fullName;
 
-    @Column(length = 40, nullable = false)
+    @Column(name = "Email", length = 150, nullable = false)
     private String email;
 
-    @Column(name = "password_hash")
+    @Column(name = "PasswordHash", nullable = false)
     @JsonIgnore
     private String password;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "phone_number", length = 20)
+    @Column(name = "Phone", length = 20)
     private String phoneNumber;
 
     @Column(name = "provider")
@@ -38,8 +40,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private com.example.auth.enums.Gender gender;
 
+    @Column(name = "active", nullable = false)
     private boolean enabled = false;
 
+    @Column(name = "Role")
     private String role = "USER"; // USER or ADMIN
 
     // Constructors
@@ -62,10 +66,10 @@ public class User {
         this.enabled = true;
         this.birthDate = LocalDate.of(1990, 1, 1);
         this.phoneNumber = "N/A";
-        this.password = "OAUTH_USER"; // Placeholder for OAuth users
+        this.password = "OAUTH_USER";
     }
 
-    // Getters and Setters
+    // Getters and Setters (keep all the same)
     public Long getId() {
         return id;
     }

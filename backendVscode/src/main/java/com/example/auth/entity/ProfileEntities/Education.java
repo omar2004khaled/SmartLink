@@ -3,7 +3,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Education")
+@Table(name = "education")
 public class Education {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="EducationId")

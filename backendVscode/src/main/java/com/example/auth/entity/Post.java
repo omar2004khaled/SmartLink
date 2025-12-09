@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
-@Table(name = "Posts")
+@Table(name = "posts")
 @Getter
 @Setter
 @AllArgsConstructor

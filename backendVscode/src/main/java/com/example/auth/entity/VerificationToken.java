@@ -17,7 +17,7 @@ public class VerificationToken {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
+    @JoinColumn(name = "expiresAt", nullable = false)
     private LocalDateTime expiresAt;
 
     public VerificationToken() {}

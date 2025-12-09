@@ -10,6 +10,5 @@ public interface AttachmentService {
     Optional<Attachment> findById(Long theId);
     void deleteById(Long theId);
     Attachment save(Attachment attachment);
-    List<Attachment> findByType(TypeofAttachments type);
     void updateAttachmentById(Attachment attachment);
 }

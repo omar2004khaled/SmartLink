@@ -13,8 +13,8 @@ CREATE TABLE CompanyProfile (
     CreatedAt       DATETIME DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt       DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
-    FOREIGN KEY (LocationId) REFERENCES Location(LocationId) ON DELETE SET NULL
+    FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE,
+    FOREIGN KEY (LocationId) REFERENCES location(LocationId) ON DELETE SET NULL
 );
 
 CREATE UNIQUE INDEX CompanyProfileByUser ON CompanyProfile(UserId);
@@ -28,8 +28,8 @@ CREATE TABLE Company_Followers (
     
     PRIMARY KEY (FollowerId, CompanyId),
     
-    FOREIGN KEY (FollowerId) REFERENCES Users(UserId) ON DELETE CASCADE,
-    FOREIGN KEY (CompanyId) REFERENCES Users(UserId) ON DELETE CASCADE
+    FOREIGN KEY (FollowerId) REFERENCES user(UserId) ON DELETE CASCADE,
+    FOREIGN KEY (CompanyId) REFERENCES user(UserId) ON DELETE CASCADE
 );
 
 CREATE INDEX FollowersByUser ON Company_Followers(FollowerId);

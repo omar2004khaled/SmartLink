@@ -21,11 +21,10 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     @Transactional
     void deleteById(Long theId);
     Attachment save(Attachment attachment);
-    @Query("SELECT a FROM Attachment a WHERE a.typeofAttachments = :type")
-    List<Attachment> findByType(@Param("type") TypeofAttachments type);
+
     @Modifying
     @Transactional
-    @Query("UPDATE Attachment a SET a.AttachmentURL = :attachmentURL WHERE a.AttachId = :AttachmentID")
-    void updateAttachmentById(@Param("attachmentURL") String attachmentURL, @Param("AttachmentID") Long AttachId);
+    @Query("UPDATE Attachment a SET a.AttachmentURL = :attachmentURL WHERE a.AttachId = :attachmentId")
+    void updateAttachmentById(@Param("attachmentURL") String attachmentURL, @Param("attachmentId") Long attachmentId);
 
 }
