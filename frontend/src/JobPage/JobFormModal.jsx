@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import JobFormField from './JobFormField';
 
-const JobFormModal = ({ onClose, onSuccess,companyId}) => {
+const JobFormModal = ({ onClose, onSuccess,companyId, editingJob = null }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   
   const [formData, setFormData] = useState({
     companyId: companyId,
-    title: '',
-    description: '',
-    experienceLevel: '',
-    jobType: '',
-    locationType: '',
-    jobLocation: '',
-    salaryMin: '',
-    salaryMax: '',
-    deadline: ''
+    title: editingJob?.title || '',
+    description: editingJob?.description || '',
+    experienceLevel: editingJob?.experienceLevel || '',
+    jobType: editingJob?.jobType || '',
+    locationType: editingJob?.locationType || '',
+    jobLocation: editingJob?.jobLocation || '',
+    salaryMin: editingJob?.salaryMin || '',
+    salaryMax: editingJob?.salaryMax || '',
+    deadline: editingJob?.deadline ? new Date(editingJob.deadline).toISOString().split('T')[0] : ''
   });
 
   const experienceLevels = ['ENTRY', 'JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'];
@@ -37,7 +37,7 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
     if (!formData.deadline) newErrors.deadline = 'Application deadline is required';
     if( parseInt(formData.salaryMax)< parseInt(formData.salaryMin))newErrors.salaryMax='must be greater than minimum salary'
     if(parseInt(formData.salaryMax)<0)newErrors.salaryMax='must be positive value'
-    if(parseInt(formData.salaryMin)<0)newErrors.salaryMax='must be positive value'
+    if(parseInt(formData.salaryMin)<0)newErrors.salaryMin='must be positive value'
     if (formData.deadline < today)newErrors.deadline = 'Not valid deadline'; 
 
     setErrors(newErrors);
@@ -52,22 +52,40 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
       deadlineDate.setHours(23, 59, 59, 999);
 
     try {
-      const payload = {
-        ...formData,
-        salaryMin: parseInt(formData.salaryMin),
-        salaryMax: parseInt(formData.salaryMax),
-        deadline: deadlineDate.toISOString()
-      };
+      const payload = editingJob 
+        ? {
+            title: formData.title,
+            description: formData.description,
+            experienceLevel: formData.experienceLevel,
+            jobType: formData.jobType,
+            locationType: formData.locationType,
+            jobLocation: formData.jobLocation,
+            salaryMin: parseInt(formData.salaryMin),
+            salaryMax: parseInt(formData.salaryMax),
+            deadline: deadlineDate.toISOString()
+          }
+        : {
+            ...formData,
+            salaryMin: parseInt(formData.salaryMin),
+            salaryMax: parseInt(formData.salaryMax),
+            deadline: deadlineDate.toISOString()
+          };
 
-      const response = await fetch('http://localhost:8080/jobs/create', {
-        method: 'POST',
+      const url = editingJob 
+        ? `http://localhost:8080/jobs/${editingJob.jobId}`
+        : 'http://localhost:8080/jobs/create';
+      
+      const method = editingJob ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error('Failed to create job');
+      if (!response.ok) throw new Error(`Failed to ${editingJob ? 'update' : 'create'} job`);
 
-      onSuccess('Job posted successfully!');
+      onSuccess(editingJob ? 'Job updated successfully!' : 'Job posted successfully!');
       onClose();
 
     } catch (err) {
@@ -91,7 +109,9 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
       <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
 
         <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">New Job</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {editingJob ? 'Edit Job' : 'New Job'}
+          </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X size={24} />
           </button>
@@ -195,7 +215,7 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
           <div className="flex justify-end gap-4 pt-4 border-t">
             <button
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-lg"
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               disabled={loading}
             >
               Cancel
@@ -204,9 +224,9 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Posting...' : 'Post Job'}
+              {loading ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
             </button>
           </div>
 
