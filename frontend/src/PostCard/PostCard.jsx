@@ -20,7 +20,11 @@ function PostItem({ post }) {
   const [attachedFile, setAttachedFile] = useState(null);
 
   useEffect(() => {
-    setComments(post?.comments || commentsSeed);
+    if (post?.id) {
+      fetchCommentsFromServer();
+    } else {
+      setComments(post?.comments || commentsSeed);
+    }
   }, [post]);
 
   useEffect(() => {
@@ -53,7 +57,7 @@ function PostItem({ post }) {
     if (!post || !post.id) return;
     setLoadingComments(true);
     try {
-      const res = await fetch(`/comment/getAll/${post.id}/0`);
+      const res = await fetch(`http://localhost:8080/comment/getAll/${post.id}/0`);
       if (!res.ok) throw new Error('Failed to fetch comments');
       const data = await res.json();
       const mapped = data.map((c) => ({
@@ -106,7 +110,7 @@ function PostItem({ post }) {
   };
 
   const saveCommentToServer = async (commentDTO) => {
-    const res = await fetch('/comment/add', {
+    const res = await fetch('http://localhost:8080/comment/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(commentDTO),
