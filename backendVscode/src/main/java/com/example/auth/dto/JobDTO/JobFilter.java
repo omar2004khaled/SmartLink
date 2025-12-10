@@ -6,6 +6,8 @@ import com.example.auth.enums.LocationType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 public class JobFilter {
