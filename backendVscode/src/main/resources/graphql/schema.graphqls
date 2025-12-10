@@ -28,9 +28,8 @@ type Job {
     salaryMax: Int
 }
 
-# ... rest of your schema
 enum ExperienceLevel {
-    ENTRY_LEVEL
+    ENTRY
     JUNIOR
     MID
     SENIOR
