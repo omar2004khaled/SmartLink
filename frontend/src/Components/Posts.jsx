@@ -55,12 +55,12 @@ export default function Posts() {
 
   const transformPosts = (postsData) => {
     return postsData.map(post => ({
-      id: post.postId,
+      id: post.id,
       userId: post.userId,
       username: post.userName || `User${post.userId}`,
       time: formatTime(post.createdAt),
       content: post.content,
-      attachment: post.attachments && post.attachments.length > 0 ? post.attachments[0] : null
+      attachments: post.attachments || []
     }));
   };
 

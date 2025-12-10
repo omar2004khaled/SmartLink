@@ -1,7 +1,8 @@
 package com.example.auth.service.PostService;
 
-
+import com.example.auth.dto.AttachmentDTO;
 import com.example.auth.dto.PostDTO;
+import com.example.auth.enums.TypeofAttachments;
 import com.example.auth.repository.*;
 import com.example.auth.service.AttachmentService.*;
 import com.example.auth.service.PostAttachmentService.*;
@@ -11,9 +12,9 @@ import com.example.auth.entity.PostAttachmentKey;
 import com.example.auth.entity.PostAttchment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import org.springframework.data.domain.*;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,10 +38,17 @@ public class PostServiceImp implements PostService{
         List<PostDTO> answers = new ArrayList<>();
         for (Post post : posts.getContent()){
             List<Long> attachmentIDs = postAttachmentService.findAttachmentsByIdOfPost(post.getPostId());
-            List<Attachment> attachments = new ArrayList<>();
+            List<AttachmentDTO> attachments = new ArrayList<>();
             for (Long attachmentID : attachmentIDs) {
                 Optional<Attachment> attachment = attachmentService.findById(attachmentID);
-                if (attachment.isPresent()) attachments.add(attachment.get());
+                if (attachment.isPresent()) {
+                    AttachmentDTO dto = new AttachmentDTO(
+                        attachment.get().getAttachId(),
+                        attachment.get().getTypeofAttachments().name(),
+                        attachment.get().getAttachmentURL()
+                    );
+                    attachments.add(dto);
+                }
             }
             PostDTO answer = new PostDTO(post.getPostId() ,  post.getContent(),post.getUserId(), attachments , post.getCreatedAt());
             answers.add(answer);
@@ -52,10 +60,17 @@ public class PostServiceImp implements PostService{
         Optional<Post> post = postRepository.findById(theId);
         if (!post.isPresent()) return null;
         List<Long> attachmentIDs = postAttachmentService.findAttachmentsByIdOfPost(post.get().getPostId());
-        List<Attachment> attachments = new ArrayList<>();
+        List<AttachmentDTO> attachments = new ArrayList<>();
         for (Long attachmentID : attachmentIDs) {
             Optional<Attachment> attachment= attachmentService.findById(attachmentID);
-            if (attachment.isPresent()) attachments.add(attachment.get());
+            if (attachment.isPresent()) {
+                AttachmentDTO dto = new AttachmentDTO(
+                    attachment.get().getAttachId(),
+                    attachment.get().getTypeofAttachments().name(),
+                    attachment.get().getAttachmentURL()
+                );
+                attachments.add(dto);
+            }
         }
         PostDTO answer = new PostDTO(post.get().getPostId(), post.get().getContent(), post.get().getUserId(), attachments , post.get().getCreatedAt());
         return answer;
@@ -75,16 +90,30 @@ public class PostServiceImp implements PostService{
     @Override
     public PostDTO save(PostDTO postDTO) {
         Post post = new Post(postDTO.getUserId(), postDTO.getContent());
-        List<Attachment> attachments = postDTO.getAttachments();
-        List<Attachment> savedAttachments = new ArrayList<>();
+        List<AttachmentDTO> attachmentDTOs = postDTO.getAttachments();
+        List<AttachmentDTO> savedAttachmentDTOs = new ArrayList<>();
         post = postRepository.save(post);
-        for (Attachment attachment : attachments) {
-            Attachment saved = attachmentService.save(attachment);
-            savedAttachments.add(saved);
-            PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(post.getPostId(), saved.getAttachId().longValue()));
-            postAttachmentService.save(postAttchment);
+        
+        if (attachmentDTOs != null) {
+            for (AttachmentDTO attachmentDTO : attachmentDTOs) {
+                Attachment attachment = new Attachment();
+                attachment.setAttachmentURL(attachmentDTO.getAttachmentURL());
+                attachment.setTypeofAttachments(TypeofAttachments.valueOf(attachmentDTO.getTypeOfAttachment()));
+                
+                Attachment saved = attachmentService.save(attachment);
+                AttachmentDTO savedDTO = new AttachmentDTO(
+                    saved.getAttachId(),
+                    saved.getTypeofAttachments().name(),
+                    saved.getAttachmentURL()
+                );
+                savedAttachmentDTOs.add(savedDTO);
+                
+                PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(post.getPostId(), saved.getAttachId()));
+                postAttachmentService.save(postAttchment);
+            }
         }
-        PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(),savedAttachments , post.getCreatedAt());
+        
+        PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(), savedAttachmentDTOs, post.getCreatedAt());
         return answer;
     }
 
@@ -110,20 +139,32 @@ public class PostServiceImp implements PostService{
             answer = savedPostDTO;
         }
         else if (postDTO.getAttachments()!=null){     ///  update the attachments of the post
-            List<Attachment> attachments = postDTO.getAttachments();
-            List<Attachment> savedAttachments = new ArrayList<>();
-            for (Attachment attachment : attachments) {
-                if (attachment.getAttachId() != null) { // edit exisiting attachment
+            List<AttachmentDTO> attachmentDTOs = postDTO.getAttachments();
+            List<AttachmentDTO> savedAttachmentDTOs = new ArrayList<>();
+            for (AttachmentDTO attachmentDTO : attachmentDTOs) {
+                if (attachmentDTO.getAttachId() != null) { // edit existing attachment
+                    Attachment attachment = new Attachment();
+                    attachment.setAttachId(attachmentDTO.getAttachId());
+                    attachment.setAttachmentURL(attachmentDTO.getAttachmentURL());
+                    attachment.setTypeofAttachments(TypeofAttachments.valueOf(attachmentDTO.getTypeOfAttachment()));
                     attachmentService.updateAttachmentById(attachment);
-                    savedAttachments.add(attachment);
+                    savedAttachmentDTOs.add(attachmentDTO);
                 }else { // no id is added so it is a new attachment
+                    Attachment attachment = new Attachment();
+                    attachment.setAttachmentURL(attachmentDTO.getAttachmentURL());
+                    attachment.setTypeofAttachments(TypeofAttachments.valueOf(attachmentDTO.getTypeOfAttachment()));
                     Attachment saved = attachmentService.save(attachment);
-                    savedAttachments.add(saved);
-                    PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(id, saved.getAttachId().longValue()));
+                    AttachmentDTO savedDTO = new AttachmentDTO(
+                        saved.getAttachId(),
+                        saved.getTypeofAttachments().name(),
+                        saved.getAttachmentURL()
+                    );
+                    savedAttachmentDTOs.add(savedDTO);
+                    PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(id, saved.getAttachId()));
                     postAttachmentService.save(postAttchment);
                 }
             }
-            answer = new PostDTO(savedPostDTO.getId(), savedPostDTO.getContent(),savedPostDTO.getUserId(),savedAttachments, savedPostDTO.getCreatedAt());
+            answer = new PostDTO(savedPostDTO.getId(), savedPostDTO.getContent(),savedPostDTO.getUserId(),savedAttachmentDTOs, savedPostDTO.getCreatedAt());
         }
         return answer;
     }

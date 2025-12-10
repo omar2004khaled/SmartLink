@@ -53,7 +53,7 @@ public class CommentService {
 
             System.out.println(commentDTO.getType().toUpperCase());
             attachment = Attachment.builder()
-                    .AttachmentURL(commentDTO.getUrl())
+                    .attachmentURL(commentDTO.getUrl())
                     .typeofAttachments(commentDTO.getType() != null ? TypeofAttachments.valueOf(commentDTO.getType()) : null)
                     .build();
             System.out.println("saving Attachments");
@@ -96,7 +96,7 @@ public class CommentService {
         if(c.isEmpty()) throw new NonExistentObject("Object Does Not exist");
         Comment comment=c.get();
         comment.setAttachment(Attachment.builder()
-                .AttachmentURL(commentDTO.getUrl())
+                .attachmentURL(commentDTO.getUrl())
                 .typeofAttachments(commentDTO.getType()!=null?TypeofAttachments.valueOf(commentDTO.getType()):null)
                 .build());
         comment.setContent(commentDTO.getText());

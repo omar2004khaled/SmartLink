@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
-@Table(name = "Posts")
+@Table(name = "posts")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,20 +14,25 @@ import java.sql.Timestamp;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PostId")
+    @Column(name = "post_id")
     private Long postId;
 
-    @Column(name = "UserId" , nullable = false)
-    private Long UserId;
+    @Column(name = "user_id" , nullable = false)
+    private Long userId;
 
     @Column(name = "content" , nullable = false , length = 2500)
-    private String content  ;
+    private String content;
 
-    @Column(name = "CreatedAt")
-    private Timestamp CreatedAt ;
+    @Column(name = "created_at")
+    private Timestamp createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Timestamp(System.currentTimeMillis());
+    }
 
     public Post(Long userId, String content) {
-        this.UserId = userId;
+        this.userId = userId;
         this.content = content;
     }
 }

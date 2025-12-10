@@ -25,7 +25,7 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     List<Attachment> findByType(@Param("type") TypeofAttachments type);
     @Modifying
     @Transactional
-    @Query("UPDATE Attachment a SET a.AttachmentURL = :attachmentURL WHERE a.AttachId = :AttachmentID")
+    @Query("UPDATE Attachment a SET a.attachmentURL = :attachmentURL WHERE a.attachId = :AttachmentID")
     void updateAttachmentById(@Param("attachmentURL") String attachmentURL, @Param("AttachmentID") Long AttachId);
 
 }

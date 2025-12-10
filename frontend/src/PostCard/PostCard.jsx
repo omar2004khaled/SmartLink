@@ -184,8 +184,16 @@ function PostItem({ post }) {
       <UserHeader username={post.username ?? 'User'} userId={post.userId} time={post.time ?? 'just now'} />
       <Content content={post.content ?? ''} />
 
-      {post.attachment && (
-        <Attachment attachment={post.attachment} onRemove={post.onRemove ?? (() => {})} />
+      {post.attachments && post.attachments.length > 0 && (
+        <div className="post-attachments">
+          {post.attachments.map((attachment, index) => (
+            <Attachment 
+              key={attachment.attachId || index} 
+              attachment={attachment} 
+              onRemove={post.onRemove ?? (() => {})} 
+            />
+          ))}
+        </div>
       )}
 
       <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} />

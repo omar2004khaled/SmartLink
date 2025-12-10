@@ -47,6 +47,6 @@ public class AttachmentSericeImp implements AttachmentService {
 
     @Override
     public void updateAttachmentById(Attachment attach) {
-        attachmentRepository.updateAttachmentById(attach.getAttachmentURL(), attach.getAttachId().longValue());
+        attachmentRepository.updateAttachmentById(attach.getAttachmentURL(), attach.getAttachId());
     }
 }

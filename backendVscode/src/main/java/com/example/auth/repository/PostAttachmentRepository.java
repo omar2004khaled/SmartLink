@@ -17,24 +17,24 @@ import java.util.List;
 @Repository
 public interface PostAttachmentRepository extends JpaRepository<PostAttchment, PostAttachmentKey> {
     List<PostAttchment> findAll();
-    @Query("SELECT p.id.PostId FROM PostAttchment p WHERE p.id.AttachId = :AttachID")
+    @Query("SELECT p.id.postId FROM PostAttchment p WHERE p.id.attachId = :AttachID")
     List<Long> findPostsByIdOfAttachment(@Param("AttachID") Long AttachID);
-    @Query("SELECT p.id.AttachId FROM PostAttchment p WHERE p.id.PostId = :PostId")
+    @Query("SELECT p.id.attachId FROM PostAttchment p WHERE p.id.postId = :PostId")
     List<Long> findAttachmentsByIdOfPost(@Param("PostId") Long PostId);
     @Modifying
     @Transactional
-    @Query("DELETE FROM PostAttchment p WHERE p.id.PostId = :PostId")
+    @Query("DELETE FROM PostAttchment p WHERE p.id.postId = :PostId")
     void deletePostById(@Param("PostId") Long PostId);
-    @Query("DELETE FROM PostAttchment p WHERE p.id.AttachId = :AttachmentID")
+    @Query("DELETE FROM PostAttchment p WHERE p.id.attachId = :AttachmentID")
     @Modifying
     @Transactional
     void deleteAttachmentById(@Param("AttachmentID") Long AttachmentID, Long PostId);
     PostAttchment save(PostAttchment postAttchment);
-    @Query("UPDATE PostAttchment p SET p.id.PostId = :PostId WHERE p.id.AttachId = :AttachmentID")
+    @Query("UPDATE PostAttchment p SET p.id.postId = :PostId WHERE p.id.attachId = :AttachmentID")
     @Modifying
     @Transactional
     void updatePostById(@Param("PostId") Long PostId, @Param("AttachmentID") Long AttachmentID);
-    @Query("UPDATE PostAttchment p SET p.id.AttachId = :AttachmentID WHERE p.id.PostId = :PostId")
+    @Query("UPDATE PostAttchment p SET p.id.attachId = :AttachmentID WHERE p.id.postId = :PostId")
     @Modifying
     @Transactional
     void updateAttachmentById(@Param("AttachmentID") Long AttachmentID,@Param("PostId") Long PostId);

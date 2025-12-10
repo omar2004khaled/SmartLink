@@ -64,44 +64,50 @@ export default function PostComposer() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!postText.trim() && mediaFiles.length === 0) return;
 
+    // Wait for all uploads to complete
     if (mediaFiles.length > 0) {
-      mediaFiles.forEach(async (m) => {
-        if (m.uploadedUrl === null) {
-          const cloudUrl = await uploadFileToCloudinary(m.file);
-          setMediaFiles((prev) =>
-            prev.map((media) => (media.id === m.id ? { ...media, uploadedUrl: cloudUrl } : media))
-          );
-        }
-      });
+      const pendingUploads = mediaFiles.filter(m => m.uploadedUrl === null);
+      if (pendingUploads.length > 0) {
+        await Promise.all(
+          pendingUploads.map(async (m) => {
+            const cloudUrl = await uploadFileToCloudinary(m.file);
+            setMediaFiles((prev) =>
+              prev.map((media) => (media.id === m.id ? { ...media, uploadedUrl: cloudUrl } : media))
+            );
+          })
+        );
+      }
     }
 
-    const uploadedUrls = mediaFiles.map((m) => m.uploadedUrl);
+    // Get final media files with uploaded URLs
+    const finalMediaFiles = mediaFiles.filter(m => m.uploadedUrl);
 
-    SavePost({
-      userId: 1,
-      content: postText,
-      attachments: [
-        ...mediaFiles.map((m) => ({
+    try {
+      await SavePost({
+        userId: 1,
+        content: postText,
+        attachments: finalMediaFiles.map((m) => ({
           typeOfAttachment: m.type === "image" ? "Image" : "Video",
           attachmentURL: m.uploadedUrl,
-        }))
-      ],
-    });
-    alert(`
-      Post Submitted! 
-      Text: ${postText}
-      Feeling: ${feeling ?? "None"}
-      Uploaded URLs:
-      ${uploadedUrls.join("\n")}
-    `);
-
-    setPostText("");
-    setMediaFiles([]);
-    setFeeling(null);
-    navigate('/home');
+        })),
+      });
+      
+      alert('Post submitted successfully!');
+      setPostText("");
+      setMediaFiles([]);
+      setFeeling(null);
+      navigate('/home');
+    } catch (error) {
+      console.error('Error submitting post:', error);
+      if (error.message.includes('Unable to connect to server')) {
+        alert('Unable to connect to server. Please check if the backend is running on port 8080.');
+      } else {
+        alert('Failed to submit post. Please try again.');
+      }
+    }
   };
 
   return (

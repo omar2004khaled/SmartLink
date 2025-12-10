@@ -135,7 +135,7 @@ public class CommentServiceTest {
                 .commentId(commentDTO.getCommentId())
                 .attachment(Attachment.builder()
                         .typeofAttachments(TypeofAttachments.valueOf(commentDTO.getType()))
-                        .AttachmentURL(commentDTO.getUrl())
+                        .attachmentURL(commentDTO.getUrl())
                         .build())
                 .build();
         Mockito.when(commentRepo.findById(commentDTO.getCommentId()))
@@ -152,7 +152,7 @@ public class CommentServiceTest {
                 .content(commentDTO.getText())
                 .attachment(Attachment.builder()
                         .typeofAttachments(TypeofAttachments.valueOf(commentDTO.getType()))
-                        .AttachmentURL(commentDTO.getUrl())
+                        .attachmentURL(commentDTO.getUrl())
                         .build())
                 .build();
         Mockito.when(commentRepo.findById(commentDTO.getCommentId()))
