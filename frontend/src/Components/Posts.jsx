@@ -55,7 +55,7 @@ export default function Posts() {
 
   const transformPosts = (postsData) => {
     return postsData.map(post => ({
-      id: post.postId,
+      id: post.id || post.postId,
       userId: post.userId,
       username: post.userName || `User${post.userId}`,
       time: formatTime(post.createdAt),
@@ -75,11 +75,10 @@ export default function Posts() {
     if (diffInHours < 24) return `${Math.floor(diffInHours)} hours ago`;
     return `${Math.floor(diffInHours / 24)} days ago`;
   };
-
   return (
     <div>
       {posts.map(p => (
-        <PostCard key={p.id} post={p} />
+        <PostCard key={p.id} post={p} Posts={posts} />
       ))}
 
       {posts.length > 0 && posts.length % pageSize === 0 && (

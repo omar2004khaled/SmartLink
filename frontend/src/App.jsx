@@ -9,18 +9,18 @@ import OAuthCallback from "./components/OAuthCallback";
 import Dashboard from "./components/Dashboard";
 import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
-import Posts from './components/Posts';
-import UserProfile from './components/Profile/UserProfile/UserProfile';
-import UserTypeSelection from './components/UserTypeSelection';
-import LoginTypeSelection from './components/LoginTypeSelection';
-import CompanySignUp from './components/CompanySignUp';
-import CompanyLogin from './components/CompanyLogin';
-import CompanyProfilePage from './components/CompanyProfilePage';
-import CompanyHome from './components/CompanyHome';
-import CompanyJobs from './components/CompanyJobs';
-import MainPage from './components/MainPage';
-import AdminLogin from './components/AdminLogin';
-import AdminDashboard from './components/AdminDashboard';
+import Posts from './Components/Posts';
+import UserProfile from './Components/Profile/UserProfile/UserProfile';
+import UserTypeSelection from './Components/UserTypeSelection';
+import LoginTypeSelection from './Components/LoginTypeSelection';
+import CompanySignUp from './Components/CompanySignUp';
+import CompanyLogin from './Components/CompanyLogin';
+import CompanyProfilePage from './Components/CompanyProfilePage';
+import CompanyHome from './Components/CompanyHome';
+import CompanyJobs from './Components/CompanyJobs';
+import MainPage from './Components/MainPage';
+import AdminLogin from './Components/AdminLogin';
+import AdminDashboard from './Components/AdminDashboard';
 
 function App() {
   return (
