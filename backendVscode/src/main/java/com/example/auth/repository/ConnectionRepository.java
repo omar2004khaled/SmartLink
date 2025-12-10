@@ -33,7 +33,8 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     @Query("""
             SELECT c FROM Connection c 
             WHERE ((c.sender.id =?1AND c.receiver.id =?2)
-            OR(c.sender.id =?2AND c.receiver.id =?1))            
+            OR(c.sender.id =?2AND c.receiver.id =?1))
+            AND c.status = 'ACCEPTED'            
             """)
     Optional<Connection> findConnectionBetweenUsers(Long userId1, Long userId2);
 }

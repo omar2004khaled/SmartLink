@@ -83,7 +83,7 @@ public class ConnectionService {
     
     @Transactional(readOnly = true)
     public List<ConnectionDto> getPendingRequests(Long userId) {
-       return connectionRepo.findPendingRequestsByReceiverId(userId).stream().map(this::toDto).collect(Collectors.toList());
+       return connectionRepo.findByUserIdAndStatus(userId, ConnectionStatus.PENDING).stream().map(this::toDto).collect(Collectors.toList());
     }
     
     @Transactional(readOnly = true)
