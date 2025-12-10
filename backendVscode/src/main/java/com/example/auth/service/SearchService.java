@@ -15,12 +15,12 @@ public class SearchService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<UserSearchDTO> searchUsers(String query) {
+    public List<UserSearchDTO> searchUsers(String query, Long currentUserId) {
         if (query == null || query.trim().isEmpty()) {
             throw new IllegalArgumentException("Search query cannot be empty");
         }
 
-        List<User> users = userRepository.searchUsers(query.trim());
+        List<User> users = userRepository.searchUsers(query.trim(), currentUserId);
         
         return users.stream()
                 .map(user -> new UserSearchDTO(

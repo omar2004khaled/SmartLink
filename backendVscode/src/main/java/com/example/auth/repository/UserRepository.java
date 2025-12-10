@@ -11,8 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     boolean existsByPhoneNumber(String phoneNumber);
     
-    @Query("SELECT u FROM User u WHERE u.enabled = true AND (" +
+    @Query("SELECT u FROM User u WHERE u.enabled = true AND u.userType = 'JOB_SEEKER' AND u.id != :currentUserId AND (" +
            "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
-    List<User> searchUsers(@Param("query") String query);
+    List<User> searchUsers(@Param("query") String query, @Param("currentUserId") Long currentUserId);
 }

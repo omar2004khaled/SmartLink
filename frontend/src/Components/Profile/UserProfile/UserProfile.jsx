@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import Navbar from "../../Navbar";
 import ProfileInfo from "./ProfileInfo";
 import ExperienceSection from "./ExperienceSection";
 import SkillsSection from "./SkillsSection";
@@ -17,7 +18,10 @@ const API_BASE = "http://localhost:8080/api/profiles";
 
 export default function UserProfile() {
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId');
+  const { userId: urlUserId } = useParams();
+  const loggedInUserId = localStorage.getItem('userId');
+  const userId = urlUserId || loggedInUserId;
+  const isOwnProfile = !urlUserId || urlUserId === loggedInUserId;
   const [profileId, setProfileId] = useState(null);
   const [profile, setProfile] = useState(null);
   const [locations, setLocations] = useState([]);
@@ -93,8 +97,8 @@ export default function UserProfile() {
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!profile) return <div>No profile found.</div>;
 
-  // Handler stubs for edit/add/delete
-  const handleEditProfile = () => setEditProfile(true);
+  // Handler stubs for edit/add/delete (only for own profile)
+  const handleEditProfile = () => isOwnProfile && setEditProfile(true);
   const handleSaveProfile = async (form) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -162,8 +166,8 @@ export default function UserProfile() {
   };
   const handleCancelProfile = () => setEditProfile(false);
 
-  const handleEditExperience = id => setEditExperienceId(id);
-  const handleAddExperience = () => setEditExperienceId("new");
+  const handleEditExperience = id => isOwnProfile && setEditExperienceId(id);
+  const handleAddExperience = () => isOwnProfile && setEditExperienceId("new");
   const handleSaveExperience = async (form) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -210,8 +214,8 @@ export default function UserProfile() {
     }
   };
 
-  const handleEditSkill = id => setEditSkillId(id);
-  const handleAddSkill = () => setEditSkillId("new");
+  const handleEditSkill = id => isOwnProfile && setEditSkillId(id);
+  const handleAddSkill = () => isOwnProfile && setEditSkillId("new");
   const handleSaveSkill = async (form) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -257,8 +261,8 @@ export default function UserProfile() {
     }
   };
 
-  const handleEditProject = id => setEditProjectId(id);
-  const handleAddProject = () => setEditProjectId("new");
+  const handleEditProject = id => isOwnProfile && setEditProjectId(id);
+  const handleAddProject = () => isOwnProfile && setEditProjectId("new");
   const handleSaveProject = async (form) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -310,8 +314,8 @@ export default function UserProfile() {
     }
   };
 
-  const handleEditEducation = id => setEditEducationId(id);
-  const handleAddEducation = () => setEditEducationId("new");
+  const handleEditEducation = id => isOwnProfile && setEditEducationId(id);
+  const handleAddEducation = () => isOwnProfile && setEditEducationId("new");
   const handleSaveEducation = async (form) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -358,17 +362,11 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="up-page" style={{ fontFamily: "system-ui", maxWidth: 980, margin: "2rem auto" }}>
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-        <button 
-          onClick={() => navigate('/PostComposotion')}
-          style={{ padding: '0.5rem 1rem', background: '#0066cc', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-        >
-          Go to Posts
-        </button>
-      </div>
+    <div>
+      <Navbar />
+      <div className="up-page" style={{ fontFamily: "system-ui", maxWidth: 980, margin: "2rem auto" }}>
       <div className="profile-container" style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 16px #0002", padding: 24 }}>
-        <ProfileInfo profile={profile} onEdit={handleEditProfile} />
+        <ProfileInfo profile={profile} onEdit={isOwnProfile ? handleEditProfile : null} isOwnProfile={isOwnProfile} />
 
         <div className="up-sections">
           {/* Experience Card */}
@@ -380,11 +378,11 @@ export default function UserProfile() {
               </div>
               <div className="up-card-actions">
                 {/* keep header Add (styled) and remove Manage */}
-                <button className="btn btn-outline btn-sm" onClick={handleAddExperience}>+ Add</button>
+                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddExperience}>+ Add</button>}
               </div>
             </div>
             <div className="up-card-body">
-              <ExperienceSection experience={experience} onAdd={handleAddExperience} onEdit={handleEditExperience} onDelete={handleDeleteExperience} />
+              <ExperienceSection experience={experience} onAdd={isOwnProfile ? handleAddExperience : null} onEdit={isOwnProfile ? handleEditExperience : null} onDelete={isOwnProfile ? handleDeleteExperience : null} />
             </div>
           </section>
 
@@ -396,11 +394,11 @@ export default function UserProfile() {
                 <div className="up-card-sub">Degrees, certifications and institutions</div>
               </div>
               <div className="up-card-actions">
-                <button className="btn btn-outline btn-sm" onClick={handleAddEducation}>+ Add</button>
+                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddEducation}>+ Add</button>}
               </div>
             </div>
             <div className="up-card-body">
-              <EducationSection education={education} onAdd={handleAddEducation} onEdit={handleEditEducation} onDelete={handleDeleteEducation} />
+              <EducationSection education={education} onAdd={isOwnProfile ? handleAddEducation : null} onEdit={isOwnProfile ? handleEditEducation : null} onDelete={isOwnProfile ? handleDeleteEducation : null} />
             </div>
           </section>
 
@@ -412,11 +410,11 @@ export default function UserProfile() {
                 <div className="up-card-sub">Core skills, tools & proficiencies</div>
               </div>
               <div className="up-card-actions">
-                <button className="btn btn-outline btn-sm" onClick={handleAddSkill}>+ Add</button>
+                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddSkill}>+ Add</button>}
               </div>
             </div>
             <div className="up-card-body">
-              <SkillsSection skills={skills} onAdd={handleAddSkill} onEdit={handleEditSkill} onDelete={handleDeleteSkill} />
+              <SkillsSection skills={skills} onAdd={isOwnProfile ? handleAddSkill : null} onEdit={isOwnProfile ? handleEditSkill : null} onDelete={isOwnProfile ? handleDeleteSkill : null} />
             </div>
           </section>
 
@@ -428,11 +426,11 @@ export default function UserProfile() {
                 <div className="up-card-sub">Selected projects and highlights</div>
               </div>
               <div className="up-card-actions">
-                <button className="btn btn-outline btn-sm" onClick={handleAddProject}>+ Add</button>
+                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddProject}>+ Add</button>}
               </div>
             </div>
             <div className="up-card-body">
-              <ProjectsSection projects={projects} onAdd={handleAddProject} onEdit={handleEditProject} onDelete={handleDeleteProject} />
+              <ProjectsSection projects={projects} onAdd={isOwnProfile ? handleAddProject : null} onEdit={isOwnProfile ? handleEditProject : null} onDelete={isOwnProfile ? handleDeleteProject : null} />
             </div>
           </section>
         </div>
@@ -443,6 +441,7 @@ export default function UserProfile() {
         <SkillForm open={!!editSkillId} skill={skills.find(s => s.id === editSkillId)} onSave={handleSaveSkill} onCancel={handleCancelSkill} />
         <ProjectForm open={!!editProjectId} project={projects.find(p => p.id === editProjectId)} onSave={handleSaveProject} onCancel={handleCancelProject} />
         <EducationForm open={!!editEducationId} education={education.find(e => e.id === editEducationId)} onSave={handleSaveEducation} onCancel={handleCancelEducation} />
+      </div>
       </div>
     </div>
   );

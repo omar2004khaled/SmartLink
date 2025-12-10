@@ -19,7 +19,7 @@ public class SearchController {
     private SearchService searchService;
 
     @GetMapping("/users")
-    public ResponseEntity<?> searchUsers(@RequestParam(required = false) String query) {
+    public ResponseEntity<?> searchUsers(@RequestParam(required = false) String query, @RequestParam Long currentUserId) {
         try {
             if (query == null || query.trim().isEmpty()) {
                 Map<String, String> error = new HashMap<>();
@@ -33,7 +33,7 @@ public class SearchController {
                 return ResponseEntity.badRequest().body(error);
             }
 
-            List<UserSearchDTO> results = searchService.searchUsers(query);
+            List<UserSearchDTO> results = searchService.searchUsers(query, currentUserId);
             
             Map<String, Object> response = new HashMap<>();
             response.put("query", query);

@@ -181,7 +181,7 @@ function PostItem({ post }) {
 
   return (
     <div className="post-card">
-      <UserHeader username={post.username ?? 'User'} time={post.time ?? 'just now'} />
+      <UserHeader username={post.username ?? 'User'} userId={post.userId} time={post.time ?? 'just now'} />
       <Content content={post.content ?? ''} />
 
       {post.attachment && (

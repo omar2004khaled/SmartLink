@@ -1,7 +1,7 @@
 import React from "react";
 import "./UserProfile.css";   // ← IMPORTANT
 
-export default function ProfileInfo({ profile, onEdit }) {
+export default function ProfileInfo({ profile, onEdit, isOwnProfile = true }) {
   return (
     <section style={{ display: "flex", gap: 24, alignItems: "center", marginBottom: 32 }}>
       <img
@@ -28,7 +28,11 @@ export default function ProfileInfo({ profile, onEdit }) {
           Email: {profile.userEmail}
         </div>
 
-        <button onClick={onEdit} className="btn-edit edit-right">Edit Profile</button>
+        {isOwnProfile ? (
+          <button onClick={onEdit} className="btn-edit edit-right">Edit Profile</button>
+        ) : (
+          <button className="btn-connect edit-right">Connect</button>
+        )}
 
       </div>
     </section>

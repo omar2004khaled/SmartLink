@@ -130,6 +130,24 @@
   box-shadow: 0 8px 20px rgba(11, 102, 195, 0.22);
 }
 
+.btn-connect {
+  margin-top: 12px;
+  background: linear-gradient(180deg, #28a745, #218838);
+  color: #fff;
+  border: 1px solid rgba(40, 167, 69, 0.08);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(40, 167, 69, 0.16);
+  transition: 0.15s ease-out;
+}
+
+.btn-connect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.22);
+}
+
 .edit-right {
   float: right;
   margin-top: 12px;

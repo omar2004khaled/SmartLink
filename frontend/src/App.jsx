@@ -16,12 +16,14 @@ import LoginTypeSelection from './Components/LoginTypeSelection';
 import CompanySignUp from './Components/CompanySignUp';
 import CompanyLogin from './Components/CompanyLogin';
 import CompanyProfilePage from './Components/CompanyProfilePage';
+import MainPage from './components/MainPage';
 
 function App() {
   return (
     <Routes>
       {/* User Type Selection */}
       <Route path="/" element={<UserTypeSelection />} />
+      <Route path="/home" element={<MainPage />} />
       <Route path="/signup-select" element={<UserTypeSelection />} />
       <Route path="/login-select" element={<LoginTypeSelection />} />
       
@@ -29,6 +31,7 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<UserProfile />} />
+      <Route path="/profile/:userId" element={<UserProfile />} />
       
       {/* Company Routes */}
       <Route path="/company/signup" element={<CompanySignUp />} />
