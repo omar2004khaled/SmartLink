@@ -29,10 +29,12 @@ public class CompanyProfileController {
     @GetMapping("/{companyId}")
     public ResponseEntity<?> getCompanyProfile(@PathVariable Long companyId, @RequestParam(required = false) Long userId) {
         try {
+            System.out.println("Getting company profile for companyId: " + companyId + ", userId: " + userId);
             CompanyDTO company = companyProfileService.getCompanyProfile(companyId, userId);
             return ResponseEntity.ok(company);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ERROR in get Profile");
+            System.out.println("Error getting company profile: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found");
         }
     }
 

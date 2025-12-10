@@ -23,7 +23,7 @@ export default function CompanyProfile({ companyId, userId }) {
   const API_BASE_URL ='http://localhost:8080';
 
   useEffect(() => {
-    if (companyId) {
+    if (companyId || userId) {
       fetchCompanyBasicData();
     }
   }, [companyId, userId]);
@@ -33,9 +33,15 @@ export default function CompanyProfile({ companyId, userId }) {
       setLoading(true);
       setError(null);
 
-      const url = userId 
-        ? `${API_BASE_URL}/api/company/${companyId}?userId=${userId}`
-        : `${API_BASE_URL}/api/company/${companyId}`;
+      let url;
+      if (companyId) {
+        url = userId 
+          ? `${API_BASE_URL}/api/company/${companyId}?userId=${userId}`
+          : `${API_BASE_URL}/api/company/${companyId}`;
+      } else {
+        // Use user endpoint when no companyId provided (for own profile)
+        url = `${API_BASE_URL}/api/company/user/${userId}`;
+      }
       
       const token = localStorage.getItem('authToken');
       const headers = {
@@ -67,6 +73,11 @@ export default function CompanyProfile({ companyId, userId }) {
       setCompanyData(data);
       setIsFollowing(data.isFollowing || false);
       setIsOwner(data.userId === userId);
+      
+      // Set companyId if not provided (for API calls)
+      if (!companyId && data.companyProfileId) {
+        companyId = data.companyProfileId;
+      }
       
       setTabData({
         description: data.description,

@@ -85,6 +85,7 @@ public class AuthService {
         companyProfile.setWebsite(request.getWebsite());
         companyProfile.setIndustry(request.getIndustry());
         companyProfile.setFounded(request.getFounded());
+        companyProfile.setNumberOfFollowers(0L);
         companyRepo.save(companyProfile);
 
         
