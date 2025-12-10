@@ -181,6 +181,11 @@ const JobsPage = () => {
               <span className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">
                 ⏰ {job.jobType=="FULL_TIME"? "Full time":"job.jobType"}
               </span>
+              {job.deadline && (
+                <span className="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium">
+                  📅 Deadline: {new Date(job.deadline).toLocaleDateString()}
+                </span>
+              )}
             </div>
             <button
               onClick={() => handleApply(job)}

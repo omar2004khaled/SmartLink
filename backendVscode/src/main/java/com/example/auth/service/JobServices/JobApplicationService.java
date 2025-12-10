@@ -31,9 +31,8 @@ public class JobApplicationService {
             return jobApplicationRepository.save(jobApplication(applicationDTO)).getId();
     }
     public JobApplication jobApplication(ApplicationDTO applicationDTO){
-        System.out.println(applicationDTO.getUserId());
-        System.out.println(applicationDTO.getJobId());
-        System.out.println(applicationDTO.getStatus());
+        if(jobApplicationRepository.getApplicationByUserAndJob(applicationDTO.getUserId(),applicationDTO.getJobId()).isEmpty())
+            throw new RuntimeException("you applied before");
         Optional<Job> opJob=jobRepository.findById(applicationDTO.getJobId());
         Optional<User> opUser=userRepository.findById(applicationDTO.getUserId());
         if(opJob.isEmpty()||opUser.isEmpty()) {

@@ -26,6 +26,7 @@ type Job {
     jobLocation: String!
     salaryMin: Int
     salaryMax: Int
+    deadline: String!
 }
 
 enum ExperienceLevel {

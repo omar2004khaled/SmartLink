@@ -12,6 +12,7 @@ const GET_JOBS_QUERY = `
       jobLocation
       salaryMin
       salaryMax
+      deadline
     }
   }
 `;
