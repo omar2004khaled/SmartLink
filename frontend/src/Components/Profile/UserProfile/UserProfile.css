@@ -1,7 +1,6 @@
-/* ---------- Professional section cards & buttons ---------- */
 
 .up-page { 
-  padding: 18px 20px; 
+  padding: 100px 20px 18px 20px; 
 }
 
 .profile-container {
@@ -54,7 +53,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-left: auto;          /* 🔹 ensures actions stay on the right */
+  margin-left: auto;         
 }
 
 /* card body where the section components render */
@@ -62,7 +61,7 @@
   padding: 16px 20px;
 }
 
-/* ---------- Button styles (scoped to cards to avoid conflicts) ---------- */
+
 
 /* base button */
 .up-card .btn {
@@ -130,6 +129,24 @@
   box-shadow: 0 8px 20px rgba(11, 102, 195, 0.22);
 }
 
+.btn-connect {
+  margin-top: 12px;
+  background: linear-gradient(180deg, #28a745, #218838);
+  color: #fff;
+  border: 1px solid rgba(40, 167, 69, 0.08);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(40, 167, 69, 0.16);
+  transition: 0.15s ease-out;
+}
+
+.btn-connect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.22);
+}
+
 .edit-right {
   float: right;
   margin-top: 12px;
@@ -157,7 +174,7 @@
 
   .up-card-actions {
     width: 100%;
-    justify-content: flex-end;   /* 🔹 still right-aligned on mobile */
+    justify-content: flex-end;   
     margin-left: 0;
   }
 }
