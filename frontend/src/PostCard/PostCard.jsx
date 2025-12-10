@@ -373,12 +373,58 @@ function PostItem({ post }) {
     }
   };
 
+  const formatRelativeTime = (dateString) => {
+  if (!dateString) return 'just now';
+  
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    // Less than a minute
+    if (diffInSeconds < 60) {
+      return 'just now';
+    }
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+    }
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) {
+      return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+    }
+    
+    // Weeks
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks < 4) {
+      return `${diffInWeeks} ${diffInWeeks === 1 ? 'week' : 'weeks'} ago`;
+    }
+    
+    // Months
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) {
+      return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
+    }
+    
+    // Years
+    const diffInYears = Math.floor(diffInDays / 365);
+    return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
+    
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'recently';
+  }
+};
   return (
     <div className="post-card" data-post-id={post?.id || post?.postId}>
       <UserHeader 
         username={userInfo?.fullName || post.username || 'User'} 
         userId={post.userId} 
-        time={post.time ?? 'just now'}
+        time={post.time ? formatRelativeTime(post.time) : 'just now'}
         bio={userInfo ? (userInfo.role ? `${userInfo.role}${userInfo.email ? ` • ${userInfo.email}` : ''}` : userInfo.email || '') : ''}
         avatarUrl={null}
         onDelete={handleDeletePost}
@@ -455,11 +501,22 @@ function PostItem({ post }) {
         </div>
       ) : (
         <>
-          <Content content={post.content ?? ''} />
-          {post.attachment && (
-            <Attachment attachment={post.attachment} onRemove={post.onRemove ?? (() => {})} />
-          )}
-        </>
+  <Content content={post.content ?? ''} />
+  
+  {/* Display ALL attachments */}
+  {post.attachments && post.attachments.length > 0 && (
+    <div className="post-attachments-container">
+      {post.attachments.map((attachment, index) => (
+        <Attachment 
+          key={`attachment-${post.id}-${index}`}
+          attachment={attachment}
+          index={index}
+          totalAttachments={post.attachments.length}
+        />
+      ))}
+    </div>
+  )}
+</>
       )}
 
       <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} />
