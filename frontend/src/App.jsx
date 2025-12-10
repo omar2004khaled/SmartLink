@@ -18,6 +18,7 @@ import CompanyLogin from './Components/CompanyLogin';
 import CompanyProfilePage from './Components/CompanyProfilePage';
 import MainPage from './Components/MainPage';
 import JobsPage from './Components/job/JobsPage';
+import CompanyJobsPage from './JobPage/CompanyJobsPage';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
       <Route path="/posts" element={<Posts />} />
       <Route path="/post" element={<PostCard />} />
       <Route path="/job" element={<JobsPage/>} />
+      <Route path="/jobs" element={<CompanyJobsPage/>} />
     </Routes>
   );
 }

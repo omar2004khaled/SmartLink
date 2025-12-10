@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { mockJobs } from './mockJobs';
+import React, { useState, useEffect } from 'react';
+import { fetchJobs } from './mockJobs';
 
 const JobsPage = () => {
   const [showSearch, setShowSearch] = useState(false);
-  const [jobs, setJobs] = useState(mockJobs);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     title: '',
     location: '',
@@ -22,9 +23,13 @@ const JobsPage = () => {
     coverLetter: ''
   });
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    console.log('Searching with filters:', filters);
+    console.log('Filters from form:', filters);
+    setLoading(true);
+    const data = await fetchJobs(filters);
+    setJobs(data);
+    setLoading(false);
   };
 
   const handleFilterChange = (e) => {
@@ -47,6 +52,16 @@ const JobsPage = () => {
     setShowApplyDialog(false);
     setApplicationData({ name: '', email: '', cv: null, coverLetter: '' });
   };
+
+  useEffect(() => {
+    const loadJobs = async () => {
+      setLoading(true);
+      const data = await fetchJobs();
+      setJobs(data);
+      setLoading(false);
+    };
+    loadJobs();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -87,9 +102,9 @@ const JobsPage = () => {
               className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
             >
               <option value="">Location Type</option>
-              <option value="Remote">Remote</option>
-              <option value="Onsite">On-site</option>
-              <option value="Hybrid">Hybrid</option>
+              <option value="remote">Remote</option>
+              <option value="onsite">On-site</option>
+              <option value="hybrid">Hybrid</option>
             </select>
             <select
               name="level"
@@ -98,9 +113,9 @@ const JobsPage = () => {
               className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
             >
               <option value="">Experience Level</option>
-              <option value="Entry">Entry</option>
-              <option value="Mid">Mid</option>
-              <option value="Senior">Senior</option>
+              <option value="entry_level">Entry</option>
+              <option value="mid">Mid</option>
+              <option value="senior">Senior</option>
             </select>
             <select
               name="jobType"
@@ -109,8 +124,8 @@ const JobsPage = () => {
               className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
             >
               <option value="">Job Type</option>
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
+              <option value="full_time">Full-time</option>
+              <option value="part_time">Part-time</option>
             </select>
             <input
               type="number"
@@ -138,8 +153,13 @@ const JobsPage = () => {
         </div>
       )}
 
-      <div className="grid gap-6">
-        {jobs.map((job) => (
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-gray-600 text-lg">Loading jobs...</p>
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {jobs.map((job) => (
           <div
             key={job.id}
             className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200"
@@ -148,19 +168,16 @@ const JobsPage = () => {
             <p className="text-gray-600 mb-4 leading-relaxed">{job.description}</p>
             <div className="flex flex-wrap gap-3">
               <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
-                📍 {job.location} ({job.type})
+                📍 {job.jobLlocation} ({job.locationType})
               </span>
               <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium">
-                💼 {job.level} Level
+                💼 {job.experienceLevel} Level
               </span>
               <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-                💰 ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}
+                💰 ${job.salaryMin} - ${job.salaryMax}
               </span>
               <span className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">
-                ⏰ {job.jobType}
-              </span>
-              <span className="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium">
-                📅 Deadline: {job.deadline}
+                ⏰ {job.jobType=="FULL_TIME"? "Full time":"job.jobType"}
               </span>
             </div>
             <button
@@ -171,7 +188,8 @@ const JobsPage = () => {
             </button>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {showApplyDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
