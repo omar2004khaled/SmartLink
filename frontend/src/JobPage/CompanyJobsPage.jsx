@@ -5,13 +5,26 @@ import JobList from './JobList';
 
 const CompanyJobsPage = ({ companyId }) => {
   const [showForm, setShowForm] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleSuccess = (msg) => {
     setSuccessMessage(msg);
+    setRefreshTrigger(prev => prev + 1);
     setTimeout(() => {
       setSuccessMessage('');
     }, 3000);
+  };
+
+  const handleEdit = (job) => {
+    setEditingJob(job);
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingJob(null);
   };
 
   return (
@@ -38,13 +51,18 @@ const CompanyJobsPage = ({ companyId }) => {
 
         {showForm && (
           <JobFormModal
-            onClose={() => setShowForm(false)}
+            onClose={handleCloseForm}
             onSuccess={handleSuccess}
             companyId={companyId}
+            editingJob={editingJob}
           />
         )}
 
-        <JobList />
+        <JobList 
+          companyId={companyId} 
+          refreshTrigger={refreshTrigger}
+          onEdit={handleEdit}
+        />
       </div>
     </div>
   );

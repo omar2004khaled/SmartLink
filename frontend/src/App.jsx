@@ -6,11 +6,13 @@ import EmailVerified from "./components/EmailVerified";
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import OAuthCallback from "./components/OAuthCallback";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./Components/Dashboard";
 import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
-import Posts from './Components/Posts';
 import UserProfile from './Components/Profile/UserProfile/UserProfile';
+import JobsPage from './Components/job/JobsPage';
+import CompanyJobsPage from './JobPage/CompanyJobsPage';
+import Posts from './Components/Posts';
 import UserTypeSelection from './Components/UserTypeSelection';
 import LoginTypeSelection from './Components/LoginTypeSelection';
 import CompanySignUp from './Components/CompanySignUp';
@@ -53,6 +55,8 @@ function App() {
       <Route path="/PostComposotion" element={<PostComposotion />} />
       <Route path="/posts" element={<Posts />} />
       <Route path="/post" element={<PostCard />} />
+      <Route path="/job" element={<JobsPage/>} />
+      <Route path="/jobs" element={<CompanyJobsPage/>} />
       
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
