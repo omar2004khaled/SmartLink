@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 @RestController
 @RequestMapping("/jobs")
@@ -24,13 +24,19 @@ public class JobController {
     }
 
     @GetMapping("/company/current/{companyId}")
-    public ResponseEntity<List<JobResponse>> getCurrentJobs(@PathVariable Long companyId) {
-        return ResponseEntity.ok(jobService.getCurrentJobs(companyId));
+    public ResponseEntity<Page<JobResponse>> getCurrentJobs(
+            @PathVariable Long companyId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(jobService.getCurrentJobs(companyId, page, size));
     }
 
     @GetMapping("/company/ended/{companyId}")
-    public ResponseEntity<List<JobResponse>> getEndedJobs(@PathVariable Long companyId) {
-        return ResponseEntity.ok(jobService.getEndedJobs(companyId));
+    public ResponseEntity<Page<JobResponse>> getEndedJobs(
+            @PathVariable Long companyId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(jobService.getEndedJobs(companyId, page, size));
     }
     @DeleteMapping("/{jobId}")
     public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {

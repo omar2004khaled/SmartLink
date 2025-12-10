@@ -7,17 +7,18 @@ import com.example.auth.entity.Job;
 import com.example.auth.entity.User;
 import com.example.auth.repository.JobRepository;
 import com.example.auth.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class JobService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
-
 
     public JobService(JobRepository jobRepository, UserRepository userRepository) {
         this.jobRepository = jobRepository;
@@ -54,16 +55,25 @@ public class JobService {
                 .salaryMax(saved.getSalaryMax())
                 .deadline(saved.getDeadline())
                 .build();
-
     }
-    private List<JobResponse> getResponse(User company,List<Job> jobs){
-        List<JobResponse> currentJobs=new ArrayList<>();
-        for(Job j:jobs){
-            currentJobs.add(getResponse(company,j));
-        }
-        return currentJobs;
 
+    private JobResponse mapToJobResponse(Job job) {
+        return JobResponse.builder()
+                .jobId(job.getJobId())
+                .title(job.getTitle())
+                .description(job.getDescription())
+                .companyName(job.getCompany().getFullName())
+                .jobLocation(job.getJobLocation())
+                .experienceLevel(job.getExperienceLevel())
+                .jobType(job.getJobType())
+                .locationType(job.getLocationType())
+                .createdAt(job.getCreatedAt())
+                .salaryMin(job.getSalaryMin())
+                .salaryMax(job.getSalaryMax())
+                .deadline(job.getDeadline())
+                .build();
     }
+
     public JobResponse createJob(JobRequest request) {
         User company = userRepository.findById(request.getCompanyId())
                 .orElseThrow(() -> new RuntimeException("Company not found"));
@@ -79,18 +89,23 @@ public class JobService {
     }
 
 
-    public List<JobResponse> getCurrentJobs(Long companyId) {
+    public Page<JobResponse> getCurrentJobs(Long companyId, int page, int size) {
         User company = userRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
-        List<Job> jobs = jobRepository.findByCompanyAndDeadlineAfter(company, Instant.now());
-        return getResponse(company,jobs);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        Page<Job> jobPage = jobRepository.findByCompanyAndDeadlineAfter(company, Instant.now(), pageable);
+        return jobPage.map(this::mapToJobResponse);
     }
 
-    public List<JobResponse> getEndedJobs(Long companyId) {
+    public Page<JobResponse> getEndedJobs(Long companyId, int page, int size) {
         User company = userRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
-        List<Job> jobs = jobRepository.findByCompanyAndDeadlineBefore(company, Instant.now());
-        return getResponse(company,jobs);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("deadline").ascending());
+        Page<Job> jobPage = jobRepository.findByCompanyAndDeadlineBefore(company, Instant.now(), pageable);
+        
+        return jobPage.map(this::mapToJobResponse);
     }
 
     public void deleteJob(Long jobId) {

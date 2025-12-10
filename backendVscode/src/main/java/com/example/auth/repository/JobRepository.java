@@ -11,10 +11,12 @@ import java.time.Instant;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface JobRepository extends JpaRepository<Job,Long> {
-    List<Job> findByCompanyAndDeadlineAfter(User company, Instant now);
-    List<Job> findByCompanyAndDeadlineBefore(User company, Instant now);
+    Page<Job> findByCompanyAndDeadlineAfter(User company, Instant deadline, Pageable pageable);
+    Page<Job> findByCompanyAndDeadlineBefore(User company, Instant deadline, Pageable pageable);
         @Query("SELECT j FROM Job j WHERE " +
                 "(:title IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
                 "(:experienceLevel IS NULL OR j.experienceLevel = :experienceLevel) AND " +

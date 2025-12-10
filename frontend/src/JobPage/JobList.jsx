@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, ChevronLeft, ChevronRight } from 'lucide-react';
 import JobCard from './JobCard';
 import DeleteConfirmModal from './DeleteConfirmModal';
 
@@ -10,22 +10,30 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
   const [deleteModal, setDeleteModal] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState('current');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchJobs = async () => {
     setLoading(true);
     setError(null);
+    console.log(companyId)
     if(companyId===null) return;
     try {
       const endpoint = activeTab === 'current' 
-        ? `http://localhost:8080/jobs/company/current/${companyId}`
-        : `http://localhost:8080/jobs/company/ended/${companyId}`;
+        ? `http://localhost:8080/jobs/company/current/${companyId}?page=${currentPage}&size=${pageSize}`
+        : `http://localhost:8080/jobs/company/ended/${companyId}?page=${currentPage}&size=${pageSize}`;
       
       const response = await fetch(endpoint);
       if (!response.ok) throw new Error('Failed to fetch jobs');
       
       const data = await response.json();
       console.log(data);
-      setJobs(data);
+      setJobs(data.content);
+      setTotalPages(data.totalPages);
+      setTotalElements(data.totalElements);
+      setCurrentPage(data.number);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -35,7 +43,10 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
 
   useEffect(() => {
     fetchJobs();
-  }, [companyId, activeTab, refreshTrigger]);
+  }, [companyId, activeTab, refreshTrigger, currentPage, pageSize]);
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [activeTab]);
 
   const handleDelete = async () => {
     if (!deleteModal) return;
@@ -48,13 +59,29 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
       
       if (!response.ok) throw new Error('Failed to delete job');
       
-      setJobs(jobs.filter(j => j.jobId !== deleteModal.jobId));
+      if (jobs.length === 1 && currentPage > 0) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        fetchJobs();
+      }
+      
       setDeleteModal(null);
     } catch (err) {
       alert('Error deleting job: ' + err.message);
     } finally {
       setDeleting(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(parseInt(e.target.value));
+    setCurrentPage(0);
   };
 
   if (loading) {
@@ -101,22 +128,103 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
         </div>
       </div>
 
+      {totalElements > 0 && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="pageSize" className="text-sm text-gray-600">
+              Jobs per page:
+            </label>
+            <select
+              id="pageSize"
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       {jobs.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
           <Briefcase size={48} className="mx-auto mb-4 text-gray-400" />
           <p>No {activeTab} jobs found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {jobs.map(job => (
-            <JobCard
-              key={job.jobId}
-              job={job}
-              onEdit={onEdit}
-              onDelete={setDeleteModal}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {jobs.map(job => (
+              <JobCard
+                key={job.jobId}
+                job={job}
+                onEdit={onEdit}
+                onDelete={setDeleteModal}
+              />
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 0}
+                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Previous page"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <div className="flex gap-1">
+                {[...Array(totalPages)].map((_, index) => {
+                  const showPage = 
+                    index === 0 || 
+                    index === totalPages - 1 || 
+                    (index >= currentPage - 1 && index <= currentPage + 1);
+                  
+                  const showEllipsis = 
+                    (index === currentPage - 2 && currentPage > 2) ||
+                    (index === currentPage + 2 && currentPage < totalPages - 3);
+
+                  if (showEllipsis) {
+                    return (
+                      <span key={index} className="px-3 py-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  if (!showPage) return null;
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handlePageChange(index)}
+                      className={`px-4 py-2 rounded-lg border ${
+                        currentPage === index
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages - 1}
+                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Next page"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {deleteModal && (
