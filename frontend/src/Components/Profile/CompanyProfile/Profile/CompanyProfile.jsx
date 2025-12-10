@@ -194,11 +194,12 @@ export default function CompanyProfile({ companyId, userId }) {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const response = await fetch(`${API_BASE_URL}/api/company/${companyId}`, {
+      const currentCompanyId = companyId || companyData?.companyProfileId;
+      const response = await fetch(`${API_BASE_URL}/api/company/${currentCompanyId}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ 
-          companyId, 
+          companyId: currentCompanyId, 
           ...updatedData
         }),
       });
