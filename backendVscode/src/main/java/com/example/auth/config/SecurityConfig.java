@@ -36,8 +36,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/auth/**", "/auth/company/**", "/api/public",
                                                                 "/oauth2/**", "/login/oauth2/**",
                                                                 "/api/profiles/**", "/api/locations/**",
-                                                                "/api/company/**", "/api/users/**", "/api/connections/**",
-                                                                "/Post/add/**", "/Post/**")
+                                                                "/api/company/**", "/api/users/**", "/Post/add/**",
+                                                                "/Post/**","/jobs/**",
+                                                                 "/api/search/**", "/api/connections/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())

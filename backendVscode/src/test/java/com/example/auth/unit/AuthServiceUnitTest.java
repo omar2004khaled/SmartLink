@@ -41,8 +41,16 @@ class AuthServiceUnitTest {
     @Mock
     private com.example.auth.config.JwtService jwtService;
     
+    @Mock
+    private com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository profileRepo;
+    
+    @Mock
+    private com.example.auth.repository.CompanyProfileRepo companyRepo;
+    
     @InjectMocks
     private AuthService authService;
+
+
 
     @Test
     void register_ValidRequest_CreatesUserAndSendsEmail() {
@@ -60,6 +68,7 @@ class AuthServiceUnitTest {
         when(userRepository.existsByPhoneNumber(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(new User());
+        when(profileRepo.save(any())).thenReturn(new com.example.auth.entity.ProfileEntities.JobSeekerProfile());
         when(tokenRepository.save(any(VerificationToken.class))).thenReturn(new VerificationToken());
 
         // Act
@@ -67,6 +76,7 @@ class AuthServiceUnitTest {
 
         // Assert
         verify(userRepository).save(any(User.class));
+        verify(profileRepo).save(any());
         verify(tokenRepository).save(any(VerificationToken.class));
         verify(emailService).sendVerificationEmail(anyString(), anyString());
     }

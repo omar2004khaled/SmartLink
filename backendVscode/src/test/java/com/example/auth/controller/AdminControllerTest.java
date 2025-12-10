@@ -25,6 +25,7 @@ import com.example.auth.entity.User;
 import com.example.auth.enums.Gender;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.repository.VerificationTokenRepository;
+import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,12 +40,16 @@ class AdminControllerTest {
         @Autowired
         private VerificationTokenRepository tokenRepository;
 
+        @Autowired
+        private JobSeekerProfileRepository jobSeekerProfileRepository;
+
         private User adminUser;
         private User regularUser;
 
         @BeforeEach
         void setUp() {
-                // Delete verification tokens first (FK dependency), then users
+                // Delete child entities first to avoid FK constraint violations
+                jobSeekerProfileRepository.deleteAll();
                 tokenRepository.deleteAll();
                 userRepository.deleteAll();
 

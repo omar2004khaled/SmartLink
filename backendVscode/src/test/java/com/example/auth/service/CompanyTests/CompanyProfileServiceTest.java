@@ -28,6 +28,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,12 +79,20 @@ class CompanyProfileServiceTest {
         testCompanyLocation.setLocationId(1L);
     }
 
+
+
+
+
+
+
     @Test
     void getCompanyProfile_Success() {
-        Long companyId = 100L;
+        Long companyId = 1L;
         Long userId = 200L;
+        testCompany.setCompanyProfileId(companyId);
+        testCompany.setUserId(100L);
 
-        when(companyProfileRepo.findByUserId(companyId)).thenReturn(Optional.of(testCompany));
+        when(companyProfileRepo.findById(companyId)).thenReturn(Optional.of(testCompany));
         when(companyFollowerRepo.existsByFollowerIdAndCompanyId(userId, companyId)).thenReturn(true);
         when(companyLocationRepo.findByCompanyId(companyId)).thenReturn(Arrays.asList(testCompanyLocation));
         when(locationRepo.findById(1L)).thenReturn(Optional.of(testLocation));
@@ -95,21 +104,29 @@ class CompanyProfileServiceTest {
         assertEquals(100L, result.getUserId());
         assertEquals(true, result.getIsFollowing());
         assertEquals(1, result.getLocations().size());
-        verify(companyProfileRepo).findByUserId(companyId);
+        verify(companyProfileRepo).findById(companyId);
     }
 
     @Test
     void getCompanyProfile_CompanyNotFound() {
-        when(companyProfileRepo.findByUserId(anyLong())).thenReturn(Optional.empty());
+        Long companyId = 999L;
+        Long userId = 2L;
+        
+        when(companyProfileRepo.findById(companyId)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> {
-            companyProfileService.getCompanyProfile(1L, 2L);
+            companyProfileService.getCompanyProfile(companyId, userId);
         });
+        
+        verify(companyProfileRepo).findById(companyId);
     }
 
     @Test
     void updateCompanyProfile_Success() {
         Long companyId = 1L;
+        testCompany.setCompanyProfileId(companyId);
+        testCompany.setUserId(companyId); // Make userId consistent
+        
         CompanyUpdateDTO updateDTO = new CompanyUpdateDTO();
         updateDTO.setCompanyName("Updated Company");
         updateDTO.setDescription("Updated Description");
@@ -126,9 +143,8 @@ class CompanyProfileServiceTest {
 
         when(companyProfileRepo.findById(companyId)).thenReturn(Optional.of(testCompany));
         when(companyProfileRepo.save(any(CompanyProfile.class))).thenReturn(testCompany);
-        when(companyProfileRepo.findByUserId(anyLong())).thenReturn(Optional.of(testCompany));
-        when(companyLocationRepo.findByCompanyId(anyLong())).thenReturn(new ArrayList<>());
-        when(companyFollowerRepo.existsByFollowerIdAndCompanyId(anyLong(), anyLong())).thenReturn(false);
+        when(companyLocationRepo.findByCompanyId(companyId)).thenReturn(new ArrayList<>());
+        when(companyFollowerRepo.existsByFollowerIdAndCompanyId(eq(companyId), eq(companyId))).thenReturn(false);
         when(locationRepo.findByCityAndCountry("Alexandria", "Egypt")).thenReturn(Optional.empty());
         when(locationRepo.save(any(Location.class))).thenReturn(testLocation);
 
