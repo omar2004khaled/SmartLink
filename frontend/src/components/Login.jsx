@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import Logo from '../assets/Logo.png';
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -140,7 +141,7 @@ useEffect(() => {
       }
     }
 
-    navigate('/profile'); 
+    navigate('/home'); 
   } catch (error) {
     console.error("Login Error:", error);
     if (error.message === 'Failed to fetch') {
@@ -160,7 +161,7 @@ useEffect(() => {
             <div className="self-start">
               <div className="flex items-center gap-2">
                 <img 
-                    src="src/assets/Logo.png" 
+                    src={Logo} 
                     alt="Logo"
                     className="h-12 w-auto object-contain"
                     />

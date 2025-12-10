@@ -3,7 +3,7 @@ import avatar from './avatar.png';
 import { Link } from 'react-router-dom';
 import { MoreVertical } from 'lucide-react';
 
-function UserHeader({ username = 'User', time = "18 hours ago", avatarUrl = null, bio = '', onReport = null, onSnooze = null }) {
+function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUrl = null, bio = '', onReport = null, onSnooze = null }) {
     const placeholder = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect fill='%23eef2ff' width='100%' height='100%'/><text x='50%' y='50%' font-size='40' text-anchor='middle' fill='%230f172a' dy='.3em'>U</text></svg>`;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -42,7 +42,7 @@ function UserHeader({ username = 'User', time = "18 hours ago", avatarUrl = null
 
     return (
         <div className="user-header">
-            <Link to={`/profile/${username}`} className="user-link">
+            <Link to={`/profile/${userId}`} className="user-link">
                 <img
                     src={avatarUrl || avatar}
                     alt={`${username} avatar`}
@@ -52,7 +52,7 @@ function UserHeader({ username = 'User', time = "18 hours ago", avatarUrl = null
             </Link>
 
             <div className="user-info">
-                <Link to={`/profile/${username}`} className="user-link">
+                <Link to={`/profile/${userId}`} className="user-link">
                     <span className="user-username">{username}</span>
                 </Link>
                 <span className="user-bio">{bio || 'No bio provided'}</span>
