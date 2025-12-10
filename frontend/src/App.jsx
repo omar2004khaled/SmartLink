@@ -9,14 +9,15 @@ import OAuthCallback from "./components/OAuthCallback";
 import Dashboard from "./components/Dashboard";
 import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
-import Posts from './components/Posts';
+import Posts from './Components/Posts';
 import UserProfile from './Components/Profile/UserProfile/UserProfile';
 import UserTypeSelection from './Components/UserTypeSelection';
 import LoginTypeSelection from './Components/LoginTypeSelection';
 import CompanySignUp from './Components/CompanySignUp';
 import CompanyLogin from './Components/CompanyLogin';
 import CompanyProfilePage from './Components/CompanyProfilePage';
-import MainPage from './components/MainPage';
+import MainPage from './Components/MainPage';
+import JobsPage from './Components/job/JobsPage';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
       <Route path="/PostComposotion" element={<PostComposotion />} />
       <Route path="/posts" element={<Posts />} />
       <Route path="/post" element={<PostCard />} />
+      <Route path="/job" element={<JobsPage/>} />
     </Routes>
   );
 }
