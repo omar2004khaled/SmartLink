@@ -44,33 +44,33 @@ public class AuthService {
 
     @Transactional
     public Long registerCompany(com.example.auth.dto.CompanyRegisterRequest request) {
-        // 1. Check if email already exists
+        
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
 
-        // 2. Check if phone number already exists
+        
         if (userRepo.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new IllegalArgumentException("Phone number already exists");
         }
 
-        // 3. Check if passwords match
+        
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match");
         }
 
-        // 4. Check password complexity
+        
         String password = request.getPassword();
         if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
             throw new IllegalArgumentException("Password must contain at least one digit, one lowercase, one uppercase, one special character, and be 8-20 characters long");
         }
 
-        // 5. Create and save user
+       
         User user = new User();
         user.setFullName(request.getCompanyName().trim());
         user.setEmail(request.getEmail().toLowerCase());
         user.setPassword(passwordEncoder.encode(password));
-        user.setBirthDate(LocalDate.now()); // Not applicable for companies
+        user.setBirthDate(LocalDate.now()); 
         user.setPhoneNumber(request.getPhoneNumber());
         user.setEnabled(false);
         user.setRole("USER");
@@ -78,7 +78,7 @@ public class AuthService {
 
         userRepo.save(user);
 
-        // 6. Create CompanyProfile
+        
         com.example.auth.entity.CompanyProfile companyProfile = new com.example.auth.entity.CompanyProfile();
         companyProfile.setUserId(user.getId());
         companyProfile.setCompanyName(request.getCompanyName());
@@ -87,18 +87,13 @@ public class AuthService {
         companyProfile.setFounded(request.getFounded());
         companyRepo.save(companyProfile);
 
-        // 7. Create verification token
+        
         VerificationToken verificationToken = new VerificationToken(user, LocalDateTime.now().plusDays(1));
         tokenRepo.save(verificationToken);
 
-        // 8. Send verification email
+      
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
         
-        // Print token to console for testing
-        System.out.println("\n========================================");
-        System.out.println("COMPANY VERIFICATION TOKEN FOR: " + user.getEmail());
-        System.out.println("Token: " + verificationToken.getToken());
-        System.out.println("========================================\n");
 
         return user.getId();
     }
@@ -168,11 +163,6 @@ public class AuthService {
         // 9. Send verification email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
         
-        // Print token to console for testing
-        System.out.println("\n========================================");
-        System.out.println("VERIFICATION TOKEN FOR: " + user.getEmail());
-        System.out.println("Token: " + verificationToken.getToken());
-        System.out.println("========================================\n");
 
         return user.getId();
     }
