@@ -32,7 +32,7 @@ public class CompanyProfileController {
             CompanyDTO company = companyProfileService.getCompanyProfile(companyId, userId);
             return ResponseEntity.ok(company);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ERROR in get Profile");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found");
         }
     }
 
@@ -67,7 +67,6 @@ public class CompanyProfileController {
     @PutMapping("/{companyId}")
     public ResponseEntity<?> updateCompanyProfile(@PathVariable Long companyId, @RequestBody CompanyUpdateDTO request) {
         try {
-            System.out.println(request.toString());
             CompanyDTO updated = companyProfileService.updateCompanyProfile(companyId, request);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
