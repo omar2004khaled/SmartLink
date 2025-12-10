@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { fetchJobs } from './mockJobs';
-
+import { fetchJobs } from './Jobs';
+import { submitApplication } from './jobService';
 const JobsPage = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [jobs, setJobs] = useState([]);
@@ -49,8 +49,10 @@ const JobsPage = () => {
   const handleSubmitApplication = (e) => {
     e.preventDefault();
     console.log('Application submitted:', applicationData, 'for job:', selectedJob);
+    submitApplication(selectedJob.jobId, applicationData)
     setShowApplyDialog(false);
     setApplicationData({ name: '', email: '', cv: null, coverLetter: '' });
+
   };
 
   useEffect(() => {
