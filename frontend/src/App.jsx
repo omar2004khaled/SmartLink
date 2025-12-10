@@ -19,6 +19,8 @@ import CompanyProfilePage from './components/CompanyProfilePage';
 import CompanyHome from './components/CompanyHome';
 import CompanyJobs from './components/CompanyJobs';
 import MainPage from './components/MainPage';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
 
 function App() {
   return (
@@ -51,6 +53,10 @@ function App() {
       <Route path="/PostComposotion" element={<PostComposotion />} />
       <Route path="/posts" element={<Posts />} />
       <Route path="/post" element={<PostCard />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
   );
 }

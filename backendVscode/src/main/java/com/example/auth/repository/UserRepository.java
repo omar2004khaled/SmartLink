@@ -15,4 +15,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<User> searchUsers(@Param("query") String query, @Param("currentUserId") Long currentUserId);
+    
+    @Query("SELECT u FROM User u WHERE " +
+           "(:search = '' OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "(:userType = '' OR u.userType = :userType)")
+    org.springframework.data.domain.Page<User> findUsersWithFilters(@Param("search") String search, @Param("userType") String userType, org.springframework.data.domain.Pageable pageable);
 }

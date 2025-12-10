@@ -49,6 +49,32 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #1e40af;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.admin-link:hover {
+  background-color: #1d4ed8;
+  color: white;
+  text-decoration: none;
+}
+
 .content-header h2 {
   font-size: 20px;
   font-weight: 600;
