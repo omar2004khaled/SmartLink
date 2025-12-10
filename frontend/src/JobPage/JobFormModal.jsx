@@ -35,9 +35,9 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
     if (!formData.salaryMin) newErrors.salaryMin = 'Minimum salary is required';
     if (!formData.salaryMax) newErrors.salaryMax = 'Maximum salary is required';
     if (!formData.deadline) newErrors.deadline = 'Application deadline is required';
-    if(formData.salaryMax<formData.salaryMin)newErrors.salaryMax='must be greater than minimum salary'
-    if(formData.salaryMax<0)newErrors.salaryMax='must be positive value'
-    if(formData.salaryMin<0)newErrors.salaryMax='must be positive value'
+    if( parseInt(formData.salaryMax)< parseInt(formData.salaryMin))newErrors.salaryMax='must be greater than minimum salary'
+    if(parseInt(formData.salaryMax)<0)newErrors.salaryMax='must be positive value'
+    if(parseInt(formData.salaryMin)<0)newErrors.salaryMax='must be positive value'
     if (formData.deadline < today)newErrors.deadline = 'Not valid deadline'; 
 
     setErrors(newErrors);
@@ -48,13 +48,15 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
     if (!validateForm()) return;
 
     setLoading(true);
+    const deadlineDate = new Date(formData.deadline);
+      deadlineDate.setHours(23, 59, 59, 999);
 
     try {
       const payload = {
         ...formData,
         salaryMin: parseInt(formData.salaryMin),
         salaryMax: parseInt(formData.salaryMax),
-        deadline: new Date(formData.deadline).toISOString()
+        deadline: deadlineDate.toISOString()
       };
 
       const response = await fetch('http://localhost:8080/jobs/create', {
