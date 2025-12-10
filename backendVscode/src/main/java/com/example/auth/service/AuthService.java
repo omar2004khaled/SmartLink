@@ -93,6 +93,12 @@ public class AuthService {
 
         // 8. Send verification email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
+        
+        // Print token to console for testing
+        System.out.println("\n========================================");
+        System.out.println("COMPANY VERIFICATION TOKEN FOR: " + user.getEmail());
+        System.out.println("Token: " + verificationToken.getToken());
+        System.out.println("========================================\n");
 
         return user.getId();
     }
@@ -161,6 +167,12 @@ public class AuthService {
 
         // 9. Send verification email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
+        
+        // Print token to console for testing
+        System.out.println("\n========================================");
+        System.out.println("VERIFICATION TOKEN FOR: " + user.getEmail());
+        System.out.println("Token: " + verificationToken.getToken());
+        System.out.println("========================================\n");
 
         return user.getId();
     }
