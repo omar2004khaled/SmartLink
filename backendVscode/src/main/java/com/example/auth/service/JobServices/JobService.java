@@ -13,21 +13,14 @@ public class JobService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
 
-    // Add constructor for dependency injection
+
     public JobService(JobRepository jobRepository, UserRepository userRepository) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
     }
 
-    public JobResponse createJob(JobRequest request) {
-        User company = userRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Company not found"));
-
-        if (!company.getUserType().equals("COMPANY")) {
-            throw new RuntimeException("User is not a company");
-        }
-
-        Job job = Job.builder()
+    private Job getJob(User company,JobRequest request){
+        return Job.builder()
                 .company(company)
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -40,8 +33,8 @@ public class JobService {
                 .deadline(request.getDeadline())
                 .build();
 
-        Job saved = jobRepository.save(job);
-
+    }
+    private JobResponse getResponse(User company,Job saved){
         return JobResponse.builder()
                 .jobId(saved.getJobId())
                 .title(saved.getTitle())
@@ -50,5 +43,20 @@ public class JobService {
                 .jobLocation(saved.getJobLocation())
                 .createdAt(saved.getCreatedAt())
                 .build();
+
+    }
+
+    public JobResponse createJob(JobRequest request) {
+        User company = userRepository.findById(request.getCompanyId())
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        if (!company.getUserType().equals("COMPANY")) {
+            throw new RuntimeException("User is not a company");
+        }
+        Job job=getJob(company,request);
+        Job saved = jobRepository.save(job);
+        return getResponse(company,saved);
+
+
     }
 }
