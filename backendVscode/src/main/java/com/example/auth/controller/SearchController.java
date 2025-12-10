@@ -21,6 +21,13 @@ public class SearchController {
     @GetMapping("/users")
     public ResponseEntity<?> searchUsers(@RequestParam(required = false) String query, @RequestParam Long currentUserId) {
         try {
+
+            if (currentUserId == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Current user ID is required");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
             if (query == null || query.trim().isEmpty()) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "Query parameter is required");
