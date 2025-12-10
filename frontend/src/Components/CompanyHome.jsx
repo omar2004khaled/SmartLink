@@ -1,43 +1,37 @@
 import React, { useState } from 'react';
-import { Plus, Shield } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import Navbar from './Navbar';
+import { Plus } from 'lucide-react';
+import CompanyNavbar from './CompanyNavbar';
 import Posts from './Posts';
 import PostComposotion from '../PostComposotion/PostComposotion';
 import './MainPage.css';
 
-const MainPage = () => {
+const CompanyHome = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
 
   return (
     <div className="home-page">
-      <Navbar showSearch={true} />
+      <CompanyNavbar />
       
       <div className="home-content">
-        {/* Home Header */}
         <div className="home-header">
           <div className="header-info">
-            <h1 className="home-title">Home</h1>
-            <p className="home-subtitle">Welcome back! Here's what's happening in your network.</p>
+            <h1 className="home-title">Company Dashboard</h1>
+            <p className="home-subtitle">Welcome back! Manage your company presence and connect with talent.</p>
           </div>
         </div>
 
-        {/* Main Content Area */}
         <div className="main-content">
           <div className="content-header">
             <h2>Recent Activity</h2>
-            <div className="header-actions">
-              <button className="quick-post-btn" onClick={() => setShowCreatePost(true)}>
-                <Plus size={16} />
-                Share something
-              </button>
-            </div>
+            <button className="quick-post-btn" onClick={() => setShowCreatePost(true)}>
+              <Plus size={16} />
+              Share something
+            </button>
           </div>
           <Posts />
         </div>
       </div>
 
-      {/* Create Post Modal */}
       {showCreatePost && (
         <div className="modal-overlay" onClick={() => setShowCreatePost(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -49,4 +43,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default CompanyHome;

@@ -1,6 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Building2, User } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Building2, User, Shield } from 'lucide-react';
 
 const UserTypeSelection = () => {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ const UserTypeSelection = () => {
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2">
       {/* Left Panel */}
       <div className="hidden md:flex flex-col justify-between p-12 bg-[#FFEAEE] dark:bg-[#2C1A1D] text-center">
-        <div className="self-start">
+        <div className="flex justify-between items-start w-full">
           <div className="flex items-center gap-2">
             <img 
               src="src/assets/Logo.png" 
@@ -18,6 +18,13 @@ const UserTypeSelection = () => {
             />
             <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">Smart Link</span>
           </div>
+          <Link 
+            to="/admin/login" 
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Shield size={16} />
+            Admin
+          </Link>
         </div>
         <div className="flex flex-col gap-6">
           <h1 className="text-gray-800 dark:text-gray-200 text-5xl font-black leading-tight tracking-[-0.033em]">
