@@ -81,7 +81,10 @@ public class CommentService {
     }
     private CommentDTO ConvertToDTO(Comment comment){
         CommentDTO c= CommentDTO.builder()
+                .commentId(comment.getCommentId())
+                .userId(comment.getUser().getId())
                 .text(comment.getContent())
+                .postId(comment.getPost().getPostId())
                 .build();
         if(comment.getAttachment() != null) {
             c.setUrl(comment.getAttachment().getAttachmentURL());

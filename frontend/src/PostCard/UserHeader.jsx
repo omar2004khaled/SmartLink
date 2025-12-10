@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import avatar from './avatar.png';
 import { Link } from 'react-router-dom';
-import { MoreVertical } from 'lucide-react';
+import { Delete, MoreVertical } from 'lucide-react';
+import { userIdFromLocalStorage } from "../FetchData/FetchData";
 
-function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUrl = null, bio = '', onReport = null, onSnooze = null }) {
+function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUrl = null, bio = '', onReport = null, onSnooze = null, onDelete = null, onUpdate = null, postId = null }) {
     const placeholder = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect fill='%23eef2ff' width='100%' height='100%'/><text x='50%' y='50%' font-size='40' text-anchor='middle' fill='%230f172a' dy='.3em'>U</text></svg>`;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -35,6 +36,23 @@ function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUr
             alert(`Snoozed ${username} for 30 days.`);
         }
     }
+    function handleDelete() {
+        setMenuOpen(false);
+        if (typeof onDelete === 'function') {
+            onDelete();
+        } else {
+            alert('Delete function not available');
+        }
+    }
+    
+    function handleUpdate() {
+        setMenuOpen(false);
+        if (typeof onUpdate === 'function') {
+            onUpdate();
+        } else {
+            alert('Update function not available');
+        }
+    }
 
     function handleMenuKeyDown(e) {
         if (e.key === 'Escape') setMenuOpen(false);
@@ -55,7 +73,7 @@ function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUr
                 <Link to={`/profile/${userId}`} className="user-link">
                     <span className="user-username">{username}</span>
                 </Link>
-                <span className="user-bio">{bio || 'No bio provided'}</span>
+                {bio && <span className="user-bio">{bio}</span>}
             </div>
 
             <span className="post-timestamp">{time}</span>
@@ -79,6 +97,16 @@ function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUr
                 </button>
 
                 {menuOpen && (
+                    userIdFromLocalStorage()===userId?(<>
+                    <ul className="post-menu" role="menu">
+                        <li>
+                            <button className="post-menu-item" role="menuitem" onClick={handleUpdate}>Edit post</button>
+                        </li>
+                        <li>
+                            <button className="post-menu-item" role="menuitem" onClick={handleDelete}>Delete post</button>
+                        </li>
+                    </ul>
+                    </>):(<>
                     <ul className="post-menu" role="menu">
                         <li>
                             <button className="post-menu-item" role="menuitem" onClick={handleReport}>Report post</button>
@@ -87,6 +115,7 @@ function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUr
                             <button className="post-menu-item" role="menuitem" onClick={handleSnooze}>Snooze {username} for 30 days</button>
                         </li>
                     </ul>
+                    </>)
                 )}
             </div>
         </div>

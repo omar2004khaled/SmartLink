@@ -18,7 +18,7 @@ import LoginTypeSelection from './Components/LoginTypeSelection';
 import CompanySignUp from './Components/CompanySignUp';
 import CompanyLogin from './Components/CompanyLogin';
 import CompanyProfilePage from './Components/CompanyProfilePage';
-import CompanyHome from './components/CompanyHome';
+import CompanyHome from './Components/CompanyHome';
 import CompanyJobs from './Components/CompanyJobs';
 import MainPage from './Components/MainPage';
 import AdminLogin from './Components/AdminLogin';

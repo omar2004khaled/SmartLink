@@ -39,7 +39,7 @@ export default function CommentsPanel({ comments = [], onClose }) {
           )}
 
           {visibleComments.map((c, i) => (
-            <div key={i} className="comment-item">
+            <div key={c.commentId ?? i} className="comment-item">
               <img
                 src={c.avatar || '/src/PostCard/avatar.png'}
                 alt="avatar"
@@ -48,6 +48,11 @@ export default function CommentsPanel({ comments = [], onClose }) {
               <div className="comment-body">
                 <div className="comment-author">{c.author || 'Anonymous'}</div>
                 <div className="comment-text">{c.text}</div>
+                {c.attachment && (
+                  <div style={{ marginTop: 8 }}>
+                    <img src={c.attachment} alt="attachment" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                  </div>
+                )}
                 {c.time && <div className="comment-time">{c.time}</div>}
               </div>
             </div>

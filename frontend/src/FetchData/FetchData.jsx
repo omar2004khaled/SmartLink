@@ -1,15 +1,67 @@
 import axios from 'axios';
+
 const API_BASE_URL = "http://localhost:8080";
+
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
-    withCredentials: false, // Set to true if you need cookies
+    withCredentials: true, // CRITICAL: Set to true for CORS to work properly
     headers: {
         'Content-Type': 'application/json',
-    }
+    },
+    timeout: 10000, // 10 second timeout
 });
+
+// Request interceptor to add JWT token if available
+apiClient.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, config.data || config.params);
+        return config;
+    },
+    (error) => {
+        console.error('Request interceptor error:', error);
+        return Promise.reject(error);
+    }
+);
+apiClient.interceptors.response.use(
+    (response) => {
+        console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+        return response;
+    },
+    (error) => {
+        if (error.response) {
+            // Server responded with error status
+            console.error(`API Error [${error.response.status}]:`, error.response.data);
+            
+            // Handle specific status codes
+            if (error.response.status === 401) {
+                console.warn('Unauthorized - consider redirecting to login');
+            } else if (error.response.status === 403) {
+                console.warn('Forbidden - insufficient permissions');
+            } else if (error.response.status === 404) {
+                console.warn('Resource not found');
+            }
+        } else if (error.request) {
+            // Request made but no response received
+            console.error('Network Error - No response from server:', error.message);
+            console.error('Please check if backend is running on', API_BASE_URL);
+        } else {
+            // Error setting up the request
+            console.error('Request setup error:', error.message);
+        }
+        return Promise.reject(error);
+    }
+);
+export const userIdFromLocalStorage = () => {
+    const userId = localStorage.getItem('userId');
+    return userId ? parseInt(userId) : null;
+};
 export const SavePost = async (postData) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/Post/add`, postData);
+        const response = await apiClient.post('/Post/add', postData);
         console.log("Post saved successfully:", response.data);
         return response.data;
     } catch (error) {
@@ -19,7 +71,7 @@ export const SavePost = async (postData) => {
 }
 export const GetPosts = async (page = 0, size = 10, sortBy = 'postId', ascending = false) => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/Post/all`, {
+        const response = await apiClient.get('/Post/all', {
             params: {
                 page: page,
                 size: size,
@@ -28,7 +80,13 @@ export const GetPosts = async (page = 0, size = 10, sortBy = 'postId', ascending
             }
         });
         console.log(`Posts fetched successfully (page ${page}, size ${size}):`, response.data);
-        return response.data;
+        
+        const normalizedData = response.data.map(post => ({
+            ...post,
+            id: post.id || post.postId, 
+        }));
+        
+        return normalizedData;
     } catch (error) {
         console.error("Error fetching posts:", error);
         throw error;
@@ -37,14 +95,19 @@ export const GetPosts = async (page = 0, size = 10, sortBy = 'postId', ascending
 
 // For getting all posts at once (using large page size)
 export const GetAllPosts = async () => {
-    return await GetPosts(0, 1000, 'PostId', false);
+    return await GetPosts(0, 1000, 'postId', false);
 }
 
 export const GetSpecificPost = async (PostId) => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/Post/${PostId}`);
+        const response = await apiClient.get(`/Post/${PostId}`);
         console.log("Post with id " + PostId + " fetched successfully:", response.data);
-        return response.data;
+        
+        const post = response.data;
+        return {
+            ...post,
+            id: post.id || post.postId,
+        };
     } catch (error) {
         console.error("Error fetching Post:", error);
         throw error;
@@ -52,7 +115,7 @@ export const GetSpecificPost = async (PostId) => {
 }
 export const DeletePost = async (PostId) => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/Post/delete/${PostId}`);
+        const response = await apiClient.delete(`/Post/delete/${PostId}`);
         console.log("Post with id " + PostId + " deleted successfully:", response.data);
         return response.data;
     } catch (error) {
@@ -62,7 +125,7 @@ export const DeletePost = async (PostId) => {
 }
 export const UpdatePost = async (PostId, updatedData) => {
     try {
-        const response = await axios.put(`${API_BASE_URL}/Post/update/${PostId}`, updatedData);
+        const response = await apiClient.put(`/Post/update/${PostId}`, updatedData);
         console.log("Post with id " + PostId + " updated successfully:", response.data);
         return response.data;
     } catch (error) {
@@ -70,3 +133,75 @@ export const UpdatePost = async (PostId, updatedData) => {
         throw error;
     }
 }
+export const GetComments = async (postId, page = 0, size = 10) => {
+    try {
+        console.log(`Fetching comments for post ${postId}, page ${page}`);
+        const response = await apiClient.get(`/comment/getAll/${postId}/${page}`);
+        console.log(`Comments for post ${postId} fetched:`, response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        throw error;
+    }
+}
+
+export const SaveComment = async (commentDTO) => {
+    try {
+        console.log("=== Attempting to save comment ===");
+        console.log("Comment data:", commentDTO);
+        
+        if (!commentDTO.postId) {
+            throw new Error('Post ID is required to save a comment');
+        }
+        
+        console.log("API endpoint:", `${API_BASE_URL}/comment/add`);
+        
+        const response = await apiClient.post('/comment/add', commentDTO);
+        
+        console.log("=== Comment saved successfully ===");
+        console.log("Response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("=== Error saving comment ===");
+        
+        if (error.response) {
+            console.error("Status:", error.response.status);
+            console.error("Data:", error.response.data);
+            console.error("Headers:", error.response.headers);
+            
+            if (error.response.status === 403) {
+                throw new Error('Access denied. Please check your permissions.');
+            } else if (error.response.status === 401) {
+                throw new Error('Unauthorized. Please log in again.');
+            } else if (error.response.status === 400) {
+                throw new Error(`Invalid data: ${error.response.data.message || 'Please check your input'}`);
+            } else if (error.response.status === 500) {
+                throw new Error('Server error. Please try again later.');
+            }
+        } else if (error.request) {
+            console.error("No response received from server");
+            console.error("Request:", error.request);
+            throw new Error('Cannot connect to server. Please check if the backend is running.');
+        } else {
+            console.error("Error:", error.message);
+        }
+        throw error;
+    }
+}
+
+export const GetUserInfo = async (userId) => {
+    try {
+        console.log(`Fetching user info for userId: ${userId}`);
+        const response = await apiClient.get(`/auth/user/${userId}`);
+        console.log(`User info for userId ${userId} fetched:`, response.data);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching user info for userId ${userId}:`, error);
+        if (error.response) {
+            console.error(`Status: ${error.response.status}, Data:`, error.response.data);
+        }
+        return null;
+    }
+}
+
+export default apiClient;
