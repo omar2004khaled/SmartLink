@@ -2,13 +2,10 @@ package com.example.auth.service.PostService;
 
 
 import com.example.auth.dto.PostDTO;
+import com.example.auth.entity.*;
 import com.example.auth.repository.*;
 import com.example.auth.service.AttachmentService.*;
 import com.example.auth.service.PostAttachmentService.*;
-import com.example.auth.entity.Attachment;
-import com.example.auth.entity.Post;
-import com.example.auth.entity.PostAttachmentKey;
-import com.example.auth.entity.PostAttchment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +20,14 @@ public class PostServiceImp implements PostService{
     private PostRepository postRepository;
     private AttachmentService attachmentService;
     private PostAttachmentService postAttachmentService;
+    private CommentRepo commentRepository;
 
     @Autowired
-    public PostServiceImp(PostRepository postRepository , AttachmentService attachmentService ,PostAttachmentService postAttachmentService) {
+    public PostServiceImp(PostRepository postRepository , AttachmentService attachmentService ,PostAttachmentService postAttachmentService , CommentRepo commentRepo) {
         this.postRepository = postRepository;
         this.attachmentService = attachmentService;
         this.postAttachmentService = postAttachmentService;
+        this.commentRepository = commentRepo;
     }
     @Override
     public List<PostDTO> findAll(Pageable pageable) {
@@ -43,6 +42,7 @@ public class PostServiceImp implements PostService{
                 if (attachment.isPresent()) attachments.add(attachment.get());
             }
             PostDTO answer = new PostDTO(post.getPostId() ,  post.getContent(),post.getUserId(), attachments , post.getCreatedAt());
+            System.out.println(answer.getId());
             answers.add(answer);
         }
         return answers;
@@ -64,6 +64,14 @@ public class PostServiceImp implements PostService{
     @Override
     public void deleteById(Long theId) {
         List<Long> attachmentIDs = postAttachmentService.findAttachmentsByIdOfPost(theId);
+
+        while (true) {
+            Page<Comment> comments = commentRepository.findByPostIdNative(theId , Pageable.ofSize(10) );
+            if (comments.isEmpty()) break;
+            for (Comment comment : comments) {
+                commentRepository.delete(comment);
+            }
+        }
         for (Long attachmentID : attachmentIDs) {
             attachmentService.deleteById(attachmentID);
             postAttachmentService.deleteAttachmentById(attachmentID, theId);

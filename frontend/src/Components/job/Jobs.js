@@ -3,6 +3,7 @@ const GRAPHQL_ENDPOINT = 'http://localhost:8080/graphql';
 const GET_JOBS_QUERY = `
   query GetJobs($filter: JobFilter) {
     allJobs(filter: $filter) {
+      jobId
       title
       description
       experienceLevel
@@ -11,6 +12,7 @@ const GET_JOBS_QUERY = `
       jobLocation
       salaryMin
       salaryMax
+      deadline
     }
   }
 `;

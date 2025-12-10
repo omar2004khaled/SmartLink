@@ -6,7 +6,7 @@ import Upload_button from './upload_button';
 import MediaReviewer from './media_review';
 import TextEditor from './text_editor';
 import SubmitButton from './submit_button';
-import { SavePost } from '../FetchData/FetchData';
+import { SavePost , userIdFromLocalStorage} from '../FetchData/FetchData';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function PostComposer() {
@@ -81,7 +81,7 @@ export default function PostComposer() {
     const uploadedUrls = mediaFiles.map((m) => m.uploadedUrl);
 
     SavePost({
-      userId: 1,
+      userId: userIdFromLocalStorage(),
       content: postText,
       attachments: [
         ...mediaFiles.map((m) => ({

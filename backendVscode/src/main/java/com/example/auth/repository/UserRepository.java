@@ -10,6 +10,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     boolean existsByPhoneNumber(String phoneNumber);
+    @Query("SELECT u FROM User u WHERE u.id = (SELECT p.UserId FROM Post p WHERE p.postId = :postId)")
+    Optional<User> findByPostId(@Param("postId") Long postId);
     
     @Query("SELECT u FROM User u WHERE u.enabled = true AND u.userType = 'JOB_SEEKER' AND u.id != :currentUserId AND (" +
            "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
