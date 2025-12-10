@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.auth.entity.User;
 import com.example.auth.repository.UserRepository;
+import com.example.auth.service.EmailService;
 
 @RestController
 @RequestMapping("/admin")
@@ -29,9 +31,11 @@ import com.example.auth.repository.UserRepository;
 public class AdminController {
 
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
-    public AdminController(UserRepository userRepository) {
+    public AdminController(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     @GetMapping("/dashboard")
@@ -66,17 +70,50 @@ public class AdminController {
     }
 
     @GetMapping("/stats")
-    public String getStats() {
-        long totalUsers = userRepository.count();
-        long enabledUsers = userRepository.findAll().stream()
-                .filter(User::isEnabled)
-                .count();
-        long adminUsers = userRepository.findAll().stream()
-                .filter(user -> "ADMIN".equals(user.getRole()))
-                .count();
+    public ResponseEntity<?> getStats() {
+        List<User> allUsers = userRepository.findAll();
+        
+        long totalUsers = allUsers.size();
+        long activeUsers = allUsers.stream().filter(User::isEnabled).count();
+        long adminUsers = allUsers.stream().filter(user -> "ADMIN".equals(user.getRole())).count();
+        long companyUsers = allUsers.stream().filter(user -> "COMPANY".equals(user.getUserType())).count();
+        long jobSeekerUsers = allUsers.stream().filter(user -> "JOB_SEEKER".equals(user.getUserType())).count();
+        
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalUsers", totalUsers);
+        stats.put("activeUsers", activeUsers);
+        stats.put("adminUsers", adminUsers);
+        stats.put("companyUsers", companyUsers);
+        stats.put("jobSeekerUsers", jobSeekerUsers);
+        
+        return ResponseEntity.ok(stats);
+    }
 
-        return String.format("Total Users: %d, Enabled: %d, Admins: %d",
-                totalUsers, enabledUsers, adminUsers);
+    @PostMapping("/send-email/{userId}")
+    public ResponseEntity<?> sendEmailToUser(@PathVariable Long userId, @RequestBody Map<String, String> request, Authentication auth) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found with ID: " + userId);
+        }
+        
+        User user = userOptional.get();
+        String message = request.get("message");
+        
+        if (message == null || message.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Message cannot be empty");
+        }
+        
+        // Send email using EmailService
+        boolean emailSent = emailService.sendAdminNotification(user.getEmail(), auth.getName(), message);
+        
+        if (emailSent) {
+            // Log the email action
+            System.out.println("AUDIT LOG: Admin " + auth.getName() + " sent email to " + user.getEmail() + " (ID: " + userId + ") at " + java.time.LocalDateTime.now());
+            return ResponseEntity.ok("Email sent to " + user.getEmail() + " successfully!");
+        } else {
+            return ResponseEntity.badRequest().body("Failed to send email to " + user.getEmail());
+        }
     }
 
     @PostMapping("/promote/{userId}")

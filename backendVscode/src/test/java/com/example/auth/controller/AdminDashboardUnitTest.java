@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.Test;
 
 import com.example.auth.repository.UserRepository;
+import com.example.auth.service.EmailService;
 
 class AdminDashboardUnitTest {
 
@@ -13,7 +14,8 @@ class AdminDashboardUnitTest {
     void adminDashboard_DirectCall_ShouldReturnCorrectMessage() {
         // Arrange - Create mock repository and controller instance
         UserRepository mockRepository = mock(UserRepository.class);
-        AdminController controller = new AdminController(mockRepository);
+        EmailService mockEmailService = mock(EmailService.class);
+        AdminController controller = new AdminController(mockRepository, mockEmailService);
         
         // Act - Call method directly
         String result = controller.adminDashboard();
@@ -26,9 +28,10 @@ class AdminDashboardUnitTest {
     void adminController_Constructor_ShouldAcceptRepository() {
         // Arrange - Create mock repository
         UserRepository mockRepository = mock(UserRepository.class);
+        EmailService mockEmailService = mock(EmailService.class);
         
         // Act - Create controller with repository
-        AdminController controller = new AdminController(mockRepository);
+        AdminController controller = new AdminController(mockRepository, mockEmailService);
         
         // Assert - Controller should be created successfully
         assertEquals(AdminController.class, controller.getClass());
@@ -38,7 +41,8 @@ class AdminDashboardUnitTest {
     void adminDashboard_MultipleCallsShouldReturnSameMessage() {
         // Arrange - Create controller
         UserRepository mockRepository = mock(UserRepository.class);
-        AdminController controller = new AdminController(mockRepository);
+        EmailService mockEmailService = mock(EmailService.class);
+        AdminController controller = new AdminController(mockRepository, mockEmailService);
         
         // Act - Call method multiple times
         String result1 = controller.adminDashboard();

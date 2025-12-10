@@ -126,30 +126,6 @@ const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'overview' && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
-            
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <StatCard
-                icon={Users}
-                title="Total Users"
-                value={stats.totalUsers}
-                color="#3B82F6"
-              />
-              <StatCard
-                icon={UserCheck}
-                title="Active Users"
-                value={stats.activeUsers}
-                color="#10B981"
-              />
-              <StatCard
-                icon={Shield}
-                title="Administrators"
-                value={stats.adminCount}
-                color="#8B5CF6"
-              />
-            </div>
-
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>

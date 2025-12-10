@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight, Trash2, UserPlus, UserMinus, AlertCircle } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Trash2, UserPlus, UserMinus, AlertCircle, Mail, BarChart3, Users, UserCheck, Shield } from 'lucide-react';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -12,10 +12,29 @@ const UserManagement = () => {
   const [notification, setNotification] = useState({ message: '', type: '' });
   const [currentUserEmail] = useState(localStorage.getItem('userEmail'));
   const [isSuperAdmin] = useState(currentUserEmail === 'BigBoss@example.com');
+  const [stats, setStats] = useState({ totalUsers: 0, activeUsers: 0, adminUsers: 0, companyUsers: 0, jobSeekerUsers: 0 });
 
   useEffect(() => {
     fetchUsers();
+    fetchStats();
   }, [currentPage, searchTerm, userTypeFilter]);
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('http://localhost:8080/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      // Silent fail for stats
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -43,7 +62,6 @@ const UserManagement = () => {
         showNotification('Failed to fetch users', 'error');
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
       showNotification('Error fetching users', 'error');
     } finally {
       setLoading(false);
@@ -87,7 +105,6 @@ const UserManagement = () => {
         showNotification(errorText || 'Failed to delete user', 'error');
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
       showNotification('Error deleting user', 'error');
     }
   };
@@ -119,7 +136,6 @@ const UserManagement = () => {
         showNotification(errorText || 'Failed to promote user', 'error');
       }
     } catch (error) {
-      console.error('Error promoting user:', error);
       showNotification('Error promoting user', 'error');
     }
   };
@@ -151,8 +167,33 @@ const UserManagement = () => {
         showNotification(errorText || 'Failed to demote user', 'error');
       }
     } catch (error) {
-      console.error('Error demoting user:', error);
       showNotification('Error demoting user', 'error');
+    }
+  };
+
+  const handleSendEmail = async (userId, userEmail) => {
+    const message = prompt(`Enter message to send to ${userEmail}:`);
+    if (!message) return;
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:8080/admin/send-email/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
+      });
+
+      if (response.ok) {
+        showNotification('Email sent successfully', 'success');
+      } else {
+        const errorText = await response.text();
+        showNotification(errorText || 'Failed to send email', 'error');
+      }
+    } catch (error) {
+      showNotification('Error sending email', 'error');
     }
   };
 
@@ -171,6 +212,55 @@ const UserManagement = () => {
         <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
         <div className="text-sm text-gray-500">
           Total Users: {totalElements}
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-blue-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Total Users</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.totalUsers}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="flex items-center">
+            <UserCheck className="h-8 w-8 text-green-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Active Users</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.activeUsers}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="flex items-center">
+            <Shield className="h-8 w-8 text-purple-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Admins</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.adminUsers}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="flex items-center">
+            <BarChart3 className="h-8 w-8 text-blue-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Companies</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.companyUsers}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-green-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Job Seekers</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.jobSeekerUsers}</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -291,6 +381,15 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
+                        {/* Email Button */}
+                        <button
+                          onClick={() => handleSendEmail(user.id, user.email)}
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                          title="Send Email"
+                        >
+                          <Mail size={16} />
+                        </button>
+
                         {/* Delete Button */}
                         {user.email !== 'BigBoss@example.com' && (
                           <button
