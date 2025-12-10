@@ -21,7 +21,7 @@ const JobFormModal = ({ onClose, onSuccess,companyId}) => {
 
   const experienceLevels = ['ENTRY', 'JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'];
   const jobTypes = ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'FREELANCE'];
-  const locationTypes = ['ONSITE', 'REMOTE'];
+  const locationTypes = ['ONSITE', 'REMOTE','HYBRID'];
 
   const validateForm = () => {
     const today = new Date().toISOString().split("T")[0];
