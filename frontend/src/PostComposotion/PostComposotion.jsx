@@ -101,7 +101,6 @@ export default function PostComposer() {
     setPostText("");
     setMediaFiles([]);
     setFeeling(null);
-    //navigate to post page
     navigate('/home');
   };
 

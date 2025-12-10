@@ -1,7 +1,6 @@
-/* ---------- Professional section cards & buttons ---------- */
 
 .up-page { 
-  padding: 18px 20px; 
+  padding: 100px 20px 18px 20px; 
 }
 
 .profile-container {
@@ -54,7 +53,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-left: auto;          /* 🔹 ensures actions stay on the right */
+  margin-left: auto;         
 }
 
 /* card body where the section components render */
@@ -62,7 +61,7 @@
   padding: 16px 20px;
 }
 
-/* ---------- Button styles (scoped to cards to avoid conflicts) ---------- */
+
 
 /* base button */
 .up-card .btn {
@@ -175,7 +174,7 @@
 
   .up-card-actions {
     width: 100%;
-    justify-content: flex-end;   /* 🔹 still right-aligned on mobile */
+    justify-content: flex-end;   
     margin-left: 0;
   }
 }
