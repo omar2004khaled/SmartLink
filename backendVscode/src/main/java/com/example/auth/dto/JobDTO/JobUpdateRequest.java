@@ -12,25 +12,14 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class JobResponse {
-
-    private Long jobId;
-
+public class JobUpdateRequest {
     private String title;
-
     private String description;
-
-    private String companyName;
-
-    private String jobLocation;
     private ExperienceLevel experienceLevel;
     private JobType jobType;
     private LocationType locationType;
-
-    private Instant createdAt;
+    private String jobLocation;
     private Integer salaryMin;
     private Integer salaryMax;
-
     private Instant deadline;
 }
-
