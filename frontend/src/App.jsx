@@ -6,19 +6,23 @@ import EmailVerified from "./components/EmailVerified";
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import OAuthCallback from "./components/OAuthCallback";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./Components/Dashboard";
 import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
-import Posts from './components/Posts';
-import UserProfile from './components/Profile/UserProfile/UserProfile';
-import UserTypeSelection from './components/UserTypeSelection';
-import LoginTypeSelection from './components/LoginTypeSelection';
-import CompanySignUp from './components/CompanySignUp';
-import CompanyLogin from './components/CompanyLogin';
-import CompanyProfilePage from './components/CompanyProfilePage';
+import UserProfile from './Components/Profile/UserProfile/UserProfile';
+import JobsPage from './Components/job/JobsPage';
+import CompanyJobsPage from './JobPage/CompanyJobsPage';
+import Posts from './Components/Posts';
+import UserTypeSelection from './Components/UserTypeSelection';
+import LoginTypeSelection from './Components/LoginTypeSelection';
+import CompanySignUp from './Components/CompanySignUp';
+import CompanyLogin from './Components/CompanyLogin';
+import CompanyProfilePage from './Components/CompanyProfilePage';
 import CompanyHome from './components/CompanyHome';
-import CompanyJobs from './components/CompanyJobs';
-import MainPage from './components/MainPage';
+import CompanyJobs from './Components/CompanyJobs';
+import MainPage from './Components/MainPage';
+import AdminLogin from './Components/AdminLogin';
+import AdminDashboard from './Components/AdminDashboard';
 
 function App() {
   return (
@@ -51,6 +55,12 @@ function App() {
       <Route path="/PostComposotion" element={<PostComposotion />} />
       <Route path="/posts" element={<Posts />} />
       <Route path="/post" element={<PostCard />} />
+      <Route path="/job" element={<JobsPage/>} />
+      <Route path="/jobs" element={<CompanyJobsPage/>} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
   );
 }

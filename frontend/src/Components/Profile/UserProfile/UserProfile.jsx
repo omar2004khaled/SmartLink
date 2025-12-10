@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import ConnectionsTab from "./ConnectionsTab";
 import Navbar from "../../Navbar";
 import ProfileInfo from "./ProfileInfo";
 import ExperienceSection from "./ExperienceSection";
@@ -38,6 +39,18 @@ export default function UserProfile() {
   const [editSkillId, setEditSkillId] = useState(null);
   const [editProjectId, setEditProjectId] = useState(null);
   const [editEducationId, setEditEducationId] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState(null);
+  const [connectionId, setConnectionId] = useState(null);
+  const [activeTab, setActiveTab] = useState('profile');
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'connections' && isOwnProfile) {
+      setActiveTab('connections');
+    }
+  }, [location.search, isOwnProfile]);
 
   useEffect(() => {
     async function fetchProfileId() {
@@ -91,7 +104,128 @@ export default function UserProfile() {
       setLoading(false);
     }
     fetchAll();
-  }, [profileId]);
+    if (!isOwnProfile && profileId) {
+      checkConnectionStatus();
+    }
+  }, [profileId, isOwnProfile]);
+
+  const checkConnectionStatus = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const [pendingRes, acceptedRes] = await Promise.all([
+        fetch(`http://localhost:8080/api/connections/pending?userId=${loggedInUserId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`http://localhost:8080/api/connections/accepted?userId=${loggedInUserId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+      const pending = await pendingRes.json();
+      const accepted = await acceptedRes.json();
+      
+      const pendingConn = pending.find(c => 
+        (c.senderId == loggedInUserId && c.receiverId == userId) ||
+        (c.senderId == userId && c.receiverId == loggedInUserId)
+      );
+      const acceptedConn = accepted.find(c => 
+        (c.senderId == loggedInUserId && c.receiverId == userId) ||
+        (c.senderId == userId && c.receiverId == loggedInUserId)
+      );
+      
+      if (acceptedConn) {
+        setConnectionStatus('ACCEPTED');
+        setConnectionId(acceptedConn.id);
+      } else if (pendingConn) {
+        if (pendingConn.senderId == loggedInUserId) {
+          setConnectionStatus('PENDING_SENT');
+        } else {
+          setConnectionStatus('PENDING_RECEIVED');
+        }
+        setConnectionId(pendingConn.id);
+      } else {
+        setConnectionStatus('NONE');
+      }
+    } catch (err) {
+      console.error('Failed to check connection status:', err);
+    }
+  };
+
+  const handleConnect = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch('http://localhost:8080/api/connections/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ senderId: parseInt(loggedInUserId), receiverId: parseInt(userId) })
+      });
+      checkConnectionStatus();
+    } catch (err) {
+      alert('Failed to send connection request');
+    }
+  };
+
+  const handleCancelConnection = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch(`http://localhost:8080/api/connections/${connectionId}/cancel?userId=${loggedInUserId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      checkConnectionStatus();
+    } catch (err) {
+      alert('Failed to cancel connection');
+    }
+  };
+
+  const handleAcceptConnection = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch(`http://localhost:8080/api/connections/${connectionId}/accept?userId=${loggedInUserId}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      checkConnectionStatus();
+    } catch (err) {
+      alert('Failed to accept connection');
+    }
+  };
+
+  const handleRejectConnection = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch(`http://localhost:8080/api/connections/${connectionId}/reject?userId=${loggedInUserId}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      checkConnectionStatus();
+    } catch (err) {
+      alert('Failed to reject connection');
+    }
+  };
+
+  const handleRemoveConnection = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch(`http://localhost:8080/api/connections/${connectionId}/remove?userId=${loggedInUserId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      checkConnectionStatus();
+    } catch (err) {
+      alert('Failed to remove connection');
+    }
+  };
+
+  const getConnectionHandler = () => {
+    if (connectionStatus === 'NONE') return handleConnect;
+    if (connectionStatus === 'PENDING_SENT') return handleCancelConnection;
+    if (connectionStatus === 'PENDING_RECEIVED') return { accept: handleAcceptConnection, reject: handleRejectConnection };
+    if (connectionStatus === 'ACCEPTED') return handleRemoveConnection;
+    return null;
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
@@ -366,9 +500,19 @@ export default function UserProfile() {
       <Navbar />
       <div className="up-page" style={{ fontFamily: "system-ui", maxWidth: 980, margin: "2rem auto" }}>
       <div className="profile-container" style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 16px #0002", padding: 24 }}>
-        <ProfileInfo profile={profile} onEdit={isOwnProfile ? handleEditProfile : null} isOwnProfile={isOwnProfile} />
 
-        <div className="up-sections">
+        
+        {activeTab === 'profile' && (
+          <>
+            <ProfileInfo 
+              profile={profile} 
+              onEdit={isOwnProfile ? handleEditProfile : null}
+              onConnect={!isOwnProfile ? getConnectionHandler() : null}
+              connectionStatus={connectionStatus}
+              isOwnProfile={isOwnProfile}
+            />
+
+            <div className="up-sections">
           {/* Experience Card */}
           <section className="up-card">
             <div className="up-card-header">
@@ -433,7 +577,11 @@ export default function UserProfile() {
               <ProjectsSection projects={projects} onAdd={isOwnProfile ? handleAddProject : null} onEdit={isOwnProfile ? handleEditProject : null} onDelete={isOwnProfile ? handleDeleteProject : null} />
             </div>
           </section>
-        </div>
+            </div>
+          </>
+        )}
+        
+        {activeTab === 'connections' && isOwnProfile && <ConnectionsTab />}
 
         {/* Modals for editing/adding fields */}
         <ProfileInfoForm open={editProfile} profile={profile} locations={locations} onSave={handleSaveProfile} onCancel={handleCancelProfile} />

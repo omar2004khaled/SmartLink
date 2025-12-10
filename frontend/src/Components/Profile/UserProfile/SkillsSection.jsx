@@ -28,10 +28,12 @@ export default function SkillsSection({ skills = [], onAdd, onEdit, onDelete }) 
                 {skill.proficiency && <div style={{ color: "#6b7280", fontSize: 13 }}>{skill.proficiency}</div>}
               </div>
 
-              <div style={{ display: "flex", gap: 8 }}>
-                <button className="btn btn-outline btn-sm" onClick={() => onEdit?.(skill.id)}>Edit</button>
-                <button className="btn btn-sm btn-danger" onClick={() => onDelete?.(skill.id)}>Delete</button>
-              </div>
+              {(onEdit || onDelete) && (
+                <div style={{ display: "flex", gap: 8 }}>
+                  {onEdit && <button className="btn btn-outline btn-sm" onClick={() => onEdit(skill.id)}>Edit</button>}
+                  {onDelete && <button className="btn btn-sm btn-danger" onClick={() => onDelete(skill.id)}>Delete</button>}
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import Posts from './Posts';
 import PostComposotion from '../PostComposotion/PostComposotion';
@@ -25,10 +26,12 @@ const MainPage = () => {
         <div className="main-content">
           <div className="content-header">
             <h2>Recent Activity</h2>
-            <button className="quick-post-btn" onClick={() => setShowCreatePost(true)}>
-              <Plus size={16} />
-              Share something
-            </button>
+            <div className="header-actions">
+              <button className="quick-post-btn" onClick={() => setShowCreatePost(true)}>
+                <Plus size={16} />
+                Share something
+              </button>
+            </div>
           </div>
           <Posts />
         </div>
