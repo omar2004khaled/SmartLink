@@ -23,9 +23,9 @@ public class JobService {
         User company = userRepository.findById(request.getCompanyId())
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-//        if (!company.getRole().equals("Company")) {
-//            throw new RuntimeException("User is not a company");
-//        }
+        if (!company.getUserType().equals("COMPANY")) {
+            throw new RuntimeException("User is not a company");
+        }
 
         Job job = Job.builder()
                 .company(company)
