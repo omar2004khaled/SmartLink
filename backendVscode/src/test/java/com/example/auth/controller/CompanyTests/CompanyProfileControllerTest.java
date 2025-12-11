@@ -109,7 +109,7 @@ class CompanyProfileControllerTest {
         mockMvc.perform(get("/api/company/{companyId}", companyId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("ERROR in get Profile"));
+                .andExpect(content().string("Company profile not found"));
 
         verify(companyProfileService, times(1)).getCompanyProfile(companyId, null);
     }

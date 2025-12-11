@@ -144,9 +144,9 @@ class AdminControllerTest {
         void getStats_WithAdminRole_ShouldReturnCorrectStatistics() throws Exception {
                 mockMvc.perform(get("/admin/stats"))
                                 .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("Total Users: 2")))
-                                .andExpect(content().string(containsString("Enabled: 2")))
-                                .andExpect(content().string(containsString("Admins: 1")));
+                                .andExpect(jsonPath("$.totalUsers").value(2))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(1));
         }
 
         @Test
@@ -165,9 +165,9 @@ class AdminControllerTest {
 
                 mockMvc.perform(get("/admin/stats"))
                                 .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("Total Users: 3")))
-                                .andExpect(content().string(containsString("Enabled: 2")))
-                                .andExpect(content().string(containsString("Admins: 1")));
+                                .andExpect(jsonPath("$.totalUsers").value(3))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(1));
         }
 
         @Test
@@ -427,9 +427,9 @@ class AdminControllerTest {
 
                 mockMvc.perform(get("/admin/stats"))
                                 .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("Total Users: 2")))
-                                .andExpect(content().string(containsString("Enabled: 2")))
-                                .andExpect(content().string(containsString("Admins: 2")));
+                                .andExpect(jsonPath("$.totalUsers").value(2))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(2));
         }
 
         @Test

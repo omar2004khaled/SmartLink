@@ -116,9 +116,16 @@ public class CommentServiceTest {
     public void UpdateText_Success(){
         commentDTO.setUrl(null);
         commentDTO.setType(null);
+        User mockUser = new User();
+        mockUser.setId(commentDTO.getUserId());
+        Post mockPost = new Post();
+        mockPost.setPostId(commentDTO.getPostId());
+        
         Comment comment = Comment.builder()
                 .commentId(commentDTO.getCommentId())
                 .content(commentDTO.getText())
+                .user(mockUser)
+                .post(mockPost)
                 .build();
         Mockito.when(commentRepo.findById(commentDTO.getCommentId()))
                 .thenReturn(Optional.of(comment));
@@ -131,8 +138,15 @@ public class CommentServiceTest {
     @Test
     public void UpdateAttach_Success(){
         commentDTO.setText(null);
+        User mockUser = new User();
+        mockUser.setId(commentDTO.getUserId());
+        Post mockPost = new Post();
+        mockPost.setPostId(commentDTO.getPostId());
+        
         Comment comment = Comment.builder()
                 .commentId(commentDTO.getCommentId())
+                .user(mockUser)
+                .post(mockPost)
                 .attachment(Attachment.builder()
                         .typeofAttachments(TypeofAttachments.valueOf(commentDTO.getType()))
                         .AttachmentURL(commentDTO.getUrl())
@@ -147,9 +161,16 @@ public class CommentServiceTest {
     }
     @Test
     public void UpdateTextAttach_Success(){
+        User mockUser = new User();
+        mockUser.setId(commentDTO.getUserId());
+        Post mockPost = new Post();
+        mockPost.setPostId(commentDTO.getPostId());
+        
         Comment comment = Comment.builder()
                 .commentId(commentDTO.getCommentId())
                 .content(commentDTO.getText())
+                .user(mockUser)
+                .post(mockPost)
                 .attachment(Attachment.builder()
                         .typeofAttachments(TypeofAttachments.valueOf(commentDTO.getType()))
                         .AttachmentURL(commentDTO.getUrl())
