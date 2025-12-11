@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Shield, LogOut, UserCheck } from 'lucide-react';
+import { Users, Shield, LogOut, UserCheck, FileText } from 'lucide-react';
 import UserManagement from './UserManagement';
+import AdminContentManagement from './AdminContentManagement';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -118,6 +119,16 @@ const AdminDashboard = () => {
             >
               User Management
             </button>
+            <button
+              onClick={() => setActiveTab('content')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'content'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Content Management
+            </button>
           </div>
         </div>
       </nav>
@@ -140,12 +151,23 @@ const AdminDashboard = () => {
                     <p className="text-sm text-gray-500">View, edit, and manage user accounts</p>
                   </div>
                 </button>
+                <button
+                  onClick={() => setActiveTab('content')}
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <FileText className="h-6 w-6 text-green-600" />
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900">Manage Content</p>
+                    <p className="text-sm text-gray-500">View and manage all posts</p>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'users' && <UserManagement />}
+        {activeTab === 'content' && <AdminContentManagement />}
       </main>
     </div>
   );

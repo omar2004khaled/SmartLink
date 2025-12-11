@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.auth.entity.User;
 import com.example.auth.repository.UserRepository;
+import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository;
+import com.example.auth.repository.PostRepository;
+import com.example.auth.repository.CommentRepo;
+import com.example.auth.entity.Post;
 import com.example.auth.service.EmailService;
 
 @RestController
@@ -32,10 +36,16 @@ public class AdminController {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final JobSeekerProfileRepository jobSeekerProfileRepository;
+    private final PostRepository postRepository;
+    private final CommentRepo commentRepository;
 
-    public AdminController(UserRepository userRepository, EmailService emailService) {
+    public AdminController(UserRepository userRepository, EmailService emailService, JobSeekerProfileRepository jobSeekerProfileRepository, PostRepository postRepository, CommentRepo commentRepository) {
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.jobSeekerProfileRepository = jobSeekerProfileRepository;
+        this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
     }
 
     @GetMapping("/dashboard")
@@ -180,20 +190,119 @@ public class AdminController {
     @DeleteMapping("/users/{userId}")
     @PreAuthorize("hasRole('ADMIN') and @userRepository.findByEmail(authentication.name).orElse(new com.example.auth.entity.User()).email == 'BigBoss@example.com'")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId, Authentication auth) {
-        Optional<User> userOptional = userRepository.findById(userId);
+        try {
+            Optional<User> userOptional = userRepository.findById(userId);
 
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found with ID: " + userId);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.badRequest().body("User not found with ID: " + userId);
+            }
+
+            User user = userOptional.get();
+            
+            if ("BigBoss@example.com".equals(user.getEmail())) {
+                return ResponseEntity.badRequest().body("Cannot delete super admin");
+            }
+
+            jobSeekerProfileRepository.findByUser_Id(userId).ifPresent(jobSeekerProfileRepository::delete);
+            
+            // Log the action
+            System.out.println("AUDIT LOG: Admin " + auth.getName() + " deleted user " + user.getEmail() + " (ID: " + userId + ") at " + java.time.LocalDateTime.now());
+            
+            userRepository.delete(user);
+            return ResponseEntity.ok("User " + user.getEmail() + " deleted successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Cannot delete user: User has associated profile data that must be removed first.");
         }
+    }
 
-        User user = userOptional.get();
+    @GetMapping("/posts")
+    public ResponseEntity<?> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication auth) {
         
-        if ("BigBoss@example.com".equals(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Cannot delete super admin");
+        ResponseEntity<?> authCheck = checkAuthentication(auth);
+        if (authCheck != null) return authCheck;
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("postId").descending());
+        Page<Post> posts = postRepository.findAll(pageable);
+        
+        // Enrich posts with user email information
+        List<Map<String, Object>> enrichedPosts = posts.getContent().stream().map(post -> {
+            Map<String, Object> postData = new HashMap<>();
+            postData.put("postId", post.getPostId());
+            postData.put("content", post.getContent());
+            postData.put("userId", post.getUserId());
+            postData.put("createdAt", post.getCreatedAt());
+            
+            // Get user email
+            Optional<User> userOptional = userRepository.findById(post.getUserId());
+            if (userOptional.isPresent()) {
+                postData.put("userEmail", userOptional.get().getEmail());
+                postData.put("userName", userOptional.get().getFullName());
+            } else {
+                postData.put("userEmail", "Unknown User");
+                postData.put("userName", "Unknown User");
+            }
+            
+            return postData;
+        }).toList();
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("posts", enrichedPosts);
+        response.put("totalElements", posts.getTotalElements());
+        response.put("totalPages", posts.getTotalPages());
+        response.put("currentPage", posts.getNumber());
+        response.put("size", posts.getSize());
+        
+        return ResponseEntity.ok(response);
+    }
+
+    private ResponseEntity<?> checkAuthentication(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Authentication required");
+            error.put("message", "Please log in to access admin features");
+            return ResponseEntity.status(401).body(error);
         }
+        
+        boolean hasAdminRole = auth.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (!hasAdminRole) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Access denied");
+            error.put("message", "Admin privileges required");
+            return ResponseEntity.status(403).body(error);
+        }
+        
+        return null;
+    }
 
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable Long postId, Authentication auth) {
+        ResponseEntity<?> authCheck = checkAuthentication(auth);
+        if (authCheck != null) return authCheck;
+        
+        try {
+            Optional<Post> postOptional = postRepository.findById(postId);
 
-        userRepository.delete(user);
-        return ResponseEntity.ok("User " + user.getEmail() + " deleted successfully!");
+            if (postOptional.isEmpty()) {
+                return ResponseEntity.badRequest().body("Post not found with ID: " + postId);
+            }
+
+            Post post = postOptional.get();
+            
+            // Delete related comments first
+            commentRepository.deleteByPostId(postId);
+            
+            // Log the action
+            System.out.println("AUDIT LOG: Admin " + auth.getName() + " deleted post ID: " + postId + " at " + java.time.LocalDateTime.now());
+            
+            postRepository.delete(post);
+            return ResponseEntity.ok("Post deleted successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Cannot delete post: " + e.getMessage());
+        }
     }
 }
