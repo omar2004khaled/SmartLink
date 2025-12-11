@@ -109,7 +109,7 @@ const Navbar = ({ showSearch = false }) => {
               <Home size={20} />
               <span>Home</span>
             </button>
-            <button className={`sidebar-link ${isActive('/profile') ? 'active' : ''}`} onClick={() => { navigate('/profile'); setSidebarOpen(false); }}>
+            <button className={`sidebar-link ${(isActive('/profile') && !location.search.includes('tab=connections')) ? 'active' : ''}`} onClick={() => { navigate('/profile'); window.location.reload(); setSidebarOpen(false); }}>
               <User size={20} />
               <span>Profile</span>
             </button>
@@ -117,7 +117,7 @@ const Navbar = ({ showSearch = false }) => {
           
           <div className="nav-section">
             <h3 className="nav-section-title">Network</h3>
-            <button className="sidebar-link">
+            <button className={`sidebar-link ${location.search.includes('tab=connections') ? 'active' : ''}`} onClick={() => { navigate('/profile?tab=connections'); setSidebarOpen(false); }}>
               <Users size={20} />
               <span>Connections</span>
             </button>

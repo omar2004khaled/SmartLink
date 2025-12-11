@@ -45,10 +45,12 @@ export default function ProjectsSection({ projects = [], onAdd, onEdit, onDelete
                 )}
               </div>
 
-              <div style={{ marginLeft: 16, display: "flex", gap: 8, alignItems: "center" }}>
-                <button className="btn btn-outline btn-sm" onClick={() => onEdit?.(proj.id)}>Edit</button>
-                <button className="btn btn-sm btn-danger" onClick={() => onDelete?.(proj.id)}>Delete</button>
-              </div>
+              {(onEdit || onDelete) && (
+                <div style={{ marginLeft: 16, display: "flex", gap: 8, alignItems: "center" }}>
+                  {onEdit && <button className="btn btn-outline btn-sm" onClick={() => onEdit(proj.id)}>Edit</button>}
+                  {onDelete && <button className="btn btn-sm btn-danger" onClick={() => onDelete(proj.id)}>Delete</button>}
+                </div>
+              )}
             </div>
           ))}
         </div>
