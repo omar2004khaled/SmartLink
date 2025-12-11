@@ -37,7 +37,7 @@ public class SecurityConfig {
                                                                 "/oauth2/**", "/login/oauth2/**",
                                                                 "/api/profiles/**", "/api/locations/**",
                                                                 "/api/company/**", "/api/users/**", "/Post/add/**",
-                                                                "/Post/**","/jobs/**","/comment/**","/reactions/**",
+                                                                "/graphql","/apply/**","/Post/**","/jobs/**","/comment/**","/reactions/**",
                                                                  "/api/search/**", "/api/connections/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
