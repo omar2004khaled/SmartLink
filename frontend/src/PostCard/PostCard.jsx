@@ -519,7 +519,7 @@ function PostItem({ post }) {
 </>
       )}
 
-      <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} />
+      <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} postId= {post?.id || post?.postId} userId={userIdFromLocalStorage()}/>
 
       {inlineVisible && (
         <div className="inline-comments">
