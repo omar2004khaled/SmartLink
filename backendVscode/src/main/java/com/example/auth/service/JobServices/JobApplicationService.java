@@ -31,13 +31,13 @@ public class JobApplicationService {
             return jobApplicationRepository.save(jobApplication(applicationDTO)).getId();
     }
     public JobApplication jobApplication(ApplicationDTO applicationDTO){
-        if(jobApplicationRepository.getApplicationByUserAndJob(applicationDTO.getUserId(),applicationDTO.getJobId()).isEmpty())
-            throw new RuntimeException("you applied before");
         Optional<Job> opJob=jobRepository.findById(applicationDTO.getJobId());
         Optional<User> opUser=userRepository.findById(applicationDTO.getUserId());
         if(opJob.isEmpty()||opUser.isEmpty()) {
             throw new RuntimeException("there is no such job to be applied to or no such user to apply");
         }
+        if(!jobApplicationRepository.getApplicationByUserAndJob(applicationDTO.getUserId(),applicationDTO.getJobId()).isEmpty())
+            throw new RuntimeException("you applied before");
         return JobApplication
                 .builder()
                 .job(opJob.get())
