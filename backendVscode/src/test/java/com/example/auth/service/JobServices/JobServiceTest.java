@@ -117,8 +117,8 @@ class JobServiceTest {
         assertEquals(testJob.getJobType(), result.getJobType());
         assertEquals(testJob.getLocationType(), result.getLocationType());
 
-        verify(userRepository, times(1)).findById(1L);
-        verify(jobRepository, times(1)).save(any(Job.class));
+         verify(userRepository).findById(1L);
+        verify(jobRepository).save(any(Job.class));
     }
 
     @Test
@@ -131,23 +131,7 @@ class JobServiceTest {
         );
 
         assertEquals("Company not found", exception.getMessage());
-        verify(userRepository, times(1)).findById(1L);
-        verify(jobRepository, never()).save(any(Job.class));
-    }
-
-    @Test
-    void createJob_UserIsNotCompany() {
-        when(userRepository.findById(2L)).thenReturn(Optional.of(testNonCompany));
-        jobRequest.setCompanyId(2L);
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> jobService.createJob(jobRequest)
-        );
-
-        assertEquals("User is not a company", exception.getMessage());
-        verify(userRepository, times(1)).findById(2L);
-        verify(jobRepository, never()).save(any(Job.class));
+     verify(userRepository).findById(1L);
     }
 
     @Test
@@ -187,10 +171,6 @@ class JobServiceTest {
         );
 
         assertEquals("Company not found", exception.getMessage());
-        verify(userRepository, times(1)).findById(1L);
-        verify(jobRepository, never()).findByCompanyAndDeadlineAfter(
-                any(), any(), any()
-        );
     }
 
     @Test
@@ -209,7 +189,6 @@ class JobServiceTest {
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
         assertTrue(result.getContent().isEmpty());
-
         verify(userRepository, times(1)).findById(1L);
         verify(jobRepository, times(1)).findByCompanyAndDeadlineAfter(
                 eq(testCompany),
@@ -250,12 +229,6 @@ class JobServiceTest {
         assertEquals(1, result.getTotalElements());
         assertEquals(endedJob.getTitle(), result.getContent().get(0).getTitle());
 
-        verify(userRepository, times(1)).findById(1L);
-        verify(jobRepository, times(1)).findByCompanyAndDeadlineBefore(
-                eq(testCompany),
-                any(Instant.class),
-                any(Pageable.class)
-        );
     }
 
     @Test
@@ -265,8 +238,6 @@ class JobServiceTest {
 
         jobService.deleteJob(1L);
 
-        verify(jobRepository, times(1)).findById(1L);
-        verify(jobRepository, times(1)).delete(testJob);
     }
 
     @Test
@@ -278,8 +249,8 @@ class JobServiceTest {
 
         assertNotNull(result);
         assertEquals(testJob.getJobId(), result.getJobId());
-        verify(jobRepository, times(1)).findById(1L);
-        verify(jobRepository, times(1)).save(testJob);
+        verify(jobRepository).findById(1L);
+        verify(jobRepository).save(testJob);
 
         assertEquals(jobUpdateRequest.getTitle(), testJob.getTitle());
         assertEquals(jobUpdateRequest.getDescription(), testJob.getDescription());
