@@ -118,9 +118,12 @@ const JobsPage = () => {
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
               >
                 <option value="">Experience Level</option>
-                <option value="ENTRY_LEVEL">Entry Level</option>
-                <option value="MID_LEVEL">Mid Level</option>
-                <option value="SENIOR_LEVEL">Senior Level</option>
+                <option value="JUNIOR">junior Level</option>
+                <option value="ENTRY">Entry Level</option>
+                <option value="MID">Mid Level</option>
+                <option value="SENIOR">Senior Level</option>
+                <option value="LEAD">Lead Level</option>
+                <option value="PRINCIPAL">Principal Level</option>
               </select>
               <select
                 name="jobType"
@@ -131,6 +134,10 @@ const JobsPage = () => {
                 <option value="">Job Type</option>
                 <option value="FULL_TIME">Full-time</option>
                 <option value="PART_TIME">Part-time</option>
+                <option value="CONTRACT">Contract</option>
+                <option value="TEMPORARY">Temporary</option>
+                <option value="INTERNSHIP">Intern</option>
+                <option value="FREELANCE">Freelance</option>
               </select>
               <input
                 type="number"
