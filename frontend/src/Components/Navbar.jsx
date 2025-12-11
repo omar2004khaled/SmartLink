@@ -113,10 +113,6 @@ const Navbar = ({ showSearch = false }) => {
               <User size={20} />
               <span>Profile</span>
             </button>
-            <button className={`sidebar-link ${isActive('/profile') ? 'active' : ''}`} onClick={() => { navigate('/job'); setSidebarOpen(false); }}>
-              <User size={20} />
-              <span>Profile</span>
-            </button>
           </div>
           
           <div className="nav-section">

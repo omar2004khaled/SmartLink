@@ -40,8 +40,8 @@ public class SecurityConfig {
                                                                 "/Post/**","/jobs/**"
                                                                  ,"/graphql","/apply/**",
                                                                 "/Post/**","/comment/**"
-                                                                 ,"/jobs/**",
-                                                                 ,"/graphql","/apply/**"
+                                                                 ,"/jobs/**"
+                                                                 ,"/graphql","/apply/**",
                                                                  "/api/search/**", "/api/connections/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
