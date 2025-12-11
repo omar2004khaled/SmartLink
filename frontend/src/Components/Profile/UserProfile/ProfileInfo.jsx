@@ -1,7 +1,7 @@
 import React from "react";
 import "./UserProfile.css";   // ← IMPORTANT
 
-export default function ProfileInfo({ profile, onEdit, isOwnProfile = true }) {
+export default function ProfileInfo({ profile, onEdit, onConnect, connectionStatus, isOwnProfile = true }) {
   return (
     <section style={{ display: "flex", gap: 24, alignItems: "center", marginBottom: 32 }}>
       <img
@@ -31,7 +31,23 @@ export default function ProfileInfo({ profile, onEdit, isOwnProfile = true }) {
         {isOwnProfile ? (
           <button onClick={onEdit} className="btn-edit edit-right">Edit Profile</button>
         ) : (
-          <button className="btn-connect edit-right">Connect</button>
+          <div className="edit-right">
+            {connectionStatus === 'NONE' && (
+              <button onClick={onConnect} className="btn-edit">Connect</button>
+            )}
+            {connectionStatus === 'PENDING_SENT' && (
+              <button onClick={onConnect} className="btn-edit" style={{ background: '#ff5a5f' }}>Cancel</button>
+            )}
+            {connectionStatus === 'PENDING_RECEIVED' && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={onConnect.accept} className="btn-edit" style={{ background: '#0a66c2' }}>Accept</button>
+                <button onClick={onConnect.reject} className="btn-edit" style={{ background: '#ff5a5f' }}>Reject</button>
+              </div>
+            )}
+            {connectionStatus === 'ACCEPTED' && (
+              <button onClick={onConnect} className="btn-edit" style={{ background: '#ff5a5f' }}>Remove</button>
+            )}
+          </div>
         )}
 
       </div>
