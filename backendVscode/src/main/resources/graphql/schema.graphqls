@@ -26,11 +26,11 @@ type Job {
     jobLocation: String!
     salaryMin: Int
     salaryMax: Int
+    deadline: String!
 }
 
-# ... rest of your schema
 enum ExperienceLevel {
-    ENTRY_LEVEL
+    ENTRY
     JUNIOR
     MID
     SENIOR

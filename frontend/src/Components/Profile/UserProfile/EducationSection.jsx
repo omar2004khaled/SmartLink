@@ -55,13 +55,8 @@ export default function EducationSection({ education = [], onAdd, onEdit, onDele
 
                   {onDelete && (
                     <button
-                      className="btn btn-sm"
+                      className="btn btn-danger btn-sm"
                       onClick={() => onDelete(edu.id)}
-                      style={{
-                        background: "linear-gradient(180deg,#ff5a5f,#e04444)",
-                        color: "#fff",
-                        border: "1px solid rgba(204,36,36,0.12)"
-                      }}
                     >
                       Delete
                     </button>

@@ -121,7 +121,7 @@ const Navbar = ({ showSearch = false }) => {
               <Users size={20} />
               <span>Connections</span>
             </button>
-            <button className="sidebar-link">
+            <button className={`sidebar-link ${isActive('/profile') ? 'active' : ''}`} onClick={() => { navigate('/job'); setSidebarOpen(false); }}>
               <Briefcase size={20} />
               <span>Opportunities</span>
             </button>

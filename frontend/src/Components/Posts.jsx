@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect  , useRef} from 'react';
 import PostCard from '../PostCard/PostCard';
 import { GetPosts } from '../FetchData/FetchData';
 
@@ -6,96 +6,146 @@ export default function Posts() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true);
   const pageSize = 5;
+  const isFetchingRef = useRef(false);
 
   useEffect(() => {
     loadInitialPosts();
+    return () => {
+      isFetchingRef.current = false;
+    }
   }, []);
-
+  
   const loadInitialPosts = async () => {
-    try {
+    if (isFetchingRef.current) return;
+    try {  
+      isFetchingRef.current = true;
       setLoading(true);
       const postsData = await GetPosts(0, pageSize, 'PostId', false);
-      
+
       if (postsData !== null && Array.isArray(postsData)) {
         const transformedPosts = transformPosts(postsData);
         setPosts(transformedPosts);
-        setCurrentPage(0);
+        setCurrentPage(1);
+        setHasMore(postsData.length === pageSize);
+      }
+      else {
+        setPosts([]);
+        setHasMore(false);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
+      setHasMore(false);
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
   };
 
   const loadMorePosts = async () => {
-    if (loading) return;
+    console.log('Loading more posts...');
+    if (loading || !hasMore || isFetchingRef.current) return;
     
     try {
       setLoading(true);
-      const nextPage = currentPage + 1;
-      const postsData = await GetPosts(nextPage, pageSize, 'PostId', false);
+      isFetchingRef.current = true;
+      const postsData = await GetPosts(currentPage, pageSize, 'PostId', false);
       
-      if (postsData === null) {
+      if (!postsData || !Array.isArray(postsData) || postsData.length === 0) {
+        setHasMore(false);
         return;
       }
       
-      if (postsData && Array.isArray(postsData) && postsData.length > 0) {
-        const transformedPosts = transformPosts(postsData);
-        setPosts(prevPosts => [...prevPosts, ...transformedPosts]);
-        setCurrentPage(nextPage);
+      const transformedPosts = transformPosts(postsData);
+      const existingPostIds = new Set(posts.map(p => p.id));
+      const newUniquePosts = transformedPosts.filter(p => !existingPostIds.has(p.id));
+      if (newUniquePosts.length === 0) {
+        setHasMore(false);
+        console.log('No new unique posts found.');
+        return;
       }
+      setPosts(prevPosts => [...prevPosts, ...newUniquePosts]);
+      setHasMore(postsData.length === pageSize);
+      setCurrentPage(prevPage => prevPage + 1);
+      console.log(`Loaded ${newUniquePosts.length} new posts.`);
     } catch (error) {
+      setHasMore(false);
       console.error('Error fetching more posts:', error);
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
   };
 
-  const transformPosts = (postsData) => {
-    return postsData.map(post => ({
-      id: post.postId,
-      userId: post.userId,
-      username: post.userName || `User${post.userId}`,
-      time: formatTime(post.createdAt),
-      content: post.content,
-      attachment: post.attachments && post.attachments.length > 0 ? post.attachments[0] : null
-    }));
-  };
-
-  const formatTime = (timestamp) => {
-    if (!timestamp) return 'just now';
+const transformPosts = (postsData) => {
+    // First, deduplicate the incoming data
+    const seenIds = new Set();
+    const uniquePosts = [];
     
-    const postTime = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = (now - postTime) / (1000 * 60 * 60);
+    for (const post of postsData) {
+      const postId = post.id || post.postId;
+      if (!seenIds.has(postId)) {
+        seenIds.add(postId);
+        uniquePosts.push({
+          id: postId|| post.postId,
+          userId: post.userId,
+          username: post.userName || `User${post.userId}`,
+          time: post.createdAt,
+          content: post.content,
+          // Take only the first attachment
+          attachment: post.attachments && post.attachments.length > 0 
+            ? post.attachments[0]
+            : null,
+          attachments: post.attachments || []
+        });
+      }
+    }
     
-    if (diffInHours < 1) return 'just now';
-    if (diffInHours < 24) return `${Math.floor(diffInHours)} hours ago`;
-    return `${Math.floor(diffInHours / 24)} days ago`;
+    console.log(`Transformed ${postsData.length} posts to ${uniquePosts.length} unique posts`);
+    return uniquePosts;
   };
-
   return (
     <div>
       {posts.map(p => (
-        <PostCard key={p.id} post={p} />
+        <PostCard key={`post-${p.id}-${p.userId}`} post={p} />
       ))}
 
-      {posts.length > 0 && posts.length % pageSize === 0 && (
-        <div className="load-more-container" style={{ alignItems:'center', marginTop:'20px', marginBottom:'20px', display:'flex', justifyContent:'center', paddingBottom:'15px' }}>
+      {hasMore && (
+        <div className="load-more-container" style={{ 
+          alignItems: 'center', 
+          marginTop: '20px', 
+          marginBottom: '20px', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          paddingBottom: '15px' 
+        }}>
           <button 
             className="load-more-btn"
             onClick={loadMorePosts}
-            disabled={loading}
+            disabled={loading || !hasMore}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: loading ? '#ccc' : '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
           >
             {loading ? 'Loading...' : 'Load More Posts'}
           </button>
         </div>
       )}
 
+      {!hasMore && posts.length > 0 && (
+        <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
+          No more posts to load
+        </div>
+      )}
+
       {posts.length === 0 && !loading && (
-        <div className="no-posts">
+        <div className="no-posts" style={{ textAlign: 'center', padding: '40px' }}>
           No posts available. Create the first post!
         </div>
       )}
