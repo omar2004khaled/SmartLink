@@ -6,7 +6,6 @@ import EmailVerified from "./components/EmailVerified";
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import OAuthCallback from "./components/OAuthCallback";
-import Dashboard from "./Components/Dashboard";
 import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
 import UserProfile from './Components/Profile/UserProfile/UserProfile';
