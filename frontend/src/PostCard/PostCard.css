@@ -655,3 +655,116 @@
   cursor: not-allowed;
 }
 
+/* Add these styles to PostCard.css */
+
+.post-footer-container {
+    margin-top: 8px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 12px;
+}
+
+.top-reactions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 0 12px;
+}
+
+.reaction-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.reaction-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: default;
+}
+
+.reaction-icon-wrapper:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
+.reaction-count {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Update reaction picker styles */
+.reaction-option {
+    position: relative;
+}
+
+.reaction-option-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reaction-count-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+/* Add to existing .post-card-footer styles */
+.post-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 8px;
+}
+
+.reaction-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reaction-button:hover {
+    background: #f3f4f6;
+}
+
+.reaction-button.selected {
+    font-weight: 500;
+}
+
+.reaction-label {
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.reaction-button.selected .reaction-label {
+    color: currentColor;
+}

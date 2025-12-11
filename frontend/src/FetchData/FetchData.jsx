@@ -203,5 +203,70 @@ export const GetUserInfo = async (userId) => {
         return null;
     }
 }
+// Add to FetchData.jsx
 
+export const toggleReaction = async (postId, userId, reactionType) => {
+  try {
+    const response = await apiClient.post('/reactions/toggle', null, {
+      params: {
+        postId,
+        userId,
+        reactionType
+      }
+    });
+    console.log("Reaction toggled:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling reaction:", error);
+    throw error;
+  }
+};
+
+export const getReactionCounts = async (postId) => {
+  try {
+    const response = await apiClient.get(`/reactions/count/${postId}`);
+    console.log(`Reaction counts for post ${postId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reaction counts:", error);
+    throw error;
+  }
+};
+
+export const getTopReactions = async (postId, limit = 3) => {
+  try {
+    const response = await apiClient.get(`/reactions/top/${postId}`, {
+      params: { limit }
+    });
+    console.log(`Top ${limit} reactions for post ${postId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching top reactions:", error);
+    throw error;
+  }
+};
+
+export const getTotalReactions = async (postId) => {
+  try {
+    const response = await apiClient.get(`/reactions/total/${postId}`);
+    console.log(`Total reactions for post ${postId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching total reactions:", error);
+    throw error;
+  }
+};
+
+export const getUserReaction = async (postId, userId) => {
+  try {
+    const response = await apiClient.get('/reactions/user', {
+      params: { postId, userId }
+    });
+    console.log(`User reaction for post ${postId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user reaction:", error);
+    throw error;
+  }
+};
 export default apiClient;
