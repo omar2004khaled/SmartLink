@@ -54,6 +54,7 @@ const JobsPage = () => {
     submitApplication(selectedJob.jobId, applicationData);
     setShowApplyDialog(false);
     setApplicationData({ name: '', email: '', cv: null, coverLetter: '' });
+
   };
 
   useEffect(() => {

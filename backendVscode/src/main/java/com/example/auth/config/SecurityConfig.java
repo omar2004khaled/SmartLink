@@ -39,6 +39,9 @@ public class SecurityConfig {
                                                                 "/api/company/**", "/api/users/**", "/Post/add/**",
                                                                 "/Post/**","/jobs/**"
                                                                  ,"/graphql","/apply/**",
+                                                                "/Post/**","/comment/**"
+                                                                 ,"/jobs/**",
+                                                                 ,"/graphql","/apply/**"
                                                                  "/api/search/**", "/api/connections/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")

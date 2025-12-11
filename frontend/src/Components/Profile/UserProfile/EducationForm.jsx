@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../CompanyProfile/EditModal/EditModal.css";
 
 export default function EducationForm({ open, education, onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -33,19 +34,51 @@ export default function EducationForm({ open, education, onSave, onCancel }) {
   }
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#0008", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <form onSubmit={handleSubmit} style={{ background: "#fff", padding: 32, borderRadius: 12, minWidth: 320, boxShadow: "0 2px 16px #0003" }}>
-        <h2>{education ? "Edit" : "Add"} Education</h2>
-        <label>School:<br /><input name="school" value={form.school} onChange={handleChange} required /></label><br />
-        <label>Field of Study:<br /><input name="fieldOfStudy" value={form.fieldOfStudy} onChange={handleChange} /></label><br />
-        <label>Start Date:<br /><input name="startDate" type="date" value={form.startDate} onChange={handleChange} /></label><br />
-        <label>End Date:<br /><input name="endDate" type="date" value={form.endDate} onChange={handleChange} /></label><br />
-        <label>Description:<br /><textarea name="description" value={form.description} onChange={handleChange} /></label><br />
-        <div style={{ marginTop: 16 }}>
-          <button type="submit">Save</button>
-          <button type="button" onClick={onCancel} style={{ marginLeft: 8 }}>Cancel</button>
+    <div className="edit-modal-overlay">
+      <div className="edit-modal">
+        <div className="modal-header">
+          <h2>{education ? "Edit" : "Add"} Education</h2>
+          <button type="button" className="close-btn" onClick={onCancel}>
+            ✕
+          </button>
         </div>
-      </form>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="edit-form">
+            <div className="form-group">
+              <label>School</label>
+              <input name="school" value={form.school} onChange={handleChange} required className="form-input" />
+            </div>
+            
+            <div className="form-group">
+              <label>Field of Study</label>
+              <input name="fieldOfStudy" value={form.fieldOfStudy} onChange={handleChange} className="form-input" />
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label>Start Date</label>
+                <input name="startDate" type="date" value={form.startDate} onChange={handleChange} className="form-input" />
+              </div>
+              
+              <div className="form-group">
+                <label>End Date</label>
+                <input name="endDate" type="date" value={form.endDate} onChange={handleChange} className="form-input" />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label>Description</label>
+              <textarea name="description" value={form.description} onChange={handleChange} className="form-textarea" rows="4" />
+            </div>
+          </div>
+          
+          <div className="modal-footer">
+            <button type="button" onClick={onCancel} className="btn-cancel">Cancel</button>
+            <button type="submit" className="btn-save">Save</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

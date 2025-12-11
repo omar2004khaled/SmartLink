@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -15,7 +17,12 @@ public class UserController {
     public UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    
+    @GetMapping("/post/{postId}")
+    public  ResponseEntity<?> getUserbyPostId(@PathVariable Long postId){
+        Optional<User> user=userRepository.findByPostId(postId);
+        if(user.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(new UserResponse(user.get().getId(), user.get().getEmail(), user.get().getFullName(), user.get().getRole()));
+    }
     @GetMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN') or authentication.name == #email")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
