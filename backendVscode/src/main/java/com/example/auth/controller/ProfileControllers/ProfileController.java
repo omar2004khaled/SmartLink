@@ -21,6 +21,11 @@ public class ProfileController {
         return ResponseEntity.ok(service.getProfile(id));
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<JobSeekerProfileResponse> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.getProfileByUserId(userId));
+    }
+
     @PostMapping
     public ResponseEntity<JobSeekerProfileResponse> create(@RequestBody JobSeekerProfileRequest req) {
         return ResponseEntity.ok(service.createProfile(req));

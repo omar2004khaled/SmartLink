@@ -42,26 +42,27 @@ export default function EducationSection({ education = [], onAdd, onEdit, onDele
                 )}
               </div>
 
-              <div style={{ marginLeft: 16, display: "flex", gap: 8, alignItems: "center" }}>
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={() => onEdit?.(edu.id)}
-                >
-                  Edit
-                </button>
+              {(onEdit || onDelete) && (
+                <div style={{ marginLeft: 16, display: "flex", gap: 8, alignItems: "center" }}>
+                  {onEdit && (
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => onEdit(edu.id)}
+                    >
+                      Edit
+                    </button>
+                  )}
 
-                <button
-                  className="btn btn-sm"
-                  onClick={() => onDelete?.(edu.id)}
-                  style={{
-                    background: "linear-gradient(180deg,#ff5a5f,#e04444)",
-                    color: "#fff",
-                    border: "1px solid rgba(204,36,36,0.12)"
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
+                  {onDelete && (
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => onDelete(edu.id)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

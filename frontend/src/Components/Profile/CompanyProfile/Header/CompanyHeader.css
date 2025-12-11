@@ -3,23 +3,23 @@
 }
 
 .company-name {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   line-height: 1.2;
 }
 
 .description-wrapper {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .company-description {
-  font-size: 16px;
-  color: #4a5568;
+  font-size: 14px;
+  color: #666;
   margin: 0;
   line-height: 1.5;
   flex: 1;
@@ -27,16 +27,16 @@
 
 .company-meta {
   font-size: 14px;
-  color: #718096;
+  color: #666;
   margin: 0;
 }
 
 .edit-btn-small {
   background: none;
   border: none;
-  color: #2563eb;
+  color: #1976d2;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px;
   border-radius: 4px;
   transition: all 0.2s ease;
   display: flex;
@@ -46,8 +46,8 @@
 }
 
 .edit-btn-small:hover {
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  background-color: rgba(25, 118, 210, 0.1);
+  color: #1565c0;
 }
 
 @media (max-width: 768px) {
@@ -56,10 +56,10 @@
   }
   
   .company-name {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   .company-description {
-    font-size: 15px;
+    font-size: 13px;
   }
 }

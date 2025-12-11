@@ -14,8 +14,8 @@
 
 .edit-modal {
   background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
@@ -38,8 +38,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
   position: sticky;
   top: 0;
   background-color: white;
@@ -48,23 +48,26 @@
 .modal-header h2 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #999;
+  color: #666;
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.3s;
+  transition: all 0.2s;
+  border-radius: 4px;
 }
 
 .close-btn:hover {
-  color: #333;
+  color: #1a1a1a;
+  background-color: #f5f5f5;
 }
 
 .edit-form {
@@ -75,38 +78,40 @@
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  padding: 20px;
-  border-top: 1px solid #eee;
-  background-color: #f9f9f9;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background-color: white;
 }
 
 .btn-cancel,
 .btn-save {
   padding: 10px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   font-size: 14px;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
 .btn-cancel {
-  background-color: #e8e8e8;
-  color: #333;
+  background-color: white;
+  color: #1a1a1a;
+  border: 1px solid #d0d0d0;
 }
 
 .btn-cancel:hover {
-  background-color: #d0d0d0;
+  background-color: #f8f9fa;
+  border-color: #1976d2;
 }
 
 .btn-save {
-  background-color: #3498db;
+  background-color: #1976d2;
   color: white;
 }
 
 .btn-save:hover:not(:disabled) {
-  background-color: #2980b9;
+  background-color: #1565c0;
 }
 
 .btn-save:disabled {
@@ -139,16 +144,17 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  border: 2px dashed #ddd;
+  padding: 32px;
+  border: 2px dashed #d0d0d0;
   border-radius: 8px;
-  background-color: #fafafa;
+  background-color: white;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
 .image-upload:hover {
-  border-color: #5b7cfa;
-  background-color: #f5f8ff;
+  border-color: #1976d2;
+  background-color: #f8f9fa;
 }
 
 .image-upload .preview {
@@ -163,14 +169,14 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #5b7cfa;
+  background: #1976d2;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   font-size: 14px;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .upload-btn input {
@@ -178,7 +184,7 @@
 }
 
 .upload-btn:hover {
-  background: #4c63d2;
+  background: #1565c0;
 }
 
 .upload-btn:active {
@@ -202,18 +208,18 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #5b7cfa;
+  background: #1976d2;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   font-size: 13px;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-add-location:hover {
-  background: #4c63d2;
+  background: #1565c0;
 }
 
 .locations-list {
@@ -270,7 +276,8 @@
 
 .location-field input:focus {
   outline: none;
-  border-color: #5b7cfa;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
 }
 
 .btn-remove-location {

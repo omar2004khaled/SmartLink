@@ -20,20 +20,19 @@ export default function FeelingButton({setFeeling,feeling}){
             <button
               onClick={() => setShowFeelingsMenu(!showFeelingsMenu)}
               style={{
-                padding: ".9rem 1.2rem",
-                borderRadius: "0.75rem",
-                background: "#f0f9ff",
-                border: "2px solid #bfdbfe",
-                fontSize: "1rem",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                background: "#f9fafb",
+                border: "1px solid #d1d5db",
+                fontSize: "14px",
                 display: "flex",
                 alignItems: "center",
-                gap: ".5rem",
+                gap: "6px",
                 cursor: "pointer",
-                whiteSpace: "nowrap",
               }}
             >
-              <Smile size={20} />
-              {feeling ? `Feeling: ${feeling}` : "Add Feeling"}
+              <Smile size={16} />
+              {feeling ? feeling : "Feeling"}
             </button>
 
             {/* DROPDOWN MENU */}
@@ -41,34 +40,34 @@ export default function FeelingButton({setFeeling,feeling}){
               <div
                 style={{
                   position: "absolute",
-                  top: "110%",
+                  top: "100%",
                   left: 0,
                   zIndex: 10,
                   background: "white",
-                  borderRadius: "0.75rem",
-                  padding: ".5rem",
-                  border: "1px solid #bfdbfe",
+                  borderRadius: "6px",
+                  padding: "4px",
+                  border: "1px solid #d1d5db",
                   maxHeight: "200px",
                   overflowY: "auto",
-                  width: "180px",
+                  width: "160px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                 }}
               >
                 {feelingsList.map((f) => (
                   <div
                     key={f}
                     onClick={() => {
-                      console.log(f.split(" ")[1])  
                       setFeeling(f.split(" ")[1]);
-                    
                       setShowFeelingsMenu(false);
                     }}
                     style={{
-                      padding: ".75rem",
+                      padding: "8px",
                       cursor: "pointer",
-                      borderRadius: ".5rem",
+                      borderRadius: "4px",
+                      fontSize: "14px",
                     }}
                     onMouseEnter={(e) =>
-                      (e.target.style.background = "#eff6ff")
+                      (e.target.style.background = "#f3f4f6")
                     }
                     onMouseLeave={(e) =>
                       (e.target.style.background = "white")

@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Comments")
+@Table(name = "comments")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,29 +15,29 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CommentId")
+    @Column(name = "comment_id")
     private Long commentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UserId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PostId", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Column(name = "Content", length = 2500, nullable = false)
+    @Column(name = "content", length = 2500, nullable = false)
     private String content;
 
-    @Column(name = "CreatedAt", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RepliedTo")
+    @JoinColumn(name = "replied_to")
     private Comment repliedTo;
 
     @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    @JoinColumn(name = "AttachId")
+    @JoinColumn(name = "attach_id")
     private Attachment attachment;
 
 }

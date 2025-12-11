@@ -6,13 +6,14 @@ import Upload_button from './upload_button';
 import MediaReviewer from './media_review';
 import TextEditor from './text_editor';
 import SubmitButton from './submit_button';
-import { SavePost } from '../FetchData/FetchData';
-import { Link } from 'react-router-dom';
+import { SavePost , userIdFromLocalStorage} from '../FetchData/FetchData';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function PostComposer() {
   const [postText, setPostText] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
   const [feeling, setFeeling] = useState("None");
+  const navigate = useNavigate();
 
   const fileInputRef = useRef(null);
 
@@ -21,7 +22,6 @@ export default function PostComposer() {
     handleFiles(files);
   };
 
-  // 🔥 Upload to Cloudinary
   const uploadFileToCloudinary = async (file) => {
     const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
 
@@ -81,7 +81,7 @@ export default function PostComposer() {
     const uploadedUrls = mediaFiles.map((m) => m.uploadedUrl);
 
     SavePost({
-      userId: 1,
+      userId: userIdFromLocalStorage(),
       content: postText,
       attachments: [
         ...mediaFiles.map((m) => ({
@@ -100,46 +100,29 @@ export default function PostComposer() {
 
     setPostText("");
     setMediaFiles([]);
-    setFeeling(null); 
+    setFeeling(null);
+    navigate('/home');
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        width: "100vw",
-        margin: 0,
-        padding: 0,
-        background: "linear-gradient(to bottom right, #eff6ff, #ffffff)",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <Header />
+    <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "20px" }}>
+      <div style={{ maxWidth: "600px", margin: "0 auto", background: "white", borderRadius: "8px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        <Header />
+        
+        <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          <TextEditor setPostText={setPostText} postText={postText} />
+          
+          <div style={{ display: "flex", gap: "12px" }}>
+            <FeelingButton setFeeling={setFeeling} feeling={feeling} />
+            <Upload_button handleFileInput={handleFileInput} fileInputRef={fileInputRef} />
+          </div>
 
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "2rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.8rem",
-        }}
-      >
-        <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
-          <FeelingButton setFeeling={setFeeling} feeling={feeling} />
-          <Upload_button handleFileInput={handleFileInput} fileInputRef={fileInputRef} />
+          {mediaFiles.length > 0 && (
+            <MediaReviewer mediaFiles={mediaFiles} setMediaFiles={setMediaFiles} />
+          )}
+
+          <SubmitButton mediaFiles={mediaFiles} postText={postText} handleSubmit={handleSubmit} />
         </div>
-
-        <TextEditor setPostText={setPostText} postText={postText} />
-
-        {mediaFiles.length > 0 && (
-          <MediaReviewer mediaFiles={mediaFiles} setMediaFiles={setMediaFiles} />
-        )}
-
-        <SubmitButton mediaFiles={mediaFiles} postText={postText} handleSubmit={handleSubmit} />
       </div>
     </div>
   );

@@ -42,6 +42,9 @@ public class User {
 
     private String role = "USER"; // USER or ADMIN
 
+    @Column(name = "user_type")
+    private String userType = "JOB_SEEKER"; // JOB_SEEKER or COMPANY
+
     // Constructors
     public User() {}
 
@@ -152,6 +155,14 @@ public class User {
 
     public void setProviderId(String providerId) {
         this.providerId = providerId;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 
     @Override

@@ -1,0 +1,32 @@
+.posts-tab {
+  min-height: 300px;
+}
+
+.post-item {
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.post-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #2563eb;
+}
+
+.no-posts {
+  text-align: center;
+  padding: 60px 20px;
+  color: #718096;
+  font-size: 16px;
+  margin: 0;
+}
+
+.no-posts::before {
+  content: "📝";
+  display: block;
+  font-size: 48px;
+  margin-bottom: 16px;
+}

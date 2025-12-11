@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import Logo from '../assets/Logo.png';
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -121,10 +122,26 @@ useEffect(() => {
     // Success case - response should be JSON
     if (data.token) {
       localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userEmail', data.email);
       console.log("Login successful, token stored");
+      
+      // Fetch userId from backend
+      try {
+        const userResponse = await fetch(`http://localhost:8080/api/users/email/${data.email}`, {
+          headers: {
+            'Authorization': `Bearer ${data.token}`
+          }
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          localStorage.setItem('userId', userData.id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user data:', err);
+      }
     }
 
-    navigate('/dashboard'); 
+    navigate('/home'); 
   } catch (error) {
     console.error("Login Error:", error);
     if (error.message === 'Failed to fetch') {
@@ -144,7 +161,7 @@ useEffect(() => {
             <div className="self-start">
               <div className="flex items-center gap-2">
                 <img 
-                    src="src/assets/Logo.png" 
+                    src={Logo} 
                     alt="Logo"
                     className="h-12 w-auto object-contain"
                     />
@@ -335,6 +352,15 @@ useEffect(() => {
                 className="font-semibold text-primary hover:underline"
               >
                 Sign Up
+              </Link>
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Are you a company?{' '}
+              <Link 
+                to="/company/login" 
+                className="font-semibold text-primary hover:underline"
+              >
+                Company Login
               </Link>
             </p>
           </div>

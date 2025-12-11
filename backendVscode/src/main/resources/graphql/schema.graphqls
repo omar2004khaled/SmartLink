@@ -1,0 +1,55 @@
+type Query {
+    jobById(id: ID!): Job
+    allJobs(filter: JobFilter): [Job!]!
+    jobsByExperienceLevel(level: ExperienceLevel!): [Job!]!
+    jobsByType(type: JobType!): [Job!]!
+    jobsByLocation(locationType: LocationType!): [Job!]!
+}
+
+input JobFilter {
+    title: String
+    experienceLevel: ExperienceLevel
+    jobType: JobType
+    locationType: LocationType
+    jobLocation: String
+    minSalary: Int
+    maxSalary: Int
+}
+
+type Job {
+    jobId: ID!
+    title: String!
+    description: String!
+    experienceLevel: ExperienceLevel!
+    jobType: JobType!
+    locationType: LocationType!
+    jobLocation: String!
+    salaryMin: Int
+    salaryMax: Int
+    deadline: String!
+}
+
+enum ExperienceLevel {
+    ENTRY
+    JUNIOR
+    MID
+    SENIOR
+    LEAD
+    PRINCIPAL
+}
+
+enum JobType {
+    FULL_TIME
+    PART_TIME
+    CONTRACT
+    TEMPORARY
+    INTERNSHIP
+    FREELANCE
+}
+
+enum LocationType {
+    REMOTE
+    ONSITE
+    HYBRID
+}
+

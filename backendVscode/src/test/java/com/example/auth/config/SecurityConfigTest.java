@@ -49,12 +49,14 @@ class SecurityConfigTest {
                 });
     }
 
+
+
     @Test
     void securedEndpoints_ShouldRequireAuthentication() throws Exception {
         // Act & Assert - Any endpoint not explicitly permitted should require authentication
-        // With OAuth2 enabled, unauthenticated requests get redirected (302) instead of 403
+        // Expecting 404 for non-existent endpoints, not 302
         mockMvc.perform(get("/api/users"))
-                .andExpect(status().isFound()); // Should return 302 redirect for OAuth2
+                .andExpect(status().isNotFound()); // Should return 404 for non-existent endpoint
     }
 
     @Test

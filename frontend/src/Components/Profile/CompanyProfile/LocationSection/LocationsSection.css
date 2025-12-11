@@ -1,5 +1,5 @@
 .locations-section {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .locations-grid {
@@ -12,25 +12,23 @@
 .location-card {
   display: flex;
   gap: 16px;
-  padding: 20px;
-  background-color: #ffffff;
-  border: 2px solid #e1e8ed;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   transition: all 0.2s ease;
   align-items: flex-start;
 }
 
 .location-card:hover {
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
-  border-color: #2563eb;
-  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .location-icon {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  color: #2563eb;
+  width: 20px;
+  height: 20px;
+  color: #1976d2;
 }
 
 .location-info {
@@ -38,26 +36,26 @@
 }
 
 .location-address {
-  font-size: 15px;
+  font-size: 14px;
   color: #1a1a1a;
   margin: 0 0 8px 0;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .location-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
-  color: #2563eb;
+  font-size: 13px;
+  color: #1976d2;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .location-link:hover {
   text-decoration: underline;
-  color: #1d4ed8;
+  color: #1565c0;
 }
 
 .icon-small {

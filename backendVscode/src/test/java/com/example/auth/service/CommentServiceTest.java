@@ -68,14 +68,14 @@ public class CommentServiceTest {
         mockUser.setId(commentDTO.getUserId());
 
         Post mockPost = new Post();
-        mockPost.setPostId(new BigInteger(Long.toString(commentDTO.getPostId())));
+        mockPost.setPostId(commentDTO.getPostId());
 
         Comment savedComment = new Comment();
         savedComment.setCommentId(1L);
         savedComment.setContent(commentDTO.getText());
 
         Mockito.when(userRepository.findById(commentDTO.getUserId())).thenReturn(Optional.of(mockUser));
-        Mockito.when(postRepository.findById(commentDTO.getPostId())).thenReturn(mockPost);
+        Mockito.when(postRepository.findById(commentDTO.getPostId())).thenReturn(Optional.of(mockPost));
         Mockito.when(commentRepo.save(any())).thenReturn(savedComment);
         commentService.addComment(commentDTO);
         Mockito.verify(userRepository).findById(commentDTO.getUserId());
@@ -90,14 +90,14 @@ public class CommentServiceTest {
         mockUser.setId(commentDTO.getUserId());
 
         Post mockPost = new Post();
-        mockPost.setPostId(new BigInteger(Long.toString(commentDTO.getPostId())));
+        mockPost.setPostId(commentDTO.getPostId());
 
         Comment savedComment = new Comment();
         savedComment.setCommentId(1L);
         savedComment.setContent(commentDTO.getText());
 
         Mockito.when(userRepository.findById(commentDTO.getUserId())).thenReturn(Optional.of(mockUser));
-        Mockito.when(postRepository.findById(commentDTO.getPostId())).thenReturn(mockPost);
+        Mockito.when(postRepository.findById(commentDTO.getPostId())).thenReturn(Optional.of(mockPost));
         Mockito.when(commentRepo.save(any())).thenReturn(savedComment);
         commentService.addComment(commentDTO);
         Mockito.verify(userRepository).findById(commentDTO.getUserId());

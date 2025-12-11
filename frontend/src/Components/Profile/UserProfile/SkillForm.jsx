@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../CompanyProfile/EditModal/EditModal.css";
 
 export default function SkillForm({ open, skill, onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -27,16 +28,40 @@ export default function SkillForm({ open, skill, onSave, onCancel }) {
   }
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#0008", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <form onSubmit={handleSubmit} style={{ background: "#fff", padding: 32, borderRadius: 12, minWidth: 320, boxShadow: "0 2px 16px #0003" }}>
-        <h2>{skill ? "Edit" : "Add"} Skill</h2>
-        <label>Skill Name:<br /><input name="skillName" value={form.skillName} onChange={handleChange} required /></label><br />
-        <label>Proficiency:<br /><input name="proficiency" value={form.proficiency} onChange={handleChange} /></label><br />
-        <div style={{ marginTop: 16 }}>
-          <button type="submit">Save</button>
-          <button type="button" onClick={onCancel} style={{ marginLeft: 8 }}>Cancel</button>
+    <div className="edit-modal-overlay">
+      <div className="edit-modal">
+        <div className="modal-header">
+          <h2>{skill ? "Edit" : "Add"} Skill</h2>
+          <button type="button" className="close-btn" onClick={onCancel}>
+            ✕
+          </button>
         </div>
-      </form>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="edit-form">
+            <div className="form-group">
+              <label>Skill Name</label>
+              <input name="skillName" value={form.skillName} onChange={handleChange} required className="form-input" />
+            </div>
+            
+            <div className="form-group">
+              <label>Proficiency</label>
+              <select name="proficiency" value={form.proficiency} onChange={handleChange} className="form-input">
+                <option value="">Select proficiency level</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Expert">Expert</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="modal-footer">
+            <button type="button" onClick={onCancel} className="btn-cancel">Cancel</button>
+            <button type="submit" className="btn-save">Save</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

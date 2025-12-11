@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../CompanyProfile/EditModal/EditModal.css";
 
 export default function ProfileInfoForm({ open, profile, locations = [], onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -13,6 +14,7 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
     profilePicUrl: ""
   });
   const [useCustomLocation, setUseCustomLocation] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -37,58 +39,138 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  const uploadToCloudinary = async (file) => {
+    try {
+      const url = 'https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload';
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'dyk7gqqw');
+
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log('Cloudinary response:', data);
+      return data.secure_url;
+    } catch (err) {
+      console.error('Upload failed', err);
+      alert(`Upload failed: ${err.message}`);
+      return null;
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const uploadedUrl = await uploadToCloudinary(file);
+    if (uploadedUrl) {
+      setForm({ ...form, profilePicUrl: uploadedUrl });
+    } else {
+      alert('Failed to upload image');
+    }
+    setUploading(false);
+  };
+
   function handleSubmit(e) {
     e.preventDefault();
+    console.log('Submitting form:', form);
     onSave(form);
   }
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#0008", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <form onSubmit={handleSubmit} style={{ background: "#fff", padding: 32, borderRadius: 12, minWidth: 320, boxShadow: "0 2px 16px #0003" }}>
-        <h2>Edit Profile Info</h2>
-        <label>Name:<br /><input name="userName" value={form.userName} onChange={handleChange} required /></label><br />
-        <label>Headline:<br /><input name="headline" value={form.headline} onChange={handleChange} /></label><br />
-        <label>Bio:<br /><textarea name="bio" value={form.bio} onChange={handleChange} /></label><br />
-        <label>Gender:<br /><input name="gender" value={form.gender} onChange={handleChange} /></label><br />
-        <label>Birth Date:<br /><input name="birthDate" type="date" value={form.birthDate} onChange={handleChange} /></label><br />
-        <label>Location:<br />
-          {!useCustomLocation ? (
-            <>
-              <select
-                value={form.country + '|' + form.city}
-                onChange={e => {
-                  if (e.target.value === '__custom__') {
-                    setUseCustomLocation(true);
-                  } else {
-                    const [country, city] = e.target.value.split('|');
-                    setForm({ ...form, country, city });
-                  }
-                }}
-              >
-                <option value="">Select location</option>
-                {locations.map(loc => (
-                  <option key={loc.locationId} value={loc.country + '|' + loc.city}>
-                    {loc.country}, {loc.city}
-                  </option>
-                ))}
-                <option value="__custom__">Other...</option>
-              </select>
-            </>
-          ) : (
-            <>
-              <input name="country" placeholder="Country" value={form.country} onChange={handleChange} />
-              <input name="city" placeholder="City" value={form.city} onChange={handleChange} />
-              <button type="button" onClick={() => setUseCustomLocation(false)} style={{ marginLeft: 8 }}>Back</button>
-            </>
-          )}
-        </label><br />
-        <label>Email:<br /><input name="userEmail" type="email" value={form.userEmail} onChange={handleChange} /></label><br />
-        <label>Profile Picture URL:<br /><input name="profilePicUrl" value={form.profilePicUrl} onChange={handleChange} /></label><br />
-        <div style={{ marginTop: 16 }}>
-          <button type="submit">Save</button>
-          <button type="button" onClick={onCancel} style={{ marginLeft: 8 }}>Cancel</button>
+    <div className="edit-modal-overlay">
+      <div className="edit-modal">
+        <div className="modal-header">
+          <h2>Edit Profile Info</h2>
+          <button type="button" className="close-btn" onClick={onCancel}>
+            ✕
+          </button>
         </div>
-      </form>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="edit-form">
+            <div className="form-group">
+              <label>Headline</label>
+              <input name="headline" value={form.headline} onChange={handleChange} className="form-input" />
+            </div>
+            
+            <div className="form-group">
+              <label>Bio</label>
+              <textarea name="bio" value={form.bio} onChange={handleChange} className="form-textarea" rows="4" />
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label>Gender</label>
+                <input name="gender" value={form.gender} onChange={handleChange} className="form-input" />
+              </div>
+              
+              <div className="form-group">
+                <label>Birth Date</label>
+                <input name="birthDate" type="date" value={form.birthDate} onChange={handleChange} className="form-input" />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label>Location</label>
+              {!useCustomLocation ? (
+                <select
+                  value={form.country + '|' + form.city}
+                  onChange={e => {
+                    if (e.target.value === '__custom__') {
+                      setUseCustomLocation(true);
+                    } else {
+                      const [country, city] = e.target.value.split('|');
+                      setForm({ ...form, country, city });
+                    }
+                  }}
+                  className="form-input"
+                >
+                  <option value="">Select location</option>
+                  {locations.map(loc => (
+                    <option key={loc.locationId} value={loc.country + '|' + loc.city}>
+                      {loc.country}, {loc.city}
+                    </option>
+                  ))}
+                  <option value="__custom__">Other...</option>
+                </select>
+              ) : (
+                <div className="location-inputs">
+                  <input name="country" placeholder="Country" value={form.country} onChange={handleChange} className="form-input" />
+                  <input name="city" placeholder="City" value={form.city} onChange={handleChange} className="form-input" />
+                  <button type="button" onClick={() => setUseCustomLocation(false)} className="btn-back">Back</button>
+                </div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label>Profile Picture</label>
+              <div className="image-upload">
+                {form.profilePicUrl && (
+                  <img src={form.profilePicUrl} alt="Preview" className="preview" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
+                )}
+                <label className="upload-btn">
+                  <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} />
+                  {uploading ? 'Uploading...' : 'Choose Photo'}
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div className="modal-footer">
+            <button type="button" onClick={onCancel} className="btn-cancel">Cancel</button>
+            <button type="submit" className="btn-save" disabled={uploading}>Save</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

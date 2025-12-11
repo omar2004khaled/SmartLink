@@ -23,7 +23,7 @@ export default function CompanyProfile({ companyId, userId }) {
   const API_BASE_URL ='http://localhost:8080';
 
   useEffect(() => {
-    if (companyId) {
+    if (companyId || userId) {
       fetchCompanyBasicData();
     }
   }, [companyId, userId]);
@@ -33,15 +33,27 @@ export default function CompanyProfile({ companyId, userId }) {
       setLoading(true);
       setError(null);
 
-      const url = userId 
-        ? `${API_BASE_URL}/api/company/${companyId}?userId=${userId}`
-        : `${API_BASE_URL}/api/company/${companyId}`;
+      let url;
+      if (companyId) {
+        url = userId 
+          ? `${API_BASE_URL}/api/company/${companyId}?userId=${userId}`
+          : `${API_BASE_URL}/api/company/${companyId}`;
+      } else {
+        // Use user endpoint when no companyId provided (for own profile)
+        url = `${API_BASE_URL}/api/company/user/${userId}`;
+      }
+      
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       
@@ -61,6 +73,11 @@ export default function CompanyProfile({ companyId, userId }) {
       setCompanyData(data);
       setIsFollowing(data.isFollowing || false);
       setIsOwner(data.userId === userId);
+      
+      // Set companyId if not provided (for API calls)
+      if (!companyId && data.companyProfileId) {
+        companyId = data.companyProfileId;
+      }
       
       setTabData({
         description: data.description,
@@ -120,11 +137,17 @@ export default function CompanyProfile({ companyId, userId }) {
   const handleFollow = async () => {
     try {
       const op = isFollowing ? "unfollow" : "follow";
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`${API_BASE_URL}/api/company/${companyId}/${op}`, {
         method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({ userId: userId }),
       });
       
@@ -163,13 +186,20 @@ export default function CompanyProfile({ companyId, userId }) {
 
   const handleSaveEdit = async (updatedData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/company/${companyId}`, {
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const currentCompanyId = companyId || companyData?.companyProfileId;
+      const response = await fetch(`${API_BASE_URL}/api/company/${currentCompanyId}`, {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({ 
-          companyId, 
+          companyId: currentCompanyId, 
           ...updatedData
         }),
       });

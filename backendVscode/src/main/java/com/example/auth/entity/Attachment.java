@@ -1,6 +1,7 @@
 package com.example.auth.entity;
 
 import com.example.auth.enums.TypeofAttachments;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,13 +19,15 @@ public class Attachment {
     @Column(name = "AttachId")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private BigInteger AttachId;
+    private Long AttachId;
 
     @Column(name = "URL" , length = 150 , nullable = false)
+    @JsonProperty("attachmentURL")
     private String AttachmentURL;
 
     @Column(name = "Type" , nullable = false)
     @Enumerated(EnumType.STRING)
+    @JsonProperty("typeOfAttachment")
     private TypeofAttachments typeofAttachments;
 
 }

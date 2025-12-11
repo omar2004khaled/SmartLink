@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -44,6 +45,12 @@ class AuthServiceTest {
     @Mock
     private com.example.auth.config.JwtService jwtService;
 
+    @Mock
+    private com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository profileRepo;
+
+    @Mock
+    private com.example.auth.repository.CompanyProfileRepo companyRepo;
+
     @InjectMocks
     private AuthService authService;
 
@@ -67,12 +74,17 @@ class AuthServiceTest {
         validRequest.setGender(Gender.MALE);
     }
 
+
+
     @Test
     void register_WithValidData_ShouldSaveUserAndSendVerification() {
         // Arrange
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.existsByPhoneNumber(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(new User());
+        when(profileRepo.save(any())).thenReturn(new com.example.auth.entity.ProfileEntities.JobSeekerProfile());
+        when(tokenRepository.save(any(VerificationToken.class))).thenReturn(new VerificationToken());
 
         // Act
         authService.register(validRequest);
@@ -81,6 +93,7 @@ class AuthServiceTest {
         verify(userRepository).save(userCaptor.capture());
         verify(tokenRepository).save(tokenCaptor.capture());
         verify(emailService).sendVerificationEmail(anyString(), anyString());
+        verify(profileRepo).save(any());
 
         User savedUser = userCaptor.getValue();
         assertEquals("john@example.com", savedUser.getEmail());

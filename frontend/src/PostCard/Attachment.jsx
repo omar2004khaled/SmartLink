@@ -14,12 +14,6 @@ function Attachment({ attachment = { AttachId: 1, typeOfAttachment: "image", att
                     Your browser does not support the video tag.
                 </video>
             )}
-
-            {typeof onRemove === 'function' && (
-                <button className="remove-attachment-button" onClick={() => onRemove(attachment.AttachId)}>
-                    Remove
-                </button>
-            )}
         </div>
     );
 }

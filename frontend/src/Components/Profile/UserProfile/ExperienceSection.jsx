@@ -41,21 +41,27 @@ export default function ExperienceSection({ experience = [], onAdd, onEdit, onDe
                 )}
               </div>
 
-              <div style={{ marginLeft: 16, display: "flex", gap: 8, alignItems: "center" }}>
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={() => onEdit?.(exp.id)}
-                >
-                  Edit
-                </button>
+              {(onEdit || onDelete) && (
+                <div style={{ marginLeft: 16, display: "flex", gap: 8, alignItems: "center" }}>
+                  {onEdit && (
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => onEdit(exp.id)}
+                    >
+                      Edit
+                    </button>
+                  )}
 
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => onDelete?.(exp.id)}
-                >
-                  Delete
-                </button>
-              </div>
+                  {onDelete && (
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => onDelete(exp.id)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

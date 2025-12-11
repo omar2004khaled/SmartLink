@@ -1,0 +1,72 @@
+.locations-section {
+  margin-bottom: 40px;
+}
+
+.locations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.location-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  align-items: flex-start;
+}
+
+.location-card:hover {
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+  border-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.location-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: #2563eb;
+}
+
+.location-info {
+  flex: 1;
+}
+
+.location-address {
+  font-size: 15px;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.location-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.location-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.icon-small {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 768px) {
+  .locations-grid {
+    grid-template-columns: 1fr;
+  }
+}

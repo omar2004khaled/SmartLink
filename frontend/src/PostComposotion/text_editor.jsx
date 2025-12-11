@@ -1,30 +1,20 @@
 export default function TextEditor({setPostText,postText}){
-    return <div>
-          <label
-            style={{
-              display: "block",
-              marginBottom: ".6rem",
-              fontWeight: "600",
-              color: "#1e3a8a",
-            }}
-          >
-            What's on your mind?
-          </label>
-
-          <textarea
-            value={postText}
-            onChange={(e) => setPostText(e.target.value)}
-            placeholder="Write something..."
-            style={{
-              width: "100%",
-              minHeight: "200px",
-              padding: "1.2rem",
-              border: "2px solid #bfdbfe",
-              borderRadius: "0.75rem",
-              fontSize: "1.1rem",
-              outline: "none",
-              resize: "none",
-            }}
-          />
-    </div>
+    return (
+      <textarea
+        value={postText}
+        onChange={(e) => setPostText(e.target.value)}
+        placeholder="What's on your mind?"
+        style={{
+          width: "100%",
+          minHeight: "120px",
+          padding: "12px",
+          border: "1px solid #d1d5db",
+          borderRadius: "6px",
+          fontSize: "16px",
+          outline: "none",
+          resize: "vertical",
+          fontFamily: "inherit",
+        }}
+      />
+    )
 }

@@ -4,20 +4,19 @@ export default function Upload_button({fileInputRef,handleFileInput}){
     <button
                 onClick={() => fileInputRef.current?.click()}
                 style={{
-                  padding: ".9rem 1.2rem",
-                  borderRadius: "0.75rem",
-                  background: "#eef2ff",
-                  border: "2px solid #c7d2fe",
-                  fontSize: "1rem",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  background: "#f9fafb",
+                  border: "1px solid #d1d5db",
+                  fontSize: "14px",
                   display: "flex",
                   alignItems: "center",
-                  gap: ".4rem",
+                  gap: "6px",
                   cursor: "pointer",
-                  whiteSpace: "nowrap",
                 }}
               >
-                <Upload size={20} color="#4f46e5" />
-                Add Media
+                <Upload size={16} />
+                Media
               </button>
     
               {/* Hidden Input */}

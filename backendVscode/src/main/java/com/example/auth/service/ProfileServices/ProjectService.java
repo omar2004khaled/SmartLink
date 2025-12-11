@@ -34,11 +34,10 @@ public class ProjectService {
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
 
         Project project = new Project();
+        project.setProfile(profile);
         apply(dto, project);
 
         Project saved = projectRepo.save(project);
-
-        profile.getProjects().add(saved); // update link
 
         return toDto(saved);
     }

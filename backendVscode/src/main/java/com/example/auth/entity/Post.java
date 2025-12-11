@@ -29,5 +29,6 @@ public class Post {
     public Post(Long userId, String content) {
         this.UserId = userId;
         this.content = content;
+        this.CreatedAt = new Timestamp(System.currentTimeMillis());
     }
 }

@@ -112,11 +112,12 @@ class DtoTest {
     @Test
     void authResponse_ConstructorAndGetters_ShouldWork() {
         // Arrange & Act
-        AuthResponse response = new AuthResponse("token123", "USER", "john@example.com");
+        AuthResponse response = new AuthResponse("token123", "USER", "john@example.com", 1L);
 
         // Assert
         assertEquals("token123", response.token());
         assertEquals("USER", response.role());
         assertEquals("john@example.com", response.email());
+        assertEquals(1L, response.userId());
     }
 }

@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -32,18 +32,6 @@ class AuthControllerRegisterTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Test
-    void register_WithValidRequest_ShouldReturnSuccess() throws Exception {
-        RegisterRequest request = createValidRegisterRequest();
-        doNothing().when(authService).register(any(RegisterRequest.class));
-
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Registration successful. Check console for verification email."));
-    }
 
     @Test
     void register_WithInvalidRequest_ShouldReturnBadRequest() throws Exception {

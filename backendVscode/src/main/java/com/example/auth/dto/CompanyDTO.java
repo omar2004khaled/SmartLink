@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CompanyDTO {
+    private Long companyProfileId;
     private Long userId;
     private String companyName;
     private String website;
