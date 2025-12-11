@@ -29,23 +29,23 @@ public class SecurityConfig {
                 JwtAuthFilter jwtFilter = new JwtAuthFilter(jwtService);
 
                 http.csrf(csrf -> csrf.disable())
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/auth/**", "/auth/company/**", "/api/public",
-                                                                "/oauth2/**", "/login/oauth2/**",
-                                                                "/api/profiles/**", "/api/locations/**",
-                                                                "/api/company/**", "/api/users/**", "/Post/add/**",
-                                                                "/Post/**","/comment/**","/jobs/**",
-                                                                "/graphql","/apply/**","/reactions/**",
-                                                                 "/api/search/**", "/api/connections/**")
-                                                .permitAll()
-                                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                                .anyRequest().authenticated())
-                                .oauth2Login(oauth2 -> oauth2
-                                                .successHandler(oAuth2SuccessHandler))
-                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                        .sessionManagement(session -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .authorizeHttpRequests(auth -> auth
+                                .requestMatchers("/auth/*", "/auth/company/*", "/api/public",
+                                        "/oauth2/*", "/login/oauth2/*",
+                                        "/api/profiles/*", "/api/locations/*",
+                                        "/api/company/*", "/api/users/", "/Post/add/*",
+                                        "/Post/*","/comment/","/jobs/*",
+                                        "/graphql","/apply/*","/reactions/*",
+                                        "/api/search/*", "/api/connections/*")
+                                .permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .anyRequest().authenticated())
+                        .oauth2Login(oauth2 -> oauth2
+                                .successHandler(oAuth2SuccessHandler))
+                        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }

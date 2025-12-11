@@ -118,8 +118,6 @@ public class AdminController {
         boolean emailSent = emailService.sendAdminNotification(user.getEmail(), auth.getName(), message);
         
         if (emailSent) {
-            // Log the email action
-            System.out.println("AUDIT LOG: Admin " + auth.getName() + " sent email to " + user.getEmail() + " (ID: " + userId + ") at " + java.time.LocalDateTime.now());
             return ResponseEntity.ok("Email sent to " + user.getEmail() + " successfully!");
         } else {
             return ResponseEntity.badRequest().body("Failed to send email to " + user.getEmail());
@@ -148,8 +146,6 @@ public class AdminController {
         user.setRole("ADMIN");
         userRepository.save(user);
         
-        // Log the action
-        System.out.println("AUDIT LOG: Super Admin " + auth.getName() + " promoted user " + user.getEmail() + " (ID: " + userId + ") to ADMIN at " + java.time.LocalDateTime.now());
 
         return ResponseEntity.ok("User " + user.getEmail() + " promoted to ADMIN successfully!");
     }
@@ -176,8 +172,6 @@ public class AdminController {
         user.setRole("USER");
         userRepository.save(user);
         
-        // Log the action
-        System.out.println("AUDIT LOG: Super Admin " + auth.getName() + " demoted user " + user.getEmail() + " (ID: " + userId + ") to USER at " + java.time.LocalDateTime.now());
 
         return ResponseEntity.ok("User " + user.getEmail() + " demoted to USER successfully!");
     }
