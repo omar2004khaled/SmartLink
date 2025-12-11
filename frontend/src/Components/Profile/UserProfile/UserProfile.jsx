@@ -235,13 +235,17 @@ export default function UserProfile() {
   const handleEditProfile = () => isOwnProfile && setEditProfile(true);
   const handleSaveProfile = async (form) => {
     try {
+      console.log('Starting profile save with form:', form);
       const token = localStorage.getItem('authToken');
       let locationId = profile.locationId;
+      
       // If location changed, find or create location
       if (form.country && form.city && (form.country !== profile.country || form.city !== profile.city)) {
+        console.log('Location changed, processing...');
         // Try to find existing location
         let loc = locations.find(l => l.country === form.country && l.city === form.city);
         if (!loc) {
+          console.log('Creating new location...');
           // Create new location
           const locRes = await fetch(`http://localhost:8080/api/locations`, {
             method: 'POST',
@@ -253,9 +257,11 @@ export default function UserProfile() {
           });
           if (!locRes.ok) {
             const errorText = await locRes.text();
+            console.error('Location creation failed:', errorText);
             throw new Error('Failed to create location: ' + errorText);
           }
           loc = await locRes.json();
+          console.log('New location created:', loc);
           // Refresh locations
           const allLocRes = await fetch(`http://localhost:8080/api/locations`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -264,18 +270,21 @@ export default function UserProfile() {
         }
         locationId = loc.locationId;
       }
+      
       // Update profile with only backend-expected fields
       const profilePayload = {
-        profilePicUrl: form.profilePicUrl,
-        bio: form.bio,
-        headline: form.headline,
-        gender: form.gender,
-        birthDate: form.birthDate,
-        userId: userId,
+        profilePicUrl: form.profilePicUrl || null,
+        bio: form.bio || null,
+        headline: form.headline || null,
+        gender: form.gender || null,
+        birthDate: form.birthDate || null,
+        userId: parseInt(userId),
         locationId: locationId
       };
+      
       console.log('Sending profile update:', profilePayload);
       console.log('URL:', `${API_BASE}/${profileId}`);
+      
       const res = await fetch(`${API_BASE}/${profileId}`, {
         method: 'PUT',
         headers: { 
@@ -284,18 +293,23 @@ export default function UserProfile() {
         },
         body: JSON.stringify(profilePayload)
       });
+      
       console.log('Response status:', res.status);
-      console.log('Response ok:', res.ok);
+      console.log('Response headers:', res.headers);
+      
       if (!res.ok) {
         const errorText = await res.text();
-        throw new Error('Failed to update profile: ' + errorText);
+        console.error('Profile update failed:', errorText);
+        throw new Error(`Failed to update profile (${res.status}): ${errorText}`);
       }
+      
       const updated = await res.json();
+      console.log('Profile updated successfully:', updated);
       setProfile(updated);
       setEditProfile(false);
     } catch (err) {
       console.error('Profile update error:', err);
-      alert(err.message);
+      alert(`Profile update failed: ${err.message}`);
     }
   };
   const handleCancelProfile = () => setEditProfile(false);
@@ -498,8 +512,9 @@ export default function UserProfile() {
   return (
     <div>
       <Navbar />
-      <div className="up-page" style={{ fontFamily: "system-ui", maxWidth: 980, margin: "2rem auto" }}>
-      <div className="profile-container" style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 16px #0002", padding: 24 }}>
+      <div className="up-page">
+        <div className="user-profile-container">
+          <div className="profile-container">
 
         
         {activeTab === 'profile' && (
@@ -581,7 +596,11 @@ export default function UserProfile() {
           </>
         )}
         
-        {activeTab === 'connections' && isOwnProfile && <ConnectionsTab />}
+        {activeTab === 'connections' && isOwnProfile && (
+          <div className="up-sections">
+            <ConnectionsTab />
+          </div>
+        )}
 
         {/* Modals for editing/adding fields */}
         <ProfileInfoForm open={editProfile} profile={profile} locations={locations} onSave={handleSaveProfile} onCancel={handleCancelProfile} />
@@ -589,8 +608,9 @@ export default function UserProfile() {
         <SkillForm open={!!editSkillId} skill={skills.find(s => s.id === editSkillId)} onSave={handleSaveSkill} onCancel={handleCancelSkill} />
         <ProjectForm open={!!editProjectId} project={projects.find(p => p.id === editProjectId)} onSave={handleSaveProject} onCancel={handleCancelProject} />
         <EducationForm open={!!editEducationId} education={education.find(e => e.id === editEducationId)} onSave={handleSaveEducation} onCancel={handleCancelEducation} />
+          </div>
+        </div>
       </div>
-      </div>
-    </div>
+    </div>  
   );
 }

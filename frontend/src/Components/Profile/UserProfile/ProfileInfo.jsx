@@ -18,7 +18,7 @@ export default function ProfileInfo({ profile, onEdit, onConnect, connectionStat
       />
 
       <div style={{ flex: 1 }}>
-        <h2>{profile.userName}</h2>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', margin: '0 0 8px 0', color: '#1a1a1a', fontFamily: '"Bookman Old Style", "Book Antiqua", Palatino, serif', letterSpacing: '-0.5px' }}>{profile.userName}</h1>
         <div style={{ color: "#555" }}>{profile.headline}</div>
         <div style={{ marginTop: 8 }}>{profile.bio}</div>
 
