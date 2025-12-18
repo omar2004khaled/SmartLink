@@ -2,12 +2,7 @@ package com.example.auth.controller;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +12,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.auth.entity.User;
 import com.example.auth.enums.Gender;
@@ -78,8 +71,7 @@ class AdminControllerTest {
                 userRepository.save(regularUser);
         }
 
-        // ========== DASHBOARD TESTS ==========
-
+        // ===== DASHBOARD TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void adminDashboard_WithAdminRole_ShouldReturnWelcomeMessage() throws Exception {
@@ -101,16 +93,17 @@ class AdminControllerTest {
                                 .andExpect(status().isFound()); // OAuth2 redirects instead of 403
         }
 
-        // ========== GET ALL USERS TESTS ==========
-
+        // ===== GET ALL USERS TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void getAllUsers_WithAdminRole_ShouldReturnAllUsers() throws Exception {
                 mockMvc.perform(get("/admin/users"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.users", hasSize(2)))
-                                .andExpect(jsonPath("$.users[0].email", anyOf(is("admin@test.com"), is("user@test.com"))))
-                                .andExpect(jsonPath("$.users[1].email", anyOf(is("admin@test.com"), is("user@test.com"))));
+                                .andExpect(jsonPath("$.users[0].email",
+                                                anyOf(is("admin@test.com"), is("user@test.com"))))
+                                .andExpect(jsonPath("$.users[1].email",
+                                                anyOf(is("admin@test.com"), is("user@test.com"))));
         }
 
         @Test
@@ -134,11 +127,10 @@ class AdminControllerTest {
         @Test
         void getAllUsers_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(get("/admin/users"))
-                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
+                                .andExpect(status().isFound());
         }
 
-        // ========== GET STATISTICS TESTS ==========
-
+        // ===== GET STATISTICS TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void getStats_WithAdminRole_ShouldReturnCorrectStatistics() throws Exception {
@@ -177,8 +169,7 @@ class AdminControllerTest {
                                 .andExpect(status().isForbidden());
         }
 
-        // ========== GET USER BY ID TESTS ==========
-
+        // ===== GET USER BY ID TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void getUserById_WithValidId_ShouldReturnUser() throws Exception {

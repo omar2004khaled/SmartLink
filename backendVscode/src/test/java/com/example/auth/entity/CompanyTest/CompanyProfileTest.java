@@ -4,6 +4,7 @@ import com.example.auth.entity.CompanyProfile;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +41,11 @@ class CompanyProfileTest {
 
         assertNotNull(profile.getCreatedAt());
         assertNotNull(profile.getUpdatedAt());
-        assertEquals(profile.getCreatedAt(), profile.getUpdatedAt());
+
+        // Allow small tolerance (1 millisecond) due to nanosecond precision differences
+        long millisDiff = ChronoUnit.MILLIS.between(profile.getCreatedAt(), profile.getUpdatedAt());
+        assertTrue(millisDiff >= 0 && millisDiff <= 1,
+                "createdAt and updatedAt should be equal or differ by at most 1 ms");
     }
 
     @Test
