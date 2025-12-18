@@ -1,0 +1,72 @@
+.overview-section {
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.section-description {
+  font-size: 15px;
+  color: #4a5568;
+  line-height: 1.7;
+  margin: 0 0 24px 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.info-item {
+  padding: 16px;
+  background-color: #f7fafc;
+  border-radius: 8px;
+  border-left: 4px solid #2563eb;
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  transform: translateY(-2px);
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+}
+
+.info-value {
+  font-size: 15px;
+  color: #1a1a1a;
+  margin: 0;
+  font-weight: 500;
+}
+
+.info-link {
+  font-size: 15px;
+  color: #2563eb;
+  text-decoration: none;
+  word-break: break-all;
+  font-weight: 500;
+}
+
+.info-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

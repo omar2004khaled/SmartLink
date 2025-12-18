@@ -518,3 +518,253 @@
   line-height: 1;
 }
 
+/* Post Edit Mode Styles */
+.post-edit-mode {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+}
+
+.post-edit-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  background: white;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.post-edit-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.post-edit-attachment {
+  margin-bottom: 1rem;
+}
+
+.edit-attachment-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.edit-attachment-preview img {
+  max-width: 300px;
+  max-height: 300px;
+  display: block;
+  border-radius: 8px;
+}
+
+.edit-attachment-preview .remove-attach {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.2s;
+}
+
+.edit-attachment-preview .remove-attach:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.post-edit-attachment .attach-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.post-edit-attachment .attach-button:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.post-edit-attachment .attach-button input[type="file"] {
+  display: none;
+}
+
+.post-edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.post-edit-actions .cancel-btn,
+.post-edit-actions .save-btn {
+  padding: 0.625rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.post-edit-actions .cancel-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.post-edit-actions .cancel-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.post-edit-actions .save-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.post-edit-actions .save-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.post-edit-actions .cancel-btn:disabled,
+.post-edit-actions .save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Add these styles to PostCard.css */
+
+.post-footer-container {
+    margin-top: 8px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 12px;
+}
+
+.top-reactions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 0 12px;
+}
+
+.reaction-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.reaction-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: default;
+}
+
+.reaction-icon-wrapper:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
+.reaction-count {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Update reaction picker styles */
+.reaction-option {
+    position: relative;
+}
+
+.reaction-option-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reaction-count-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+/* Add to existing .post-card-footer styles */
+.post-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 8px;
+}
+
+.reaction-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reaction-button:hover {
+    background: #f3f4f6;
+}
+
+.reaction-button.selected {
+    font-weight: 500;
+}
+
+.reaction-label {
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.reaction-button.selected .reaction-label {
+    color: currentColor;
+}

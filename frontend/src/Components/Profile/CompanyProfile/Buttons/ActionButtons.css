@@ -10,9 +10,9 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border-radius: 24px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
@@ -20,46 +20,48 @@
 }
 
 .action-buttons button:focus {
-  outline: 2px solid #2563eb;
+  outline: 2px solid #1976d2;
   outline-offset: 2px;
 }
 
 .btn-edit {
-  background-color: #2563eb;
+  background-color: #1976d2;
   color: white;
 }
 
 .btn-edit:hover {
-  background-color: #1d4ed8;
+  background-color: #1565c0;
 }
 
 .btn-follow {
-  background-color: #2563eb;
+  background-color: #1976d2;
   color: white;
 }
 
 .btn-follow:hover {
-  background-color: #1d4ed8;
+  background-color: #1565c0;
 }
 
 .btn-follow.following {
   background-color: white;
-  color: #2563eb;
-  border: 2px solid #2563eb;
+  color: #1976d2;
+  border: 1px solid #d0d0d0;
 }
 
 .btn-follow.following:hover {
-  background-color: #eff6ff;
+  background-color: #f8f9fa;
+  border-color: #1976d2;
 }
 
 .btn-website {
   background-color: white;
-  color: #2563eb;
-  border: 2px solid #2563eb;
+  color: #1976d2;
+  border: 1px solid #d0d0d0;
 }
 
 .btn-website:hover {
-  background-color: #eff6ff;
+  background-color: #f8f9fa;
+  border-color: #1976d2;
 }
 
 .action-buttons .icon {

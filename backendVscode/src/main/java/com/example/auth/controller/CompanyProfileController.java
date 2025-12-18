@@ -12,10 +12,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/company")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CompanyProfileController {
 
     private final CompanyProfileService companyProfileService;
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId) {
+        try {
+            CompanyDTO company = companyProfileService.getCompanyByUserId(userId);
+            return ResponseEntity.ok(company);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found for user");
+        }
+    }
 
     @GetMapping("/{companyId}")
     public ResponseEntity<?> getCompanyProfile(@PathVariable Long companyId, @RequestParam(required = false) Long userId) {
@@ -23,7 +32,7 @@ public class CompanyProfileController {
             CompanyDTO company = companyProfileService.getCompanyProfile(companyId, userId);
             return ResponseEntity.ok(company);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ERROR in get Profile");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found");
         }
     }
 
@@ -58,7 +67,6 @@ public class CompanyProfileController {
     @PutMapping("/{companyId}")
     public ResponseEntity<?> updateCompanyProfile(@PathVariable Long companyId, @RequestBody CompanyUpdateDTO request) {
         try {
-            System.out.println(request.toString());
             CompanyDTO updated = companyProfileService.updateCompanyProfile(companyId, request);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {

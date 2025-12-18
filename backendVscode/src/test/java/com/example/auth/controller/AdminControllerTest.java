@@ -25,6 +25,7 @@ import com.example.auth.entity.User;
 import com.example.auth.enums.Gender;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.repository.VerificationTokenRepository;
+import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,12 +40,16 @@ class AdminControllerTest {
         @Autowired
         private VerificationTokenRepository tokenRepository;
 
+        @Autowired
+        private JobSeekerProfileRepository jobSeekerProfileRepository;
+
         private User adminUser;
         private User regularUser;
 
         @BeforeEach
         void setUp() {
-                // Delete verification tokens first (FK dependency), then users
+                // Delete child entities first to avoid FK constraint violations
+                jobSeekerProfileRepository.deleteAll();
                 tokenRepository.deleteAll();
                 userRepository.deleteAll();
 
@@ -103,9 +108,9 @@ class AdminControllerTest {
         void getAllUsers_WithAdminRole_ShouldReturnAllUsers() throws Exception {
                 mockMvc.perform(get("/admin/users"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", hasSize(2)))
-                                .andExpect(jsonPath("$[0].email", anyOf(is("admin@test.com"), is("user@test.com"))))
-                                .andExpect(jsonPath("$[1].email", anyOf(is("admin@test.com"), is("user@test.com"))));
+                                .andExpect(jsonPath("$.users", hasSize(2)))
+                                .andExpect(jsonPath("$.users[0].email", anyOf(is("admin@test.com"), is("user@test.com"))))
+                                .andExpect(jsonPath("$.users[1].email", anyOf(is("admin@test.com"), is("user@test.com"))));
         }
 
         @Test
@@ -113,10 +118,10 @@ class AdminControllerTest {
         void getAllUsers_WithAdminRole_ShouldReturnUserDetails() throws Exception {
                 mockMvc.perform(get("/admin/users"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[*].id", hasItems(notNullValue())))
-                                .andExpect(jsonPath("$[*].fullName", hasItems(notNullValue())))
-                                .andExpect(jsonPath("$[*].email", hasItems(notNullValue())))
-                                .andExpect(jsonPath("$[*].role", hasItems(notNullValue())));
+                                .andExpect(jsonPath("$.users[*].id", hasItems(notNullValue())))
+                                .andExpect(jsonPath("$.users[*].fullName", hasItems(notNullValue())))
+                                .andExpect(jsonPath("$.users[*].email", hasItems(notNullValue())))
+                                .andExpect(jsonPath("$.users[*].role", hasItems(notNullValue())));
         }
 
         @Test
@@ -139,9 +144,9 @@ class AdminControllerTest {
         void getStats_WithAdminRole_ShouldReturnCorrectStatistics() throws Exception {
                 mockMvc.perform(get("/admin/stats"))
                                 .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("Total Users: 2")))
-                                .andExpect(content().string(containsString("Enabled: 2")))
-                                .andExpect(content().string(containsString("Admins: 1")));
+                                .andExpect(jsonPath("$.totalUsers").value(2))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(1));
         }
 
         @Test
@@ -160,9 +165,9 @@ class AdminControllerTest {
 
                 mockMvc.perform(get("/admin/stats"))
                                 .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("Total Users: 3")))
-                                .andExpect(content().string(containsString("Enabled: 2")))
-                                .andExpect(content().string(containsString("Admins: 1")));
+                                .andExpect(jsonPath("$.totalUsers").value(3))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(1));
         }
 
         @Test
@@ -390,7 +395,7 @@ class AdminControllerTest {
 
                 mockMvc.perform(get("/admin/users"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", hasSize(0)));
+                                .andExpect(jsonPath("$.users", hasSize(0)));
         }
 
         @Test
@@ -422,9 +427,9 @@ class AdminControllerTest {
 
                 mockMvc.perform(get("/admin/stats"))
                                 .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("Total Users: 2")))
-                                .andExpect(content().string(containsString("Enabled: 2")))
-                                .andExpect(content().string(containsString("Admins: 2")));
+                                .andExpect(jsonPath("$.totalUsers").value(2))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(2));
         }
 
         @Test

@@ -1,6 +1,7 @@
 -- ===================================
 -- DROP TABLES (in correct dependency order)
 -- ===================================
+DROP TABLE IF EXISTS connections;
 DROP TABLE IF EXISTS comments_like;
 DROP TABLE IF EXISTS comments_attach;
 DROP TABLE IF EXISTS comments;
@@ -272,3 +273,24 @@ CREATE TABLE comments_like(
     FOREIGN KEY (CommentId) REFERENCES comments(CommentId) ON DELETE CASCADE,
     FOREIGN KEY (UserId) REFERENCES user(UserId) ON DELETE CASCADE
 );
+
+
+-- ===================================
+-- CONNECTIONS TABLE
+-- ===================================
+CREATE TABLE connections (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sender_id       BIGINT NOT NULL,
+    receiver_id     BIGINT NOT NULL,
+    created_at      DATETIME NOT NULL,
+    status          ENUM('PENDING', 'ACCEPTED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    
+    FOREIGN KEY (sender_id) REFERENCES user(UserId) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES user(UserId) ON DELETE CASCADE,
+    
+    UNIQUE KEY unique_connection (sender_id, receiver_id)
+);
+
+CREATE INDEX idx_sender ON connections(sender_id);
+CREATE INDEX idx_receiver ON connections(receiver_id);
+CREATE INDEX idx_status ON connections(status);

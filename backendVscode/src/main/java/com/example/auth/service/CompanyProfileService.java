@@ -54,12 +54,26 @@ public class CompanyProfileService {
                 .build();
     }
 
+    public CompanyDTO getCompanyByUserId(Long userId) {
+        CompanyProfile companyProfile = companyProfileRepo.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Company profile not found for user"));
+        
+        CompanyDTO companyDTO = getCompanyDTO(companyProfile);
+        companyDTO.setCompanyProfileId(companyProfile.getCompanyProfileId());
+        companyDTO.setLocations(getLocations(companyProfile.getCompanyProfileId()));
+        
+        return companyDTO;
+    }
+
     public CompanyDTO getCompanyProfile(Long companyId, Long userId){
-        CompanyProfile companyProfile = companyProfileRepo.findByUserId(companyId)
+        CompanyProfile companyProfile = companyProfileRepo.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("company not found"));
 
         CompanyDTO companyDTO = getCompanyDTO(companyProfile);
-        companyDTO.setIsFollowing(companyFollowerRepo.existsByFollowerIdAndCompanyId(userId, companyId));
+        companyDTO.setCompanyProfileId(companyProfile.getCompanyProfileId());
+        if (userId != null) {
+            companyDTO.setIsFollowing(companyFollowerRepo.existsByFollowerIdAndCompanyId(userId, companyId));
+        }
         companyDTO.setLocations(getLocations(companyId));
 
         return companyDTO;
@@ -80,7 +94,7 @@ public class CompanyProfileService {
                 .coverImageUrl(request.getCoverImageUrl() != null ? request.getCoverImageUrl() : company.getCoverImageUrl())
                 .build();
 
-        CompanyProfile saved = companyProfileRepo.save(company);
+        CompanyProfile saved = companyProfileRepo.save(updated);
 
         if (request.getLocations() != null) {
             updateCompanyLocations(companyId, request.getLocations());

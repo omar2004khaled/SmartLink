@@ -1,33 +1,33 @@
 .navigation-tabs {
   display: flex;
   background-color: white;
-  border-bottom: 2px solid #e1e8ed;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0 40px;
 }
 
 .tab-button {
-  padding: 16px 32px;
-  font-size: 15px;
+  padding: 16px 24px;
+  font-size: 14px;
   font-weight: 500;
-  color: #718096;
+  color: #666;
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  bottom: -2px;
+  bottom: -1px;
 }
 
 .tab-button:hover {
-  color: #2563eb;
-  background-color: #f7fafc;
+  color: #1976d2;
+  background-color: rgba(25, 118, 210, 0.05);
 }
 
 .tab-button.active {
-  color: #2563eb;
-  font-weight: 700;
-  border-bottom-color: #2563eb;
+  color: #1976d2;
+  font-weight: 600;
+  border-bottom-color: #1976d2;
 }
 
 @media (max-width: 768px) {

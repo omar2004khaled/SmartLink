@@ -30,6 +30,13 @@ public class ProfileService {
         return toResponse(p);
     }
 
+    @Transactional(readOnly = true)
+    public JobSeekerProfileResponse getProfileByUserId(Long userId) {
+        JobSeekerProfile p = profileRepo.findByUser_Id(userId)
+        .orElseThrow(() -> new RuntimeException("Profile not found for user id " + userId));
+        return toResponse(p);
+    }
+
     @Transactional
     public JobSeekerProfileResponse createProfile(JobSeekerProfileRequest req) {
         JobSeekerProfile p = new JobSeekerProfile();
@@ -54,12 +61,17 @@ public class ProfileService {
     public JobSeekerProfileResponse updateProfile(Long id, JobSeekerProfileRequest req) {
         JobSeekerProfile p = profileRepo.findById(id)
         .orElseThrow(() -> new RuntimeException("Profile not found with id " + id));
+        
         applyRequestToEntity(p, req);
 
-        if (req.getUserId() != null) {
+        // Don't update user if not provided
+        if (req.getUserId() != null && !req.getUserId().equals(p.getUser().getId())) {
             User u = userRepo.findById(req.getUserId())
             .orElseThrow(() -> new RuntimeException("User not found with id " + req.getUserId()));
-            p.setUser(u);}
+            p.setUser(u);
+        }
+        
+        // Update location if provided
         if (req.getLocationId() != null) {
             Location loc = locationRepo.findById(req.getLocationId())
             .orElseThrow(() -> new RuntimeException("Location not found with id " + req.getLocationId()));
