@@ -24,6 +24,30 @@ jobs:
     - name: Build with Maven
       working-directory: ./backendVscode
       run: mvn -B package --file pom.xml
+      
+    - name: Generate JaCoCo Report
+      working-directory: ./backendVscode
+      run: mvn jacoco:report
+      
+    # Optional: Upload test results as artifact
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports
+        path: |
+          backendVscode/target/surefire-reports/
+          backendVscode/target/jacoco-report/
+          
+    - name: Show failed tests
+      if: always()
+      working-directory: ./backendVscode
+      run: |
+        echo "Checking for test failures..."
+        find . -name "*.txt" -path "*/surefire-reports/*" | xargs grep -l "FAILURE\|ERROR" | while read file; do
+          echo "=== Failed test file: $file ==="
+          cat "$file"
+        done
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
