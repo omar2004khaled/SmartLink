@@ -187,7 +187,7 @@ public class AuthService {
         }
 
         // 4. Generate JWT token
-        return jwtService.generateToken(user.getEmail(), user.getRole());
+        return jwtService.generateToken(user.getEmail(), user.getRole(), user.getUserType());
     }
 
     public String getUserRole(String email) {

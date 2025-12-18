@@ -10,10 +10,13 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 public class OAuth2Service {
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository jobSeekerProfileRepository;
 
-    public OAuth2Service(UserRepository userRepository, JwtService jwtService) {
+    public OAuth2Service(UserRepository userRepository, JwtService jwtService,
+            com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository jobSeekerProfileRepository) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
+        this.jobSeekerProfileRepository = jobSeekerProfileRepository;
     }
 
     public String processOAuth2User(OAuth2User oauth2User, String provider) {
@@ -24,7 +27,17 @@ public class OAuth2Service {
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     User newUser = new User(name, email, provider, providerId);
-                    return userRepository.save(newUser);
+                    User savedUser = userRepository.save(newUser);
+
+                    com.example.auth.entity.ProfileEntities.JobSeekerProfile profile = new com.example.auth.entity.ProfileEntities.JobSeekerProfile();
+                    profile.setUser(savedUser);
+                    profile.setBirthDate(newUser.getBirthDate());
+
+                    profile.setGender(com.example.auth.entity.ProfileEntities.JobSeekerProfile.Gender.MALE);
+
+                    jobSeekerProfileRepository.save(profile);
+
+                    return savedUser;
                 });
 
         if (!user.getProvider().equals(provider)) {
@@ -33,6 +46,6 @@ public class OAuth2Service {
             userRepository.save(user);
         }
 
-        return jwtService.generateToken(user.getEmail(), user.getRole());
+        return jwtService.generateToken(user.getEmail(), user.getRole(), user.getUserType());
     }
 }
