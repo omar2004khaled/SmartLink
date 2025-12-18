@@ -1,7 +1,9 @@
 package com.example.auth.config;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,10 +20,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
         private final JwtService jwtService;
         private final OAuth2SuccessHandler oAuth2SuccessHandler;
+        private final List<String> allowedOrigins;
 
-        public SecurityConfig(JwtService jwtService, OAuth2SuccessHandler oAuth2SuccessHandler) {
+        public SecurityConfig(
+                        JwtService jwtService,
+                        OAuth2SuccessHandler oAuth2SuccessHandler,
+                        @Value("${app.cors.allowed-origins}") String allowedOriginsProperty) {
                 this.jwtService = jwtService;
                 this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+                this.allowedOrigins = Arrays.stream(allowedOriginsProperty.split(","))
+                                .map(String::trim)
+                                .filter(origin -> !origin.isEmpty())
+                                .toList();
         }
 
         @Bean
@@ -29,32 +39,31 @@ public class SecurityConfig {
                 JwtAuthFilter jwtFilter = new JwtAuthFilter(jwtService);
 
                 http.csrf(csrf -> csrf.disable())
-                        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                        .sessionManagement(session -> session
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                        .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/auth/**", "/auth/company/**", "/api/public",
-                                        "/oauth2/**", "/login/oauth2/**",
-                                        "/api/profiles/**", "/api/locations/**",
-                                        "/api/company/**", "/api/users/**", "/Post/add/**",
-                                        "/Post/**","/comment/**","/jobs/**",
-                                        "/graphql","/apply/**","/reactions/**",
-                                        "/api/search/**", "/api/connections/**")
-                                .permitAll()
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .anyRequest().authenticated())
-                        .oauth2Login(oauth2 -> oauth2
-                                .successHandler(oAuth2SuccessHandler))
-                        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/auth/**", "/auth/company/**", "/api/public",
+                                                                "/oauth2/**", "/login/oauth2/**",
+                                                                "/api/profiles/**", "/api/locations/**",
+                                                                "/api/company/**", "/api/users/**", "/Post/add/**",
+                                                                "/Post/**", "/comment/**", "/jobs/**",
+                                                                "/graphql", "/apply/**", "/reactions/**",
+                                                                "/api/search/**", "/api/connections/**")
+                                                .permitAll()
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                .anyRequest().authenticated())
+                                .oauth2Login(oauth2 -> oauth2
+                                                .successHandler(oAuth2SuccessHandler))
+                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }
 
-        // ADD THIS BEAN
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
-                configuration.setAllowedOrigins(Arrays.asList("http://localhost:5175", "http://localhost:5173"));
+                configuration.setAllowedOrigins(allowedOrigins);
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration.setAllowCredentials(true);

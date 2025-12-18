@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const CompanyLogin = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const CompanyLogin = () => {
     setError('');
 
     try {
-      const response = await fetch("http://localhost:8080/auth/company/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/company/login`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

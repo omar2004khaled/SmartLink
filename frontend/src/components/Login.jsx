@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import Logo from '../assets/Logo.png';
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { API_BASE_URL, GOOGLE_OAUTH2_AUTH_URL } from '../config';
 
 
 const Login = () => {
@@ -20,7 +21,7 @@ const Login = () => {
   const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
 
   const handleGoogleLogin = () => {
-   window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+   window.location.href = GOOGLE_OAUTH2_AUTH_URL;
 };
 
 
@@ -55,7 +56,7 @@ useEffect(() => {
   setError('');
 
   try {
-    const response = await fetch("http://localhost:8080/auth/login", {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -127,7 +128,7 @@ useEffect(() => {
       
       // Fetch userId from backend
       try {
-        const userResponse = await fetch(`http://localhost:8080/api/users/email/${data.email}`, {
+        const userResponse = await fetch(`${API_BASE_URL}/api/users/email/${data.email}`, {
           headers: {
             'Authorization': `Bearer ${data.token}`
           }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Briefcase, ChevronLeft, ChevronRight } from 'lucide-react';
 import JobCard from './JobCard';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { API_BASE_URL } from '../config';
 
 const JobList = ({ companyId, refreshTrigger, onEdit }) => {
   const [jobs, setJobs] = useState([]);
@@ -22,8 +23,8 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
     if(companyId===null) return;
     try {
       const endpoint = activeTab === 'current' 
-        ? `http://localhost:8080/jobs/company/current/${companyId}?page=${currentPage}&size=${pageSize}`
-        : `http://localhost:8080/jobs/company/ended/${companyId}?page=${currentPage}&size=${pageSize}`;
+        ? `${API_BASE_URL}/jobs/company/current/${companyId}?page=${currentPage}&size=${pageSize}`
+        : `${API_BASE_URL}/jobs/company/ended/${companyId}?page=${currentPage}&size=${pageSize}`;
       
       const response = await fetch(endpoint);
       if (!response.ok) throw new Error('Failed to fetch jobs');
@@ -53,7 +54,7 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
     
     setDeleting(true);
     try {
-      const response = await fetch(`http://localhost:8080/jobs/${deleteModal.jobId}`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/${deleteModal.jobId}`, {
         method: 'DELETE'
       });
       

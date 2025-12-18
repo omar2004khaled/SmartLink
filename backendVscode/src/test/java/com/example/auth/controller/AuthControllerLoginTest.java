@@ -1,27 +1,59 @@
 package com.example.auth.controller;
 
+import com.example.auth.entity.User;
+import com.example.auth.enums.Gender;
+import com.example.auth.repository.UserRepository;
+import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository;
 import com.example.auth.service.AuthService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 class AuthControllerLoginTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @MockBean
     private AuthService authService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JobSeekerProfileRepository jobSeekerProfileRepository;
+
+    @BeforeEach
+    void setUp() {
+        // Delete child entities first to avoid FK constraint violation
+        jobSeekerProfileRepository.deleteAll();
+        userRepository.deleteAll();
+
+        // Ensure a test user exists for login tests
+        User testUser = new User();
+        testUser.setFullName("Regular User");
+        testUser.setEmail("user@test.com");
+        testUser.setPassword("encodedPassword");
+        testUser.setBirthDate(LocalDate.of(1995, 5, 20));
+        testUser.setPhoneNumber("+209876543210");
+        testUser.setGender(Gender.FEMALE);
+        testUser.setEnabled(true);
+        testUser.setRole("USER");
+        userRepository.save(testUser);
+    }
 
     @Test
     void login_WithValidCredentials_Returns200AndToken() throws Exception {
@@ -34,8 +66,8 @@ class AuthControllerLoginTest {
         String body = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
 
         mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value(token))
                 .andExpect(jsonPath("$.email").value(email));
@@ -51,8 +83,8 @@ class AuthControllerLoginTest {
         String body = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
 
         mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Invalid password"));
     }

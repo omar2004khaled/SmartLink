@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 const CompanySignUp = () => {
   const navigate = useNavigate();
@@ -94,7 +95,7 @@ const CompanySignUp = () => {
     setApiError('');
 
     try {
-      const response = await fetch("http://localhost:8080/auth/company/register", {
+      const response = await fetch(`${API_BASE_URL}/auth/company/register`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Home, Briefcase, Users, User, LogOut, Menu, X } from 'lucide-react';
 import './Navbar.css';
+import { API_BASE_URL } from '../config';
 
 const Navbar = ({ showSearch = false }) => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Navbar = ({ showSearch = false }) => {
     setIsSearching(true);
     try {
       const currentUserId = localStorage.getItem('userId');
-      const response = await fetch(`http://localhost:8080/api/search/users?query=${encodeURIComponent(query)}&currentUserId=${currentUserId}`);
+      const response = await fetch(`${API_BASE_URL}/api/search/users?query=${encodeURIComponent(query)}&currentUserId=${currentUserId}`);
       const data = await response.json();
       
       if (response.ok) {

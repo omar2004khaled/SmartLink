@@ -1,4 +1,6 @@
-const GRAPHQL_ENDPOINT = 'http://localhost:8080/graphql';
+import { API_BASE_URL } from '../../config';
+
+const GRAPHQL_ENDPOINT = `${API_BASE_URL}/graphql`;
 
 const GET_JOBS_QUERY = `
   query GetJobs($filter: JobFilter) {

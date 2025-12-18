@@ -7,6 +7,7 @@ import CommentsPanel from './CommentsPanel';
 import { SaveComment, GetComments, GetUserInfo, userIdFromLocalStorage, UpdatePost, DeletePost } from '../FetchData/FetchData';
 import commentsSeed from '../data/commentsSeed';
 import './PostCard.css';
+import { API_BASE_URL, CLOUDINARY_UPLOAD_URL } from '../config';
 
 function PostItem({ post }) {
   const [showComments, setShowComments] = useState(false);
@@ -68,12 +69,11 @@ function PostItem({ post }) {
 
   const uploadToCloudinary = async (file) => {
     try {
-      const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', 'dyk7gqqw');
 
-      const res = await fetch(url, {
+      const res = await fetch(CLOUDINARY_UPLOAD_URL, {
         method: 'POST',
         body: formData,
       });
@@ -165,7 +165,7 @@ function PostItem({ post }) {
   };
 
   const saveCommentToServer = async (commentDTO) => {
-    const res = await fetch('http://localhost:8080/comment/add', {
+    const res = await fetch(`${API_BASE_URL}/comment/add`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(commentDTO),
