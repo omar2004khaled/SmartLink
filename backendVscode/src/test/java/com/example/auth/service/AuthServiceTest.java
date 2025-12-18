@@ -74,8 +74,6 @@ class AuthServiceTest {
         validRequest.setGender(Gender.MALE);
     }
 
-
-
     @Test
     void register_WithValidData_ShouldSaveUserAndSendVerification() {
         // Arrange
@@ -188,7 +186,8 @@ class AuthServiceTest {
         when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
         when(passwordEncoder.matches(rawPassword, "encoded")).thenReturn(true);
 
-        when(jwtService.generateToken(email, "USER")).thenReturn("jwt-token-123");
+        // FIXED: Added third parameter "JOB_SEEKER"
+        when(jwtService.generateToken(email, "USER", "JOB_SEEKER")).thenReturn("jwt-token-123");
 
         // Act
         String token = authService.login(email, rawPassword);
@@ -310,13 +309,15 @@ class AuthServiceTest {
 
         when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
         when(passwordEncoder.matches(rawPassword, "encoded")).thenReturn(true);
-        when(jwtService.generateToken(email, "ADMIN")).thenReturn("jwt-token-admin");
+
+        // FIXED: Added third parameter "JOB_SEEKER"
+        when(jwtService.generateToken(email, "ADMIN", "JOB_SEEKER")).thenReturn("jwt-token-admin");
 
         // Act
         String token = authService.login(email, rawPassword);
 
         // Assert
         assertEquals("jwt-token-admin", token);
-        verify(jwtService).generateToken(email, "ADMIN");
+        verify(jwtService).generateToken(email, "ADMIN", "JOB_SEEKER");
     }
 }
