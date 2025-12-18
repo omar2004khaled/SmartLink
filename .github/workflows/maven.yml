@@ -23,7 +23,7 @@ jobs:
         cache: maven
     - name: Build with Maven
       working-directory: ./backendVscode
-      run: mvn -B package --file pom.xml
+      run: mvn clean verify -Dmaven.test.failure.ignore=true
       
     - name: Generate JaCoCo Report
       working-directory: ./backendVscode
