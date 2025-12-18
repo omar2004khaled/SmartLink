@@ -8,6 +8,7 @@ import LocationsSection from '../LocationSection/LocationsSection';
 import PostsTab from '../Tabs/PostsTab';
 import EditModal from '../EditModal/EditModal';
 import './CompanyProfile.css';
+import { API_BASE_URL } from '../../../../config';
 
 export default function CompanyProfile({ companyId, userId }) {
   const [activeTab, setActiveTab] = useState('About');
@@ -20,7 +21,6 @@ export default function CompanyProfile({ companyId, userId }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editSection, setEditSection] = useState(null);
   const tabs = ['About', 'Posts'];
-  const API_BASE_URL ='http://localhost:8080';
 
   useEffect(() => {
     if (companyId || userId) {

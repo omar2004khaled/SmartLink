@@ -13,9 +13,10 @@ import SkillForm from "./SkillForm";
 import ProjectForm from "./ProjectForm";
 import EducationForm from "./EducationForm";
 import "./UserProfile.css";
+import { API_BASE_URL } from "../../../config";
 
 
-const API_BASE = "http://localhost:8080/api/profiles";
+const API_BASE = `${API_BASE_URL}/api/profiles`;
 
 export default function UserProfile() {
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ export default function UserProfile() {
           fetch(`${API_BASE}/${profileId}/skills`, { headers }),
           fetch(`${API_BASE}/${profileId}/projects`, { headers }),
           fetch(`${API_BASE}/${profileId}/education`, { headers }),
-          fetch(`http://localhost:8080/api/locations`, { headers })
+          fetch(`${API_BASE_URL}/api/locations`, { headers })
         ]);
         setProfile(await profileRes.json());
         setExperience(await expRes.json());
@@ -113,10 +114,10 @@ export default function UserProfile() {
     try {
       const token = localStorage.getItem('authToken');
       const [pendingRes, acceptedRes] = await Promise.all([
-        fetch(`http://localhost:8080/api/connections/pending?userId=${loggedInUserId}`, {
+        fetch(`${API_BASE_URL}/api/connections/pending?userId=${loggedInUserId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch(`http://localhost:8080/api/connections/accepted?userId=${loggedInUserId}`, {
+        fetch(`${API_BASE_URL}/api/connections/accepted?userId=${loggedInUserId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -153,7 +154,7 @@ export default function UserProfile() {
   const handleConnect = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      await fetch('http://localhost:8080/api/connections/send', {
+      await fetch(`${API_BASE_URL}/api/connections/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,7 +171,7 @@ export default function UserProfile() {
   const handleCancelConnection = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      await fetch(`http://localhost:8080/api/connections/${connectionId}/cancel?userId=${loggedInUserId}`, {
+      await fetch(`${API_BASE_URL}/api/connections/${connectionId}/cancel?userId=${loggedInUserId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -183,7 +184,7 @@ export default function UserProfile() {
   const handleAcceptConnection = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      await fetch(`http://localhost:8080/api/connections/${connectionId}/accept?userId=${loggedInUserId}`, {
+      await fetch(`${API_BASE_URL}/api/connections/${connectionId}/accept?userId=${loggedInUserId}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -196,7 +197,7 @@ export default function UserProfile() {
   const handleRejectConnection = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      await fetch(`http://localhost:8080/api/connections/${connectionId}/reject?userId=${loggedInUserId}`, {
+      await fetch(`${API_BASE_URL}/api/connections/${connectionId}/reject?userId=${loggedInUserId}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -209,7 +210,7 @@ export default function UserProfile() {
   const handleRemoveConnection = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      await fetch(`http://localhost:8080/api/connections/${connectionId}/remove?userId=${loggedInUserId}`, {
+      await fetch(`${API_BASE_URL}/api/connections/${connectionId}/remove?userId=${loggedInUserId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -247,7 +248,7 @@ export default function UserProfile() {
         if (!loc) {
           console.log('Creating new location...');
           // Create new location
-          const locRes = await fetch(`http://localhost:8080/api/locations`, {
+          const locRes = await fetch(`${API_BASE_URL}/api/locations`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -263,7 +264,7 @@ export default function UserProfile() {
           loc = await locRes.json();
           console.log('New location created:', loc);
           // Refresh locations
-          const allLocRes = await fetch(`http://localhost:8080/api/locations`, {
+          const allLocRes = await fetch(`${API_BASE_URL}/api/locations`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           setLocations(await allLocRes.json());

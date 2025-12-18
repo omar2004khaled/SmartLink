@@ -10,9 +10,10 @@ import SkillForm from "./SkillForm";
 import ProjectForm from "./ProjectForm";
 import EducationForm from "./EducationForm";
 import "./UserProfile.css";
+import { API_BASE_URL } from "../../../config";
 
 
-const API_BASE = "http://localhost:8080/api/profiles";
+const API_BASE = `${API_BASE_URL}/api/profiles`;
 
 export default function UserProfile({ profileId = 1 }) {
   const [profile, setProfile] = useState(null);
@@ -41,7 +42,7 @@ export default function UserProfile({ profileId = 1 }) {
           fetch(`${API_BASE}/${profileId}/skills`),
           fetch(`${API_BASE}/${profileId}/projects`),
           fetch(`${API_BASE}/${profileId}/education`),
-          fetch(`http://localhost:8080/api/locations`)
+          fetch(`${API_BASE_URL}/api/locations`)
         ]);
         setProfile(await profileRes.json());
         setExperience(await expRes.json());
@@ -73,7 +74,7 @@ export default function UserProfile({ profileId = 1 }) {
         let loc = locations.find(l => l.country === form.country && l.city === form.city);
         if (!loc) {
           // Create new location
-          const locRes = await fetch(`http://localhost:8080/api/locations`, {
+          const locRes = await fetch(`${API_BASE_URL}/api/locations`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ country: form.country, city: form.city })
@@ -81,7 +82,7 @@ export default function UserProfile({ profileId = 1 }) {
           if (!locRes.ok) throw new Error('Failed to create location');
           loc = await locRes.json();
           // Refresh locations
-          const allLocRes = await fetch(`http://localhost:8080/api/locations`);
+          const allLocRes = await fetch(`${API_BASE_URL}/api/locations`);
           setLocations(await allLocRes.json());
         }
         locationId = loc.locationId;

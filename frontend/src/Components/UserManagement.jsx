@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight, Trash2, UserPlus, UserMinus, AlertCircle, Mail, BarChart3, Users, UserCheck, Shield } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -22,7 +23,7 @@ const UserManagement = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:8080/admin/stats', {
+      const response = await fetch(`${API_BASE_URL}/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -47,7 +48,7 @@ const UserManagement = () => {
         userType: userTypeFilter
       });
 
-      const response = await fetch(`http://localhost:8080/admin/users?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/users?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -90,7 +91,7 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:8080/admin/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -121,7 +122,7 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:8080/admin/promote/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/promote/${userId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -152,7 +153,7 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:8080/admin/demote/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/demote/${userId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -177,7 +178,7 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:8080/admin/send-email/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/send-email/${userId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

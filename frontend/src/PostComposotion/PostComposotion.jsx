@@ -8,6 +8,7 @@ import TextEditor from './text_editor';
 import SubmitButton from './submit_button';
 import { SavePost , userIdFromLocalStorage} from '../FetchData/FetchData';
 import { Link, useNavigate } from 'react-router-dom';
+import { CLOUDINARY_UPLOAD_URL } from '../config';
 
 export default function PostComposer() {
   const [postText, setPostText] = useState('');
@@ -23,14 +24,11 @@ export default function PostComposer() {
   };
 
   const uploadFileToCloudinary = async (file) => {
-    const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
-
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "dyk7gqqw");   // your preset name
 
-
-    const response = await fetch(url, {
+    const response = await fetch(CLOUDINARY_UPLOAD_URL, {
       method: "POST",
       body: formData,
     });

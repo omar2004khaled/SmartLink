@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 import Logo from '../assets/Logo.png';
+import { API_BASE_URL } from '../config';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch("http://localhost:8080/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -75,7 +76,7 @@ const AdminLogin = () => {
 
       if (data.token) {
         // Verify admin role
-        const userResponse = await fetch(`http://localhost:8080/api/users/email/${data.email}`, {
+        const userResponse = await fetch(`${API_BASE_URL}/api/users/email/${data.email}`, {
           headers: {
             'Authorization': `Bearer ${data.token}`
           }

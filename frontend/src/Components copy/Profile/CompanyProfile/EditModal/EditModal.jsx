@@ -5,6 +5,7 @@ import DescriptionForm from './DescriptionForm';
 import OverviewForm from './OverviewForm';
 import LocationsForm from './LocationsForm';
 import './EditModal.css';
+import { CLOUDINARY_UPLOAD_URL } from '../../../../config';
 
 export default function EditModal({ 
   isOpen, 
@@ -73,13 +74,11 @@ export default function EditModal({
     if (!file) return;
     
     try {
-      // Upload to Cloudinary 
-      const cloudinaryUrl = 'https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload';
       const cloudinaryFormData = new FormData();
       cloudinaryFormData.append('file', file);
       cloudinaryFormData.append('upload_preset', 'dyk7gqqw');
 
-      const cloudinaryResponse = await fetch(cloudinaryUrl, {
+      const cloudinaryResponse = await fetch(CLOUDINARY_UPLOAD_URL, {
         method: 'POST',
         body: cloudinaryFormData,
       });

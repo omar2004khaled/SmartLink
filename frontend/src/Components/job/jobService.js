@@ -1,12 +1,13 @@
 
+import { API_BASE_URL, CLOUDINARY_UPLOAD_URL } from '../../config';
+
 const uploadToCloudinary = async (file) => {
   try {
-    const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', 'dyk7gqqw');
     
-    const res = await fetch(url, {
+    const res = await fetch(CLOUDINARY_UPLOAD_URL, {
       method: 'POST',
       body: formData,
     });
@@ -31,7 +32,7 @@ export const submitApplication = async (jobId, applicationData) => {
       }
     }
     const token = localStorage.getItem('authToken');
-    const response = await fetch('http://localhost:8080/apply/post', {
+    const response = await fetch(`${API_BASE_URL}/apply/post`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

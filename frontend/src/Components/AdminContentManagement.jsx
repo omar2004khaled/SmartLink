@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Calendar, User, AlertCircle, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const AdminContentManagement = () => {
   const [posts, setPosts] = useState([]);
@@ -45,7 +46,7 @@ const AdminContentManagement = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:8080/admin/posts?page=${page}&size=${size}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/posts?page=${page}&size=${size}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -94,7 +95,7 @@ const AdminContentManagement = () => {
         return;
       }
       
-      const response = await fetch(`http://localhost:8080/admin/posts/${postId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
