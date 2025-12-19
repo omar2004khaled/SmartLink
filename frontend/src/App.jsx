@@ -1,12 +1,12 @@
 import { Routes, Route } from 'react-router-dom';
-import SignUp from "./components/SignUp";
-import Login from "./components/Login";
-import VerifyEmail from "./components/VerifyEmail";
-import EmailVerified from "./components/EmailVerified";
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
-import OAuthCallback from "./components/OAuthCallback";
-import Dashboard from "./components/Dashboard";
+import SignUp from "./Components/SignUp";
+import Login from "./Components/Login";
+import VerifyEmail from "./Components/VerifyEmail";
+import EmailVerified from "./Components/EmailVerified";
+import ForgotPassword from './Components/ForgotPassword';
+import ResetPassword from './Components/ResetPassword';
+import OAuthCallback from "./Components/OAuthCallback";
+import Dashboard from "./Components/Dashboard";
 import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
 import UserProfile from './Components/Profile/UserProfile/UserProfile';
@@ -32,20 +32,21 @@ function App() {
       <Route path="/home" element={<MainPage />} />
       <Route path="/signup-select" element={<UserTypeSelection />} />
       <Route path="/login-select" element={<LoginTypeSelection />} />
-      
+
       {/* Job Seeker Routes */}
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<UserProfile />} />
       <Route path="/profile/:userId" element={<UserProfile />} />
-      
+
       {/* Company Routes */}
       <Route path="/company/signup" element={<CompanySignUp />} />
       <Route path="/company/login" element={<CompanyLogin />} />
       <Route path="/company-home" element={<CompanyHome />} />
       <Route path="/company-jobs" element={<CompanyJobs />} />
       <Route path="/company-profile" element={<CompanyProfilePage />} />
-      
+      <Route path="/company-profile/:companyId" element={<CompanyProfilePage />} />
+
       {/* Common Routes */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -55,9 +56,9 @@ function App() {
       <Route path="/PostComposotion" element={<PostComposotion />} />
       <Route path="/posts" element={<Posts />} />
       <Route path="/post" element={<PostCard />} />
-      <Route path="/job" element={<JobsPage/>} />
-      <Route path="/jobs" element={<CompanyJobsPage/>} />
-      
+      <Route path="/job" element={<JobsPage />} />
+      <Route path="/jobs" element={<CompanyJobsPage />} />
+
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />

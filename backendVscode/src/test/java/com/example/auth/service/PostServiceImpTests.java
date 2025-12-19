@@ -59,7 +59,7 @@ class PostServiceImpTests {
         post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
         List<Attachment> attachments = Arrays.asList(attachment);
-        postDTO = new PostDTO(1L, "Test post content", 100L, attachments, new Timestamp(System.currentTimeMillis()));
+        postDTO = new PostDTO(1L, "Test post content", 100L, "JOB_SEEKER", attachments, new Timestamp(System.currentTimeMillis()));
     }
 
     @Test
@@ -210,7 +210,7 @@ class PostServiceImpTests {
     @Test
     void updatePost_UpdateContent_ShouldUpdateContent() {
         // Arrange
-        PostDTO existingPostDTO = new PostDTO(1L, "Old content", 100L, new ArrayList<>(), new Timestamp(System.currentTimeMillis()));
+        PostDTO existingPostDTO = new PostDTO(1L, "Old content", 100L, "JOB_SEEKER", new ArrayList<>(), new Timestamp(System.currentTimeMillis()));
         PostDTO updateDTO = new PostDTO();
         updateDTO.setContent("New content");
         
@@ -233,7 +233,7 @@ class PostServiceImpTests {
     void updatePost_UpdateAttachments_ShouldUpdateAttachments() {
         // Arrange
         List<Attachment> attachments = Arrays.asList(attachment);
-        PostDTO existingPostDTO = new PostDTO(1L, "Content", 100L, new ArrayList<>(),new Timestamp(System.currentTimeMillis()));
+        PostDTO existingPostDTO = new PostDTO(1L, "Content", 100L, "JOB_SEEKER", new ArrayList<>(),new Timestamp(System.currentTimeMillis()));
         PostDTO updateDTO = new PostDTO();
         updateDTO.setAttachments(attachments);
 

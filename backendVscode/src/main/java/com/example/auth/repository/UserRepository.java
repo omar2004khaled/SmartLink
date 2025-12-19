@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.id = (SELECT p.UserId FROM Post p WHERE p.postId = :postId)")
     Optional<User> findByPostId(@Param("postId") Long postId);
     
-    @Query("SELECT u FROM User u WHERE u.enabled = true AND u.userType = 'JOB_SEEKER' AND u.id != :currentUserId AND (" +
+    @Query("SELECT u FROM User u WHERE u.enabled = true AND u.id != :currentUserId AND (" +
            "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<User> searchUsers(@Param("query") String query, @Param("currentUserId") Long currentUserId);

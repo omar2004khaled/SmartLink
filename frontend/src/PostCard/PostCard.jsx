@@ -44,7 +44,7 @@ function PostItem({ post }) {
     const fetchUserInfo = async () => {
       const userId = post?.userId;
       if (!userId) return;
-      
+
       setLoadingUserInfo(true);
       try {
         const info = await GetUserInfo(userId);
@@ -95,7 +95,7 @@ function PostItem({ post }) {
     setLoadingComments(true);
     try {
       const data = await GetComments(postId, 0, 10);
-      
+
       const userIds = data.map(c => c.userId).filter(Boolean);
       const uniqueUserIds = [...new Set(userIds.filter(id => id && !commentUsersInfo[id]))];
       const userInfoPromises = uniqueUserIds.map(userId => GetUserInfo(userId));
@@ -110,7 +110,7 @@ function PostItem({ post }) {
         setCommentUsersInfo(prev => ({ ...prev, ...fetchedUserInfo }));
       }
       const allUserInfo = { ...commentUsersInfo, ...fetchedUserInfo };
-      
+
       const mapped = data.map((c) => {
         const userInfo = c.userId ? allUserInfo[c.userId] : null;
         return {
@@ -155,7 +155,7 @@ function PostItem({ post }) {
     if (uploadedUrl) {
       console.log('Uploaded attachment URL:', uploadedUrl);
     } else {
-      try { alert('Attachment upload failed'); } catch(e) {}
+      try { alert('Attachment upload failed'); } catch (e) { }
     }
   };
 
@@ -338,11 +338,11 @@ function PostItem({ post }) {
         const attachments = finalAttachmentUrl ? [{
           attachmentURL: finalAttachmentUrl,
           typeOfAttachment: 'Image',
-          AttachId: null 
+          AttachId: null
         }] : [];
         const attachmentDTO = {
           id: postId,
-          content: null, 
+          content: null,
           attachments: attachments.length > 0 ? attachments : null,
           createdAt: post.createdAt || null
         };
@@ -355,7 +355,7 @@ function PostItem({ post }) {
           id: postId,
           content: editContent.trim() || null,
           userId: post.userId,
-          attachments: null, 
+          attachments: null,
           createdAt: post.createdAt || null
         };
         console.log('Updating post content:', contentDTO);
@@ -374,62 +374,63 @@ function PostItem({ post }) {
   };
 
   const formatRelativeTime = (dateString) => {
-  if (!dateString) return 'just now';
-  
-  try {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    // Less than a minute
-    if (diffInSeconds < 60) {
-      return 'just now';
+    if (!dateString) return 'just now';
+
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+
+      // Less than a minute
+      if (diffInSeconds < 60) {
+        return 'just now';
+      }
+      const diffInMinutes = Math.floor(diffInSeconds / 60);
+      if (diffInMinutes < 60) {
+        return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+      }
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) {
+        return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+      }
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) {
+        return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+      }
+
+      // Weeks
+      const diffInWeeks = Math.floor(diffInDays / 7);
+      if (diffInWeeks < 4) {
+        return `${diffInWeeks} ${diffInWeeks === 1 ? 'week' : 'weeks'} ago`;
+      }
+
+      // Months
+      const diffInMonths = Math.floor(diffInDays / 30);
+      if (diffInMonths < 12) {
+        return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
+      }
+
+      // Years
+      const diffInYears = Math.floor(diffInDays / 365);
+      return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
+
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'recently';
     }
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
-    }
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
-    }
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) {
-      return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
-    }
-    
-    // Weeks
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    if (diffInWeeks < 4) {
-      return `${diffInWeeks} ${diffInWeeks === 1 ? 'week' : 'weeks'} ago`;
-    }
-    
-    // Months
-    const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths < 12) {
-      return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
-    }
-    
-    // Years
-    const diffInYears = Math.floor(diffInDays / 365);
-    return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
-    
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'recently';
-  }
-};
+  };
   return (
     <div className="post-card" data-post-id={post?.id || post?.postId}>
-      <UserHeader 
-        username={userInfo?.fullName || post.username || 'User'} 
-        userId={post.userId} 
+      <UserHeader
+        username={userInfo?.fullName || post.username || 'User'}
+        userId={post.userId}
         time={post.time ? formatRelativeTime(post.time) : 'just now'}
         bio={userInfo ? (userInfo.role ? `${userInfo.role}${userInfo.email ? ` • ${userInfo.email}` : ''}` : userInfo.email || '') : ''}
         avatarUrl={null}
         onDelete={handleDeletePost}
         onUpdate={handleEditPost}
         postId={post?.id || post?.postId}
+        userType={userInfo?.userType || post.userType}
       />
       {isEditing ? (
         <div className="post-edit-mode">
@@ -445,8 +446,8 @@ function PostItem({ post }) {
             {editAttachmentUrl && !editAttachment && (
               <div className="edit-attachment-preview">
                 <img src={editAttachmentUrl} alt="current attachment" />
-                <button 
-                  className="remove-attach" 
+                <button
+                  className="remove-attach"
                   onClick={handleRemoveEditAttachment}
                   aria-label="Remove attachment"
                 >
@@ -454,13 +455,13 @@ function PostItem({ post }) {
                 </button>
               </div>
             )}
-            
+
             {editAttachment && (
               <div className="edit-attachment-preview">
                 <img src={editAttachment.preview} alt="new attachment preview" />
                 {editAttachment.uploading && <div className="uploading-indicator">Uploading…</div>}
-                <button 
-                  className="remove-attach" 
+                <button
+                  className="remove-attach"
                   onClick={handleRemoveEditAttachment}
                   aria-label="Remove attachment"
                 >
@@ -468,12 +469,12 @@ function PostItem({ post }) {
                 </button>
               </div>
             )}
-            
+
             {!editAttachmentUrl && !editAttachment && (
               <label className="attach-button" title="Attach image">
-                <input 
-                  type="file" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  accept="image/*"
                   onChange={handleEditFileChange}
                   disabled={!!editAttachment}
                 />
@@ -481,17 +482,17 @@ function PostItem({ post }) {
               </label>
             )}
           </div>
-          
+
           <div className="post-edit-actions">
-            <button 
-              className="cancel-btn" 
+            <button
+              className="cancel-btn"
               onClick={handleCancelEdit}
               disabled={isSaving}
             >
               Cancel
             </button>
-            <button 
-              className="save-btn" 
+            <button
+              className="save-btn"
               onClick={handleSaveEdit}
               disabled={isSaving || (!editContent.trim() && !editAttachmentUrl)}
             >
@@ -501,25 +502,25 @@ function PostItem({ post }) {
         </div>
       ) : (
         <>
-  <Content content={post.content ?? ''} />
-  
-  {/* Display ALL attachments */}
-  {post.attachments && post.attachments.length > 0 && (
-    <div className="post-attachments-container">
-      {post.attachments.map((attachment, index) => (
-        <Attachment 
-          key={`attachment-${post.id}-${index}`}
-          attachment={attachment}
-          index={index}
-          totalAttachments={post.attachments.length}
-        />
-      ))}
-    </div>
-  )}
-</>
+          <Content content={post.content ?? ''} />
+
+          {/* Display ALL attachments */}
+          {post.attachments && post.attachments.length > 0 && (
+            <div className="post-attachments-container">
+              {post.attachments.map((attachment, index) => (
+                <Attachment
+                  key={`attachment-${post.id}-${index}`}
+                  attachment={attachment}
+                  index={index}
+                  totalAttachments={post.attachments.length}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
-      <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} postId= {post?.id || post?.postId} userId={userIdFromLocalStorage()}/>
+      <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} postId={post?.id || post?.postId} userId={userIdFromLocalStorage()} />
 
       {inlineVisible && (
         <div className="inline-comments">

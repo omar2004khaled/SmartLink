@@ -22,8 +22,12 @@ public class ProfileController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<JobSeekerProfileResponse> getByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getProfileByUserId(userId));
+    public ResponseEntity<?> getByUserId(@PathVariable Long userId) {
+        try {
+            return ResponseEntity.ok(service.getProfileByUserId(userId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Profile not found");
+        }
     }
 
     @PostMapping

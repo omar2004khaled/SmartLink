@@ -79,7 +79,7 @@ const Navbar = ({ showSearch = false }) => {
                     <div className="search-loading">Searching...</div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map(user => (
-                      <div key={user.id} className="search-result-item" onClick={() => navigate(`/profile/${user.id}`)}>
+                      <div key={user.id} className="search-result-item" onClick={() => navigate(user.userType === 'COMPANY' ? `/company-profile/${user.id}` : `/profile/${user.id}`)}>
                         <div className="result-avatar">{user.fullName.charAt(0)}</div>
                         <div className="result-info">
                           <div className="result-name">{user.fullName}</div>

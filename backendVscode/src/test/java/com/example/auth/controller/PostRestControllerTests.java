@@ -31,7 +31,7 @@ class PostRestControllerTests {
 
     @BeforeEach
     void setUp() {
-        postDTO = new PostDTO(1L, "Test post content", 100L,
+        postDTO = new PostDTO(1L, "Test post content", 100L, "JOB_SEEKER",
                 Arrays.asList(), new Timestamp(System.currentTimeMillis()));
     }
 

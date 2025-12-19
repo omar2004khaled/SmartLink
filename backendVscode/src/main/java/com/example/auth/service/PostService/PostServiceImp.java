@@ -21,13 +21,15 @@ public class PostServiceImp implements PostService{
     private AttachmentService attachmentService;
     private PostAttachmentService postAttachmentService;
     private CommentRepo commentRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    public PostServiceImp(PostRepository postRepository , AttachmentService attachmentService ,PostAttachmentService postAttachmentService , CommentRepo commentRepo) {
+    public PostServiceImp(PostRepository postRepository , AttachmentService attachmentService ,PostAttachmentService postAttachmentService , CommentRepo commentRepo, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.attachmentService = attachmentService;
         this.postAttachmentService = postAttachmentService;
         this.commentRepository = commentRepo;
+        this.userRepository = userRepository;
     }
     @Override
     public List<PostDTO> findAll(Pageable pageable) {
@@ -41,7 +43,10 @@ public class PostServiceImp implements PostService{
                 Optional<Attachment> attachment = attachmentService.findById(attachmentID);
                 if (attachment.isPresent()) attachments.add(attachment.get());
             }
-            PostDTO answer = new PostDTO(post.getPostId() ,  post.getContent(),post.getUserId(), attachments , post.getCreatedAt());
+            String userType = userRepository.findById(post.getUserId())
+                    .map(user -> user.getUserType() != null ? user.getUserType().toString() : "JOB_SEEKER")
+                    .orElse("JOB_SEEKER");
+            PostDTO answer = new PostDTO(post.getPostId() ,  post.getContent(),post.getUserId(), userType, attachments , post.getCreatedAt());
             System.out.println(answer.getId());
             answers.add(answer);
         }
@@ -57,7 +62,10 @@ public class PostServiceImp implements PostService{
             Optional<Attachment> attachment= attachmentService.findById(attachmentID);
             if (attachment.isPresent()) attachments.add(attachment.get());
         }
-        PostDTO answer = new PostDTO(post.get().getPostId(), post.get().getContent(), post.get().getUserId(), attachments , post.get().getCreatedAt());
+        String userType = userRepository.findById(post.get().getUserId())
+                .map(user -> user.getUserType() != null ? user.getUserType().toString() : "JOB_SEEKER")
+                .orElse("JOB_SEEKER");
+        PostDTO answer = new PostDTO(post.get().getPostId(), post.get().getContent(), post.get().getUserId(), userType, attachments , post.get().getCreatedAt());
         return answer;
     }
 
@@ -92,7 +100,10 @@ public class PostServiceImp implements PostService{
             PostAttchment postAttchment = new PostAttchment(new PostAttachmentKey(post.getPostId(), saved.getAttachId().longValue()));
             postAttachmentService.save(postAttchment);
         }
-        PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(),savedAttachments , post.getCreatedAt());
+        String userType = userRepository.findById(post.getUserId())
+                .map(user -> user.getUserType() != null ? user.getUserType().toString() : "JOB_SEEKER")
+                .orElse("JOB_SEEKER");
+        PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(), userType, savedAttachments , post.getCreatedAt());
         return answer;
     }
 
@@ -131,7 +142,8 @@ public class PostServiceImp implements PostService{
                     postAttachmentService.save(postAttchment);
                 }
             }
-            answer = new PostDTO(savedPostDTO.getId(), savedPostDTO.getContent(),savedPostDTO.getUserId(),savedAttachments, savedPostDTO.getCreatedAt());
+            String userType = savedPostDTO.getUserType(); // Preserve existing userType
+            answer = new PostDTO(savedPostDTO.getId(), savedPostDTO.getContent(),savedPostDTO.getUserId(), userType, savedAttachments, savedPostDTO.getCreatedAt());
         }
         return answer;
     }
