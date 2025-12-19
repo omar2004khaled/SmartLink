@@ -40,6 +40,17 @@ public class OAuth2Service {
                     return savedUser;
                 });
 
+        if ("JOB_SEEKER".equals(user.getUserType())) {
+            boolean hasProfile = jobSeekerProfileRepository.findByUser_Id(user.getId()).isPresent();
+            if (!hasProfile) {
+                com.example.auth.entity.ProfileEntities.JobSeekerProfile profile = new com.example.auth.entity.ProfileEntities.JobSeekerProfile();
+                profile.setUser(user);
+                profile.setBirthDate(user.getBirthDate());
+                profile.setGender(com.example.auth.entity.ProfileEntities.JobSeekerProfile.Gender.MALE);
+                jobSeekerProfileRepository.save(profile);
+            }
+        }
+
         if (!user.getProvider().equals(provider)) {
             user.setProvider(provider);
             user.setProviderId(providerId);
