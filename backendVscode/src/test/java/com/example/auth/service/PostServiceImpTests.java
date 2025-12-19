@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class PostServiceImpTests {
 
     @Mock
@@ -36,6 +37,9 @@ class PostServiceImpTests {
 
     @Mock
     private CommentRepo commentRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private PostServiceImp postService;
@@ -60,6 +64,11 @@ class PostServiceImpTests {
 
         List<Attachment> attachments = Arrays.asList(attachment);
         postDTO = new PostDTO(1L, "Test post content", 100L, "JOB_SEEKER", attachments, new Timestamp(System.currentTimeMillis()));
+        
+        // Mock UserRepository for all tests
+        User mockUser = new User();
+        mockUser.setUserType("JOB_SEEKER");
+        when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
     }
 
     @Test

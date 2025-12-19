@@ -61,10 +61,10 @@ class SecurityConfigTest {
 
     @Test
     void nonExistentEndpoint_ShouldRequireAuthentication() throws Exception {
-        // Act & Assert - Non-existent endpoints should also be secured
-        // With OAuth2 enabled, unauthenticated requests get redirected (302) instead of 403
+        // Act & Assert - API endpoints return 401 Unauthorized (not 302 redirect)
+        // SecurityConfig returns 401 for /api/** endpoints
         mockMvc.perform(get("/api/secure-data"))
-                .andExpect(status().isFound()); // Should return 302 redirect for OAuth2
+                .andExpect(status().isUnauthorized()); // Returns 401 for API endpoints
     }
 
     @Test

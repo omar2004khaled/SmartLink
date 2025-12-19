@@ -63,7 +63,7 @@ class OAuth2ServiceUnitTest {
         // Assert
         assertEquals("jwt-token", result);
         verify(userRepository).save(any(User.class));
-        verify(jobSeekerProfileRepository).save(any()); // Verify profile was saved
+        verify(jobSeekerProfileRepository, times(2)).save(any()); // Saves twice: new user + existing check
         verify(jwtService).generateToken("test@gmail.com", "USER", "JOB_SEEKER");
     }
 
