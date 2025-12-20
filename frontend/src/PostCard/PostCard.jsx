@@ -17,6 +17,7 @@ function PostItem({ post }) {
   const [userInfo, setUserInfo] = useState(null);
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
   const [commentUsersInfo, setCommentUsersInfo] = useState({});
+  const [errorMessage, setErrorMessage] = useState(null); 
 
   const initialComments = post?.comments || commentsSeed;
   const [comments, setComments] = useState(initialComments);
@@ -29,6 +30,14 @@ function PostItem({ post }) {
   const [editAttachmentUrl, setEditAttachmentUrl] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
+
+  const showError = (message) => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 5000);
+  };
+
   useEffect(() => {
     setComments(post?.comments || commentsSeed);
   }, [post]);
@@ -40,6 +49,7 @@ function PostItem({ post }) {
       setEditAttachment(null);
     }
   }, [isEditing, post]);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       const userId = post?.userId;
@@ -136,7 +146,7 @@ function PostItem({ post }) {
     if (!f) return;
 
     if (attachedFile) {
-      alert('Only one attachment is allowed. Remove the current attachment first.');
+      showError('Only one attachment is allowed. Remove the current attachment first.');
       e.target.value = null;
       return;
     }
@@ -155,7 +165,7 @@ function PostItem({ post }) {
     if (uploadedUrl) {
       console.log('Uploaded attachment URL:', uploadedUrl);
     } else {
-      try { alert('Attachment upload failed'); } catch (e) { }
+      showError('Attachment upload failed');
     }
   };
 
@@ -184,7 +194,7 @@ function PostItem({ post }) {
     const postId = post?.id || post?.postId;
     if (!postId) {
       console.error('Cannot send comment: post ID is missing', { post });
-      alert('Error: Post ID is missing. Cannot send comment.');
+      showError('Error: Post ID is missing. Cannot send comment.');
       return;
     }
 
@@ -217,7 +227,7 @@ function PostItem({ post }) {
       await fetchCommentsFromServer();
     } catch (err) {
       console.error('Error saving comment', err);
-      alert('Failed to save comment: ' + (err.message || 'Unknown error'));
+      showError('Failed to save comment: ' + (err.message || 'Unknown error'));
     }
   };
 
@@ -236,10 +246,11 @@ function PostItem({ post }) {
       await fetchCommentsFromServer();
     }
   };
+
   const handleDeletePost = async () => {
     const postId = post?.id || post?.postId;
     if (!postId) {
-      alert('Error: Post ID is missing.');
+      showError('Error: Post ID is missing.');
       return;
     }
 
@@ -249,11 +260,11 @@ function PostItem({ post }) {
 
     try {
       await DeletePost(postId);
-      alert('Post deleted successfully!');
+      showError('Post deleted successfully!');
       window.location.reload();
     } catch (err) {
       console.error('Error deleting post:', err);
-      alert('Failed to delete post: ' + (err.message || 'Unknown error'));
+      showError('Failed to delete post: ' + (err.message || 'Unknown error'));
     }
   };
 
@@ -294,7 +305,7 @@ function PostItem({ post }) {
       setEditAttachmentUrl(uploadedUrl);
       console.log('Uploaded attachment URL:', uploadedUrl);
     } else {
-      alert('Attachment upload failed');
+      showError('Attachment upload failed');
     }
   };
 
@@ -309,12 +320,12 @@ function PostItem({ post }) {
   const handleSaveEdit = async () => {
     const postId = post?.id || post?.postId;
     if (!postId) {
-      alert('Error: Post ID is missing.');
+      showError('Error: Post ID is missing.');
       return;
     }
 
     if (!editContent.trim() && !editAttachmentUrl) {
-      alert('Please enter some content or add an attachment.');
+      showError('Please enter some content or add an attachment.');
       return;
     }
 
@@ -362,12 +373,12 @@ function PostItem({ post }) {
         await UpdatePost(postId, contentDTO);
       }
 
-      alert('Post updated successfully!');
+      showError('Post updated successfully!');
       setIsEditing(false);
       window.location.reload();
     } catch (err) {
       console.error('Error updating post:', err);
-      alert('Failed to update post: ' + (err.message || 'Unknown error'));
+      showError('Failed to update post: ' + (err.message || 'Unknown error'));
     } finally {
       setIsSaving(false);
     }
@@ -419,8 +430,17 @@ function PostItem({ post }) {
       return 'recently';
     }
   };
+
   return (
     <div className="post-card" data-post-id={post?.id || post?.postId}>
+      {/* Error Message Display */}
+      {errorMessage && (
+        <div className="error-message">
+          <span>{errorMessage}</span>
+          <button onClick={() => setErrorMessage(null)} className="error-close">×</button>
+        </div>
+      )}
+
       <UserHeader
         username={userInfo?.fullName || post.username || 'User'}
         userId={post.userId}
@@ -431,6 +451,7 @@ function PostItem({ post }) {
         onUpdate={handleEditPost}
         postId={post?.id || post?.postId}
         userType={userInfo?.userType || post.userType}
+        onError={showError}
       />
       {isEditing ? (
         <div className="post-edit-mode">

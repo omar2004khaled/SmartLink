@@ -33,11 +33,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (Exception e) {
-            // Console fallback
-            System.out.println("\n=== VERIFICATION EMAIL ===");
-            System.out.println("To: " + to);
-            System.out.println("Verification Link: " + verificationLink);
-            System.out.println("==========================\n");
+
         }
     }
 
@@ -56,10 +52,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (Exception e) {
-            System.out.println("\n=== PASSWORD RESET EMAIL ===");
-            System.out.println("To: " + to);
-            System.out.println("Reset Link: " + resetLink);
-            System.out.println("============================\n");
+
         }
     }
 
@@ -76,10 +69,7 @@ public class EmailService {
             mailSender.send(mailMessage);
             return true;
         } catch (Exception e) {
-            System.out.println("\n=== ADMIN NOTIFICATION ===");
-            System.out.println("To: " + userEmail);
-            System.out.println("Message: " + message);
-            System.out.println("==========================\n");
+
             return true;
         }
     }

@@ -4,7 +4,20 @@ import { Link } from 'react-router-dom';
 import { Delete, MoreVertical } from 'lucide-react';
 import { userIdFromLocalStorage } from "../FetchData/FetchData";
 
-function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUrl = null, bio = '', userType = null, onReport = null, onSnooze = null, onDelete = null, onUpdate = null, postId = null }) {
+function UserHeader({ 
+  username = 'User', 
+  userId, 
+  time = "18 hours ago", 
+  avatarUrl = null, 
+  bio = '', 
+  userType = null, 
+  onReport = null, 
+  onSnooze = null, 
+  onDelete = null, 
+  onUpdate = null, 
+  postId = null,
+  onError = null  
+}) {
     const placeholder = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect fill='%23eef2ff' width='100%' height='100%'/><text x='50%' y='50%' font-size='40' text-anchor='middle' fill='%230f172a' dy='.3em'>U</text></svg>`;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -24,7 +37,9 @@ function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUr
         if (typeof onReport === 'function') {
             onReport();
         } else {
-            alert('Post reported. Thank you for your feedback.');
+            if (onError) {
+                onError('Post reported. Thank you for your feedback.');
+            }
         }
     }
 
@@ -33,15 +48,20 @@ function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUr
         if (typeof onSnooze === 'function') {
             onSnooze();
         } else {
-            alert(`Snoozed ${username} for 30 days.`);
+            if (onError) {
+                onError(`Snoozed ${username} for 30 days.`);
+            }
         }
     }
+    
     function handleDelete() {
         setMenuOpen(false);
         if (typeof onDelete === 'function') {
             onDelete();
         } else {
-            alert('Delete function not available');
+            if (onError) {
+                onError('Delete function not available');
+            }
         }
     }
 
@@ -50,7 +70,9 @@ function UserHeader({ username = 'User', userId, time = "18 hours ago", avatarUr
         if (typeof onUpdate === 'function') {
             onUpdate();
         } else {
-            alert('Update function not available');
+            if (onError) {
+                onError('Update function not available');
+            }
         }
     }
 
