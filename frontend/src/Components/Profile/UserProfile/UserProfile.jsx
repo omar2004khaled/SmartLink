@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ConnectionsTab from "./ConnectionsTab";
 import Navbar from "../../Navbar";
+import CompanyNavbar from "../../CompanyNavbar";
 import ProfileInfo from "./ProfileInfo";
 import ExperienceSection from "./ExperienceSection";
 import SkillsSection from "./SkillsSection";
@@ -22,6 +23,7 @@ export default function UserProfile() {
   const navigate = useNavigate();
   const { userId: urlUserId } = useParams();
   const loggedInUserId = localStorage.getItem('userId');
+  const userType = localStorage.getItem('userType');
   const userId = urlUserId || loggedInUserId;
   const isOwnProfile = !urlUserId || urlUserId === loggedInUserId;
   const [profileId, setProfileId] = useState(null);
@@ -123,16 +125,16 @@ export default function UserProfile() {
       ]);
       const pending = await pendingRes.json();
       const accepted = await acceptedRes.json();
-      
-      const pendingConn = pending.find(c => 
+
+      const pendingConn = pending.find(c =>
         (c.senderId == loggedInUserId && c.receiverId == userId) ||
         (c.senderId == userId && c.receiverId == loggedInUserId)
       );
-      const acceptedConn = accepted.find(c => 
+      const acceptedConn = accepted.find(c =>
         (c.senderId == loggedInUserId && c.receiverId == userId) ||
         (c.senderId == userId && c.receiverId == loggedInUserId)
       );
-      
+
       if (acceptedConn) {
         setConnectionStatus('ACCEPTED');
         setConnectionId(acceptedConn.id);
@@ -239,7 +241,7 @@ export default function UserProfile() {
       console.log('Starting profile save with form:', form);
       const token = localStorage.getItem('authToken');
       let locationId = profile.locationId;
-      
+
       // If location changed, find or create location
       if (form.country && form.city && (form.country !== profile.country || form.city !== profile.city)) {
         console.log('Location changed, processing...');
@@ -250,7 +252,7 @@ export default function UserProfile() {
           // Create new location
           const locRes = await fetch(`${API_BASE_URL}/api/locations`, {
             method: 'POST',
-            headers: { 
+            headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
@@ -271,7 +273,7 @@ export default function UserProfile() {
         }
         locationId = loc.locationId;
       }
-      
+
       // Update profile with only backend-expected fields
       const profilePayload = {
         profilePicUrl: form.profilePicUrl || null,
@@ -282,28 +284,28 @@ export default function UserProfile() {
         userId: parseInt(userId),
         locationId: locationId
       };
-      
+
       console.log('Sending profile update:', profilePayload);
       console.log('URL:', `${API_BASE}/${profileId}`);
-      
+
       const res = await fetch(`${API_BASE}/${profileId}`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(profilePayload)
       });
-      
+
       console.log('Response status:', res.status);
       console.log('Response headers:', res.headers);
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         console.error('Profile update failed:', errorText);
         throw new Error(`Failed to update profile (${res.status}): ${errorText}`);
       }
-      
+
       const updated = await res.json();
       console.log('Profile updated successfully:', updated);
       setProfile(updated);
@@ -328,7 +330,7 @@ export default function UserProfile() {
       }
       const res = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -349,7 +351,7 @@ export default function UserProfile() {
   const handleDeleteExperience = async (id) => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_BASE}/${profileId}/experience/${id}`, { 
+      const res = await fetch(`${API_BASE}/${profileId}/experience/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -376,7 +378,7 @@ export default function UserProfile() {
       }
       const res = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -396,7 +398,7 @@ export default function UserProfile() {
   const handleDeleteSkill = async (id) => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_BASE}/${profileId}/skills/${id}`, { 
+      const res = await fetch(`${API_BASE}/${profileId}/skills/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -429,7 +431,7 @@ export default function UserProfile() {
       };
       const res = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -449,7 +451,7 @@ export default function UserProfile() {
   const handleDeleteProject = async (id) => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_BASE}/${profileId}/projects/${id}`, { 
+      const res = await fetch(`${API_BASE}/${profileId}/projects/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -476,7 +478,7 @@ export default function UserProfile() {
       }
       const res = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -496,7 +498,7 @@ export default function UserProfile() {
   const handleDeleteEducation = async (id) => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_BASE}/${profileId}/education/${id}`, { 
+      const res = await fetch(`${API_BASE}/${profileId}/education/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -512,106 +514,106 @@ export default function UserProfile() {
 
   return (
     <div>
-      <Navbar />
+      {userType === 'COMPANY' ? <CompanyNavbar /> : <Navbar />}
       <div className="up-page">
         <div className="user-profile-container">
           <div className="profile-container">
 
-        
-        {activeTab === 'profile' && (
-          <>
-            <ProfileInfo 
-              profile={profile} 
-              onEdit={isOwnProfile ? handleEditProfile : null}
-              onConnect={!isOwnProfile ? getConnectionHandler() : null}
-              connectionStatus={connectionStatus}
-              isOwnProfile={isOwnProfile}
-            />
 
-            <div className="up-sections">
-          {/* Experience Card */}
-          <section className="up-card">
-            <div className="up-card-header">
-              <div className="up-card-title">
-                <h3>Experience</h3>
-                <div className="up-card-sub">Professional roles & responsibilities</div>
-              </div>
-              <div className="up-card-actions">
-                {/* keep header Add (styled) and remove Manage */}
-                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddExperience}>+ Add</button>}
-              </div>
-            </div>
-            <div className="up-card-body">
-              <ExperienceSection experience={experience} onAdd={isOwnProfile ? handleAddExperience : null} onEdit={isOwnProfile ? handleEditExperience : null} onDelete={isOwnProfile ? handleDeleteExperience : null} />
-            </div>
-          </section>
+            {activeTab === 'profile' && (
+              <>
+                <ProfileInfo
+                  profile={profile}
+                  onEdit={isOwnProfile ? handleEditProfile : null}
+                  onConnect={(!isOwnProfile && userType !== 'COMPANY') ? getConnectionHandler() : null}
+                  connectionStatus={connectionStatus}
+                  isOwnProfile={isOwnProfile}
+                />
 
-          {/* Education Card */}
-          <section className="up-card">
-            <div className="up-card-header">
-              <div className="up-card-title">
-                <h3>Education</h3>
-                <div className="up-card-sub">Degrees, certifications and institutions</div>
-              </div>
-              <div className="up-card-actions">
-                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddEducation}>+ Add</button>}
-              </div>
-            </div>
-            <div className="up-card-body">
-              <EducationSection education={education} onAdd={isOwnProfile ? handleAddEducation : null} onEdit={isOwnProfile ? handleEditEducation : null} onDelete={isOwnProfile ? handleDeleteEducation : null} />
-            </div>
-          </section>
+                <div className="up-sections">
+                  {/* Experience Card */}
+                  <section className="up-card">
+                    <div className="up-card-header">
+                      <div className="up-card-title">
+                        <h3>Experience</h3>
+                        <div className="up-card-sub">Professional roles & responsibilities</div>
+                      </div>
+                      <div className="up-card-actions">
+                        {/* keep header Add (styled) and remove Manage */}
+                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddExperience}>+ Add</button>}
+                      </div>
+                    </div>
+                    <div className="up-card-body">
+                      <ExperienceSection experience={experience} onAdd={isOwnProfile ? handleAddExperience : null} onEdit={isOwnProfile ? handleEditExperience : null} onDelete={isOwnProfile ? handleDeleteExperience : null} />
+                    </div>
+                  </section>
 
-          {/* Skills Card */}
-          <section className="up-card">
-            <div className="up-card-header">
-              <div className="up-card-title">
-                <h3>Skills</h3>
-                <div className="up-card-sub">Core skills, tools & proficiencies</div>
-              </div>
-              <div className="up-card-actions">
-                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddSkill}>+ Add</button>}
-              </div>
-            </div>
-            <div className="up-card-body">
-              <SkillsSection skills={skills} onAdd={isOwnProfile ? handleAddSkill : null} onEdit={isOwnProfile ? handleEditSkill : null} onDelete={isOwnProfile ? handleDeleteSkill : null} />
-            </div>
-          </section>
+                  {/* Education Card */}
+                  <section className="up-card">
+                    <div className="up-card-header">
+                      <div className="up-card-title">
+                        <h3>Education</h3>
+                        <div className="up-card-sub">Degrees, certifications and institutions</div>
+                      </div>
+                      <div className="up-card-actions">
+                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddEducation}>+ Add</button>}
+                      </div>
+                    </div>
+                    <div className="up-card-body">
+                      <EducationSection education={education} onAdd={isOwnProfile ? handleAddEducation : null} onEdit={isOwnProfile ? handleEditEducation : null} onDelete={isOwnProfile ? handleDeleteEducation : null} />
+                    </div>
+                  </section>
 
-          {/* Projects Card */}
-          <section className="up-card">
-            <div className="up-card-header">
-              <div className="up-card-title">
-                <h3>Projects</h3>
-                <div className="up-card-sub">Selected projects and highlights</div>
-              </div>
-              <div className="up-card-actions">
-                {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddProject}>+ Add</button>}
-              </div>
-            </div>
-            <div className="up-card-body">
-              <ProjectsSection projects={projects} onAdd={isOwnProfile ? handleAddProject : null} onEdit={isOwnProfile ? handleEditProject : null} onDelete={isOwnProfile ? handleDeleteProject : null} />
-            </div>
-          </section>
-            </div>
-          </>
-        )}
-        
-        {activeTab === 'connections' && isOwnProfile && (
-          <div className="up-sections">
-            <ConnectionsTab />
-          </div>
-        )}
+                  {/* Skills Card */}
+                  <section className="up-card">
+                    <div className="up-card-header">
+                      <div className="up-card-title">
+                        <h3>Skills</h3>
+                        <div className="up-card-sub">Core skills, tools & proficiencies</div>
+                      </div>
+                      <div className="up-card-actions">
+                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddSkill}>+ Add</button>}
+                      </div>
+                    </div>
+                    <div className="up-card-body">
+                      <SkillsSection skills={skills} onAdd={isOwnProfile ? handleAddSkill : null} onEdit={isOwnProfile ? handleEditSkill : null} onDelete={isOwnProfile ? handleDeleteSkill : null} />
+                    </div>
+                  </section>
 
-        {/* Modals for editing/adding fields */}
-        <ProfileInfoForm open={editProfile} profile={profile} locations={locations} onSave={handleSaveProfile} onCancel={handleCancelProfile} />
-        <ExperienceForm open={!!editExperienceId} experience={experience.find(e => e.id === editExperienceId)} onSave={handleSaveExperience} onCancel={handleCancelExperience} />
-        <SkillForm open={!!editSkillId} skill={skills.find(s => s.id === editSkillId)} onSave={handleSaveSkill} onCancel={handleCancelSkill} />
-        <ProjectForm open={!!editProjectId} project={projects.find(p => p.id === editProjectId)} onSave={handleSaveProject} onCancel={handleCancelProject} />
-        <EducationForm open={!!editEducationId} education={education.find(e => e.id === editEducationId)} onSave={handleSaveEducation} onCancel={handleCancelEducation} />
+                  {/* Projects Card */}
+                  <section className="up-card">
+                    <div className="up-card-header">
+                      <div className="up-card-title">
+                        <h3>Projects</h3>
+                        <div className="up-card-sub">Selected projects and highlights</div>
+                      </div>
+                      <div className="up-card-actions">
+                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddProject}>+ Add</button>}
+                      </div>
+                    </div>
+                    <div className="up-card-body">
+                      <ProjectsSection projects={projects} onAdd={isOwnProfile ? handleAddProject : null} onEdit={isOwnProfile ? handleEditProject : null} onDelete={isOwnProfile ? handleDeleteProject : null} />
+                    </div>
+                  </section>
+                </div>
+              </>
+            )}
+
+            {activeTab === 'connections' && isOwnProfile && (
+              <div className="up-sections">
+                <ConnectionsTab />
+              </div>
+            )}
+
+            {/* Modals for editing/adding fields */}
+            <ProfileInfoForm open={editProfile} profile={profile} locations={locations} onSave={handleSaveProfile} onCancel={handleCancelProfile} />
+            <ExperienceForm open={!!editExperienceId} experience={experience.find(e => e.id === editExperienceId)} onSave={handleSaveExperience} onCancel={handleCancelExperience} />
+            <SkillForm open={!!editSkillId} skill={skills.find(s => s.id === editSkillId)} onSave={handleSaveSkill} onCancel={handleCancelSkill} />
+            <ProjectForm open={!!editProjectId} project={projects.find(p => p.id === editProjectId)} onSave={handleSaveProject} onCancel={handleCancelProject} />
+            <EducationForm open={!!editEducationId} education={education.find(e => e.id === editEducationId)} onSave={handleSaveEducation} onCancel={handleCancelEducation} />
           </div>
         </div>
       </div>
-    </div>  
+    </div>
   );
 }

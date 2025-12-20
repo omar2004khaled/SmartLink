@@ -15,7 +15,10 @@ class UserSearchDTOTest {
         String phoneNumber = "123456789";
 
         // Act
-        UserSearchDTO dto = new UserSearchDTO(id, fullName, email, phoneNumber);
+        String userType = "JOB_SEEKER";
+
+        // Act
+        UserSearchDTO dto = new UserSearchDTO(id, fullName, email, phoneNumber, userType);
 
         // Assert
         assertEquals(id, dto.getId());
@@ -27,7 +30,7 @@ class UserSearchDTOTest {
     @Test
     void constructor_NullParameters_CreatesDTO() {
         // Arrange & Act
-        UserSearchDTO dto = new UserSearchDTO(null, null, null, null);
+        UserSearchDTO dto = new UserSearchDTO(null, null, null, null, null);
 
         // Assert
         assertNull(dto.getId());
@@ -39,7 +42,7 @@ class UserSearchDTOTest {
     @Test
     void setId_ValidId_SetsId() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
         Long newId = 2L;
 
         // Act
@@ -52,7 +55,7 @@ class UserSearchDTOTest {
     @Test
     void setId_NullId_SetsNull() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
 
         // Act
         dto.setId(null);
@@ -64,7 +67,7 @@ class UserSearchDTOTest {
     @Test
     void setFullName_ValidName_SetsName() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
         String newName = "Jane Doe";
 
         // Act
@@ -77,7 +80,7 @@ class UserSearchDTOTest {
     @Test
     void setFullName_NullName_SetsNull() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
 
         // Act
         dto.setFullName(null);
@@ -89,7 +92,7 @@ class UserSearchDTOTest {
     @Test
     void setFullName_EmptyName_SetsEmpty() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
         String emptyName = "";
 
         // Act
@@ -102,7 +105,7 @@ class UserSearchDTOTest {
     @Test
     void setEmail_ValidEmail_SetsEmail() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
         String newEmail = "jane@email.com";
 
         // Act
@@ -115,7 +118,7 @@ class UserSearchDTOTest {
     @Test
     void setEmail_NullEmail_SetsNull() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
 
         // Act
         dto.setEmail(null);
@@ -127,7 +130,7 @@ class UserSearchDTOTest {
     @Test
     void setPhoneNumber_ValidPhoneNumber_SetsPhoneNumber() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
         String newPhone = "987654321";
 
         // Act
@@ -140,7 +143,7 @@ class UserSearchDTOTest {
     @Test
     void setPhoneNumber_NullPhoneNumber_SetsNull() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
 
         // Act
         dto.setPhoneNumber(null);
@@ -158,7 +161,10 @@ class UserSearchDTOTest {
         String phoneNumber = "555123456";
 
         // Act
-        UserSearchDTO dto = new UserSearchDTO(id, fullName, email, phoneNumber);
+        String userType = "JOB_SEEKER";
+
+        // Act
+        UserSearchDTO dto = new UserSearchDTO(id, fullName, email, phoneNumber, userType);
 
         // Assert
         assertEquals(id, dto.getId());
@@ -170,7 +176,7 @@ class UserSearchDTOTest {
     @Test
     void setters_ChainedCalls_WorkCorrectly() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123");
+        UserSearchDTO dto = new UserSearchDTO(1L, "John", "john@email.com", "123", "JOB_SEEKER");
 
         // Act
         dto.setId(10L);
@@ -193,8 +199,10 @@ class UserSearchDTOTest {
         String longEmail = "a".repeat(50) + "@" + "b".repeat(50) + ".com";
         String longPhone = "1".repeat(20);
 
+        String userType = "JOB_SEEKER";
+
         // Act
-        UserSearchDTO dto = new UserSearchDTO(largeId, longName, longEmail, longPhone);
+        UserSearchDTO dto = new UserSearchDTO(largeId, longName, longEmail, longPhone, userType);
 
         // Assert
         assertEquals(largeId, dto.getId());
@@ -211,8 +219,11 @@ class UserSearchDTOTest {
         String emailWithSpecialChars = "josé.maría@ñoño.com";
         String phoneWithSpecialChars = "+1-555-123-4567";
 
+
+        String userType = "JOB_SEEKER";
+
         // Act
-        UserSearchDTO dto = new UserSearchDTO(id, nameWithSpecialChars, emailWithSpecialChars, phoneWithSpecialChars);
+        UserSearchDTO dto = new UserSearchDTO(id, nameWithSpecialChars, emailWithSpecialChars, phoneWithSpecialChars, userType);
 
         // Assert
         assertEquals(id, dto.getId());
@@ -224,7 +235,7 @@ class UserSearchDTOTest {
     @Test
     void setters_OverwriteValues_WorkCorrectly() {
         // Arrange
-        UserSearchDTO dto = new UserSearchDTO(1L, "Original", "original@email.com", "111");
+        UserSearchDTO dto = new UserSearchDTO(1L, "Original", "original@email.com", "111", "JOB_SEEKER");
 
         // Act - Multiple overwrites
         dto.setFullName("First Update");

@@ -49,12 +49,22 @@ public class SecurityConfig {
                                                                 "/api/company/**", "/api/users/**", "/Post/add/**",
                                                                 "/Post/**", "/comment/**", "/jobs/**",
                                                                 "/graphql", "/apply/**", "/reactions/**",
-                                                                "/api/search/**", "/api/connections/**")
+                                                                "/api/search/**", "/api/connections/**",
+                                                                "/error", "/login/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
                                                 .successHandler(oAuth2SuccessHandler))
+                                .exceptionHandling(exception -> exception
+                                                .authenticationEntryPoint((request, response, authException) -> {
+                                                        if (request.getRequestURI().startsWith("/api/")) {
+                                                                response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                                                                response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                                                        } else {
+                                                                response.sendRedirect("/login/oauth2/code/google");
+                                                        }
+                                                }))
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState('processing');
   const [message, setMessage] = useState('');
-  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -20,31 +20,56 @@ const OAuthCallback = () => {
           return;
         }
 
-        // Store the token
+        // 1. Store the token
         localStorage.setItem('authToken', token);
-        
-        // Optional: Decode token to get user info (if needed)
+
+        // 2. Decode token to get email and userType
         const userData = parseJwt(token);
         console.log('User data from token:', userData);
-        
-        // Store user data if needed
+
         if (userData) {
-          localStorage.setItem('user', JSON.stringify(userData));
+          // Store basic info immediately
+          if (userData.sub) localStorage.setItem('userEmail', userData.sub);
+          if (userData.userType) localStorage.setItem('userType', userData.userType);
+
+          // 3. Fetch full user details to get userID (DATABASE ID)
+          try {
+            const userResponse = await fetch(`${API_BASE_URL}/api/users/email/${userData.sub}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+
+            if (userResponse.ok) {
+              const fullUserData = await userResponse.json();
+              console.log("Fetched full user data:", fullUserData);
+              localStorage.setItem('userId', fullUserData.id);
+              localStorage.setItem('user', JSON.stringify(fullUserData));
+            } else {
+              console.warn("Failed to fetch user ID");
+            }
+          } catch (fetchErr) {
+            console.error("Error fetching user details:", fetchErr);
+          }
         }
 
         setStatus('success');
         setMessage('Google authentication successful! Redirecting...');
 
-        
+
         setTimeout(() => {
-          navigate('/PostComposotion'); 
+          if (userData && userData.userType === 'COMPANY') {
+            navigate('/company-profile');
+          } else {
+            navigate('/home');
+          }
         }, 2000);
 
       } catch (error) {
         console.error('OAuth callback error:', error);
         setStatus('error');
         setMessage('Authentication failed. Please try again.');
-        
+
         setTimeout(() => {
           navigate('/login');
         }, 3000);
@@ -109,7 +134,7 @@ const OAuthCallback = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Authentication Failed</h2>
             <p className="text-gray-600 mb-4">{message}</p>
-            <button 
+            <button
               onClick={() => navigate('/login')}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
             >

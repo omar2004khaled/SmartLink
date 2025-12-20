@@ -28,29 +28,27 @@ class AuthServiceUnitTest {
 
     @Mock
     private UserRepository userRepository;
-    
+
     @Mock
     private VerificationTokenRepository tokenRepository;
-    
+
     @Mock
     private EmailService emailService;
-    
+
     @Mock
     private PasswordEncoder passwordEncoder;
-    
+
     @Mock
     private com.example.auth.config.JwtService jwtService;
-    
+
     @Mock
     private com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository profileRepo;
-    
+
     @Mock
     private com.example.auth.repository.CompanyProfileRepo companyRepo;
-    
+
     @InjectMocks
     private AuthService authService;
-
-
 
     @Test
     void register_ValidRequest_CreatesUserAndSendsEmail() {
@@ -63,7 +61,7 @@ class AuthServiceUnitTest {
         request.setPhoneNumber("+1234567890");
         request.setBirthDate(LocalDate.of(1990, 1, 1));
         request.setGender(Gender.MALE);
-        
+
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.existsByPhoneNumber(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
@@ -86,12 +84,12 @@ class AuthServiceUnitTest {
         // Arrange
         RegisterRequest request = new RegisterRequest();
         request.setEmail("existing@example.com");
-        
+
         when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-            () -> authService.register(request));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> authService.register(request));
         assertEquals("Email already exists", exception.getMessage());
     }
 
@@ -101,13 +99,13 @@ class AuthServiceUnitTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("test@example.com");
         request.setPhoneNumber("+1234567890");
-        
+
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.existsByPhoneNumber("+1234567890")).thenReturn(true);
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-            () -> authService.register(request));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> authService.register(request));
         assertEquals("Phone number already exists", exception.getMessage());
     }
 
@@ -119,16 +117,19 @@ class AuthServiceUnitTest {
         user.setPassword("encodedPassword");
         user.setEnabled(true);
         user.setRole("USER");
-        
+
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Password123!", "encodedPassword")).thenReturn(true);
-        when(jwtService.generateToken("test@example.com", "USER")).thenReturn("mock-jwt-token");
+
+        // FIXED: Added third parameter "JOB_SEEKER"
+        when(jwtService.generateToken("test@example.com", "USER", "JOB_SEEKER")).thenReturn("mock-jwt-token");
 
         // Act
         String result = authService.login("test@example.com", "Password123!");
 
         // Assert
-        assertNotNull(result);
+        assertEquals("mock-jwt-token", result);
+        verify(jwtService).generateToken("test@example.com", "USER", "JOB_SEEKER");
     }
 
     @Test
@@ -137,8 +138,26 @@ class AuthServiceUnitTest {
         when(userRepository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-            () -> authService.login("notfound@example.com", "password"));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> authService.login("notfound@example.com", "password"));
         assertEquals("User not found", exception.getMessage());
     }
+
+    @Test
+    void login_InvalidPassword_ThrowsException() {
+        // Arrange
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setPassword("encodedPassword");
+        user.setEnabled(true);
+
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> authService.login("test@example.com", "wrongPassword"));
+        assertEquals("Invalid password", exception.getMessage());
+    }
+
 }

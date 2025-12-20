@@ -27,7 +27,8 @@ public class SearchService {
                         user.getId(),
                         user.getFullName(),
                         user.getEmail(),
-                        user.getPhoneNumber()
+                        user.getPhoneNumber(),
+                        user.getUserType() != null ? user.getUserType().toString() : "JOB_SEEKER"
                 ))
                 .collect(Collectors.toList());
     }

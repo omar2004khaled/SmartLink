@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Home, Briefcase, Users, User, LogOut, Menu, X } from 'lucide-react';
 import './Navbar.css';
 import { API_BASE_URL } from '../config';
+import Logo from '../assets/Logo.png';
 
 const Navbar = ({ showSearch = false }) => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Navbar = ({ showSearch = false }) => {
       const currentUserId = localStorage.getItem('userId');
       const response = await fetch(`${API_BASE_URL}/api/search/users?query=${encodeURIComponent(query)}&currentUserId=${currentUserId}`);
       const data = await response.json();
-      
+
       if (response.ok) {
         setSearchResults(data.results || []);
         setShowResults(true);
@@ -59,7 +60,7 @@ const Navbar = ({ showSearch = false }) => {
             <Menu size={24} />
           </button>
           <div className="brand-section">
-            <img src="/src/assets/Logo.png" alt="SmartLink" className="brand-logo" />
+            <img src={Logo} alt="SmartLink" className="brand-logo" />
             <h1 className="brand-title">SmartLink</h1>
           </div>
           {showSearch && (
@@ -78,7 +79,7 @@ const Navbar = ({ showSearch = false }) => {
                     <div className="search-loading">Searching...</div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map(user => (
-                      <div key={user.id} className="search-result-item" onClick={() => navigate(`/profile/${user.id}`)}>
+                      <div key={user.id} className="search-result-item" onClick={() => navigate(user.userType === 'COMPANY' ? `/company-profile/${user.id}` : `/profile/${user.id}`)}>
                         <div className="result-avatar">{user.fullName.charAt(0)}</div>
                         <div className="result-info">
                           <div className="result-name">{user.fullName}</div>
@@ -115,7 +116,7 @@ const Navbar = ({ showSearch = false }) => {
               <span>Profile</span>
             </button>
           </div>
-          
+
           <div className="nav-section">
             <h3 className="nav-section-title">Network</h3>
             <button className={`sidebar-link ${location.search.includes('tab=connections') ? 'active' : ''}`} onClick={() => { navigate('/profile?tab=connections'); setSidebarOpen(false); }}>
@@ -127,7 +128,7 @@ const Navbar = ({ showSearch = false }) => {
               <span>Opportunities</span>
             </button>
           </div>
-          
+
           <div className="nav-section">
             <button className="sidebar-link logout" onClick={handleLogout}>
               <LogOut size={20} />

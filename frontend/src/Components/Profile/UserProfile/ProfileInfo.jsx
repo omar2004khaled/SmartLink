@@ -30,7 +30,7 @@ export default function ProfileInfo({ profile, onEdit, onConnect, connectionStat
 
         {isOwnProfile ? (
           <button onClick={onEdit} className="btn-edit edit-right">Edit Profile</button>
-        ) : (
+        ) : onConnect && (
           <div className="edit-right">
             {connectionStatus === 'NONE' && (
               <button onClick={onConnect} className="btn-edit">Connect</button>

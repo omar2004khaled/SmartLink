@@ -1,4 +1,4 @@
-import React, { useState, useEffect  , useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PostCard from '../PostCard/PostCard';
 import { GetPosts } from '../FetchData/FetchData';
 
@@ -16,10 +16,10 @@ export default function Posts() {
       isFetchingRef.current = false;
     }
   }, []);
-  
+
   const loadInitialPosts = async () => {
     if (isFetchingRef.current) return;
-    try {  
+    try {
       isFetchingRef.current = true;
       setLoading(true);
       const postsData = await GetPosts(0, pageSize, 'PostId', false);
@@ -46,17 +46,17 @@ export default function Posts() {
   const loadMorePosts = async () => {
     console.log('Loading more posts...');
     if (loading || !hasMore || isFetchingRef.current) return;
-    
+
     try {
       setLoading(true);
       isFetchingRef.current = true;
       const postsData = await GetPosts(currentPage, pageSize, 'PostId', false);
-      
+
       if (!postsData || !Array.isArray(postsData) || postsData.length === 0) {
         setHasMore(false);
         return;
       }
-      
+
       const transformedPosts = transformPosts(postsData);
       const existingPostIds = new Set(posts.map(p => p.id));
       const newUniquePosts = transformedPosts.filter(p => !existingPostIds.has(p.id));
@@ -78,30 +78,31 @@ export default function Posts() {
     }
   };
 
-const transformPosts = (postsData) => {
+  const transformPosts = (postsData) => {
     // First, deduplicate the incoming data
     const seenIds = new Set();
     const uniquePosts = [];
-    
+
     for (const post of postsData) {
       const postId = post.id || post.postId;
       if (!seenIds.has(postId)) {
         seenIds.add(postId);
         uniquePosts.push({
-          id: postId|| post.postId,
+          id: postId || post.postId,
           userId: post.userId,
+          userType: post.userType, // Preserve userType for routing
           username: post.userName || `User${post.userId}`,
           time: post.createdAt,
           content: post.content,
           // Take only the first attachment
-          attachment: post.attachments && post.attachments.length > 0 
+          attachment: post.attachments && post.attachments.length > 0
             ? post.attachments[0]
             : null,
           attachments: post.attachments || []
         });
       }
     }
-    
+
     console.log(`Transformed ${postsData.length} posts to ${uniquePosts.length} unique posts`);
     return uniquePosts;
   };
@@ -112,15 +113,15 @@ const transformPosts = (postsData) => {
       ))}
 
       {hasMore && (
-        <div className="load-more-container" style={{ 
-          alignItems: 'center', 
-          marginTop: '20px', 
-          marginBottom: '20px', 
-          display: 'flex', 
-          justifyContent: 'center', 
-          paddingBottom: '15px' 
+        <div className="load-more-container" style={{
+          alignItems: 'center',
+          marginTop: '20px',
+          marginBottom: '20px',
+          display: 'flex',
+          justifyContent: 'center',
+          paddingBottom: '15px'
         }}>
-          <button 
+          <button
             className="load-more-btn"
             onClick={loadMorePosts}
             disabled={loading || !hasMore}

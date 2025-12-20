@@ -39,8 +39,13 @@
 .brand-logo {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
-  object-fit: contain;
+  border-radius: 50%;
+  /* Circular look */
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  /* Subtle shadow for depth */
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  /* Clean white border */
 }
 
 .brand-title {
@@ -253,11 +258,11 @@
   .header-content {
     padding: 12px 16px;
   }
-  
+
   .brand-title {
     font-size: 20px;
   }
-  
+
   .header-search {
     max-width: 200px;
   }
