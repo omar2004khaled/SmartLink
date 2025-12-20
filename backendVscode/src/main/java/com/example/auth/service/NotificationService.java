@@ -96,6 +96,12 @@ public class NotificationService {
     public List<Notification> getNotificationsByType(Long userId, NotificationType type) {
         return notificationRepository.findByUserAndType(userId, type);
     }
+
+    @Transactional(readOnly = true)
+    public Notification getNotificationById(Long notificationId) {
+        return notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found with id: " + notificationId));
+    }
     
 
     @Transactional

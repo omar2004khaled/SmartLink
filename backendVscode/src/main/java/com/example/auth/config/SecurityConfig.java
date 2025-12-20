@@ -50,6 +50,7 @@ public class SecurityConfig {
                                                                 "/Post/**", "/comment/**", "/jobs/**",
                                                                 "/graphql", "/apply/**", "/reactions/**",
                                                                 "/api/search/**", "/api/connections/**",
+                                                                "/api/notifications/**",
                                                                 "/error", "/login/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
