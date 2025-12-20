@@ -17,12 +17,14 @@ import java.time.LocalDateTime;
 public class CompanyFollower {
 
     @Id
-    @Column(name = "FollowerId")
-    private Long followerId;
+    @ManyToOne
+    @JoinColumn(name = "FollowerId", nullable = false)
+    private User follower;
 
     @Id
-    @Column(name = "CompanyId")
-    private Long companyId;
+    @ManyToOne
+    @JoinColumn(name = "CompanyId", nullable = false)
+    private User company;
 
     @Column(name = "FollowedAt")
     private LocalDateTime followedAt;
@@ -37,7 +39,7 @@ public class CompanyFollower {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CompanyFollowerId implements Serializable {
-        private Long followerId;
-        private Long companyId;
+        private Long follower;
+        private Long company;
     }
 }

@@ -9,6 +9,8 @@ import PostsTab from '../Tabs/PostsTab';
 import EditModal from '../EditModal/EditModal';
 import './CompanyProfile.css';
 import { API_BASE_URL,CLOUDINARY_UPLOAD_URL } from '../../../../config';
+
+
 const PLACEHOLDER_LOGO = '/profilePlaceholder.jpg';
 const PLACEHOLDER_COVER = '/coverPlaceholder.webp';
 
@@ -103,7 +105,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const currentCompanyId = companyId || data.companyProfileId;
+        const currentCompanyId = data.companyProfileId;
         const response = await fetch(`${API_BASE_URL}/api/company/${currentCompanyId}`, {
           method: 'PUT',
           headers,
@@ -131,14 +133,13 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
       setError(null);
 
       let url;
-      if (companyId) {
-        url = viewerId
-          ? `${API_BASE_URL}/api/company/${companyId}?userId=${viewerId}`
-          : `${API_BASE_URL}/api/company/${companyId}`;
-      } else if (profileOwnerId) {
-        url = `${API_BASE_URL}/api/company/user/${profileOwnerId}`;
+      if (profileOwnerId) {
+        url = new URL(`${API_BASE_URL}/api/company/user/${Number(profileOwnerId)}`);
+        if (viewerId) {
+          url.searchParams.append('viewerId', Number(viewerId));
+        }
       } else {
-        url = `${API_BASE_URL}/api/company/user/${viewerId}`;
+        url = new URL(`${API_BASE_URL}/api/company/user/${Number(viewerId)}`);
       }
 
       const token = localStorage.getItem('authToken');
@@ -166,15 +167,15 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
       }
 
       let data = await response.json();
-      console.log('Company data received:', data);
+      // console.log('Company data received:', data);
       data = await checkAndUploadPlaceholders(data);
       setCompanyData(data);
-      setIsFollowing(data.isFollowing || false);
-      setIsOwner(Number(data.userId) === Number(viewerId));
-
-      if (!companyId && data.companyProfileId) {
-        companyId = data.companyProfileId;
-      }
+      
+      const followingStatus = data.isFollowing || false;
+      const ownerStatus = Number(data.userId) === Number(viewerId);
+      
+      setIsFollowing(followingStatus);
+      setIsOwner(ownerStatus);
 
       setTabData({
         description: data.description,
@@ -209,7 +210,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
 
   const fetchPostsData = async () => {
     try {
-      const idToUse = companyId || companyData?.companyProfileId;
+      const idToUse = companyData?.companyProfileId;
       if (!idToUse) throw new Error("No company ID available");
 
       const response = await fetch(`${API_BASE_URL}/api/company/${idToUse}/posts`, {
@@ -245,7 +246,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const idToUse = companyId || companyData?.companyProfileId;
+      const idToUse = companyData?.companyProfileId;
       const response = await fetch(`${API_BASE_URL}/api/company/${idToUse}/${op}`, {
         method: "POST",
         headers,
@@ -295,7 +296,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const currentCompanyId = companyId || companyData?.companyProfileId;
+      const currentCompanyId = companyData?.companyProfileId;
       const response = await fetch(`${API_BASE_URL}/api/company/${currentCompanyId}`, {
         method: 'PUT',
         headers,
@@ -319,7 +320,8 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
       const updated = await response.json();
       setCompanyData(updated);
 
-      if (updatedData.locations || activeTab === 'About') {
+      // Update tab data if on About tab
+      if (activeTab === 'About') {
         setTabData({
           description: updated.description,
           website: updated.website,
