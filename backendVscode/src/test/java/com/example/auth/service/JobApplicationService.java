@@ -1,6 +1,5 @@
 package com.example.auth.service;
 
-
 import com.example.auth.dto.JobDTO.ApplicationDTO;
 import com.example.auth.entity.Job;
 import com.example.auth.entity.JobApplication;
@@ -39,6 +38,9 @@ class JobApplicationServiceTest {
     @Mock
     private JobApplicationRepository jobApplicationRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private JobApplicationService jobApplicationService;
 
@@ -55,10 +57,16 @@ class JobApplicationServiceTest {
         applicationDTO.setJobId(100L);
         applicationDTO.setCvURL("https://example.com/cv.pdf");
 
+        // Setup mock company user
+        User mockCompany = new User();
+        mockCompany.setId(2L);
+        mockCompany.setFullName("Test Company");
+
         // Setup mock Job
         mockJob = new Job();
         mockJob.setJobId(100L);
         mockJob.setTitle("Software Engineer");
+        mockJob.setCompany(mockCompany); // Set company to avoid null pointer
 
         // Setup mock User
         mockUser = new User();
@@ -85,13 +93,15 @@ class JobApplicationServiceTest {
         when(userRepository.findById(eq(1L))).thenReturn(Optional.of(mockUser));
         when(jobApplicationRepository.save(any(JobApplication.class)))
                 .thenReturn(mockJobApplication);
+        when(notificationService.createNotification(any(), any(), any(), any(), any(), any())).thenReturn(null);
 
         Long result = jobApplicationService.savePost(applicationDTO);
         assertNotNull(result);
         assertEquals(1L, result);
         verify(jobApplicationRepository, times(1)).getApplicationByUserAndJob(eq(1L), eq(100L));
-        verify(jobRepository, times(1)).findById(eq(100L));
-        verify(userRepository, times(1)).findById(eq(1L));
+        verify(jobRepository, times(2)).findById(eq(100L)); // Called twice: once in jobApplication(), once in
+                                                            // savePost()
+        verify(userRepository, times(2)).findById(eq(1L)); // Called twice: once in jobApplication(), once in savePost()
         verify(jobApplicationRepository, times(1)).save(any(JobApplication.class));
     }
 

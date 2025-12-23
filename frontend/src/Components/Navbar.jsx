@@ -4,6 +4,8 @@ import { Search, Home, Briefcase, Users, User, LogOut, Menu, X } from 'lucide-re
 import './Navbar.css';
 import { API_BASE_URL } from '../config';
 import Logo from '../assets/Logo.png';
+import NotificationBell from './NotificationBell';
+
 
 const Navbar = ({ showSearch = false }) => {
   const navigate = useNavigate();
@@ -56,44 +58,47 @@ const Navbar = ({ showSearch = false }) => {
       {/* Top Header */}
       <header className="top-header">
         <div className="header-content">
-          <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <Menu size={24} />
-          </button>
-          <div className="brand-section">
-            <img src={Logo} alt="SmartLink" className="brand-logo" />
-            <h1 className="brand-title">SmartLink</h1>
-          </div>
-          {showSearch && (
-            <div className="header-search">
-              <Search className="search-icon" size={18} />
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="search-input"
-              />
-              {showResults && (
-                <div className="search-results">
-                  {isSearching ? (
-                    <div className="search-loading">Searching...</div>
-                  ) : searchResults.length > 0 ? (
-                    searchResults.map(user => (
-                      <div key={user.id} className="search-result-item" onClick={() => navigate(user.userType === 'COMPANY' ? `/company-profile/${user.id}` : `/profile/${user.id}`)}>
-                        <div className="result-avatar">{user.fullName.charAt(0)}</div>
-                        <div className="result-info">
-                          <div className="result-name">{user.fullName}</div>
-                          <div className="result-email">{user.email}</div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="search-no-results">No users found</div>
-                  )}
-                </div>
-              )}
+          <div className="header-left">
+            <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+              <Menu size={24} />
+            </button>
+            <div className="brand-section">
+              <img src={Logo} alt="SmartLink" className="brand-logo" />
+              <h1 className="brand-title">SmartLink</h1>
             </div>
-          )}
+            {showSearch && (
+              <div className="header-search">
+                <Search className="search-icon" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="search-input"
+                />
+                {showResults && (
+                  <div className="search-results">
+                    {isSearching ? (
+                      <div className="search-loading">Searching...</div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map(user => (
+                        <div key={user.id} className="search-result-item" onClick={() => navigate(user.userType === 'COMPANY' ? `/company-profile/${user.id}` : `/profile/${user.id}`)}>
+                          <div className="result-avatar">{user.fullName.charAt(0)}</div>
+                          <div className="result-info">
+                            <div className="result-name">{user.fullName}</div>
+                            <div className="result-email">{user.email}</div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="search-no-results">No users found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <NotificationBell />
         </div>
       </header>
 
