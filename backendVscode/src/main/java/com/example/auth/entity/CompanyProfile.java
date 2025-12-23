@@ -20,8 +20,9 @@ public class CompanyProfile {
     @Column(name = "CompanyProfileId")
     private Long companyProfileId;
 
-    @Column(name = "UserId")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UserId", nullable = false)
+    private User user;
 
     @Column(name = "CompanyName")
     private String companyName;

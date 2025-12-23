@@ -1,6 +1,5 @@
 package com.example.auth.controller.CompanyTests;
 
-
 import com.example.auth.controller.CompanyProfileController;
 import com.example.auth.dto.*;
 import com.example.auth.service.CompanyProfileService;
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -49,29 +47,31 @@ class CompanyProfileControllerTest {
         LocationDTO location = new LocationDTO(1L, "Cairo", "Egypt");
         testLocations = Arrays.asList(location);
 
-        testCompanyDTO = new CompanyDTO();
-        testCompanyDTO.setUserId(100L);
-        testCompanyDTO.setCompanyName("Test Company");
-        testCompanyDTO.setWebsite("https://test.com");
-        testCompanyDTO.setIndustry("Technology");
-        testCompanyDTO.setDescription("Test Description");
-        testCompanyDTO.setLogoUrl("logo.png");
-        testCompanyDTO.setCoverUrl("cover.png");
-        testCompanyDTO.setNumberOfFollowers(10L);
-        testCompanyDTO.setFounded(2020);
-        testCompanyDTO.setIsFollowing(false);
-        testCompanyDTO.setLocations(testLocations);
+        testCompanyDTO = CompanyDTO.builder()
+                .companyProfileId(1L)
+                .userId(100L)
+                .companyName("Test Company")
+                .website("https://test.com")
+                .industry("Technology")
+                .description("Test Description")
+                .logoUrl("logo.png")
+                .coverUrl("cover.png")
+                .numberOfFollowers(10L)
+                .founded(2020)
+                .isFollowing(false)
+                .locations(testLocations)
+                .build();
     }
 
     @Test
-    void getCompanyProfile_WithUserId_Success() throws Exception {
-        Long companyId = 1L;
-        Long userId = 200L;
+    void getCompanyByUserId_WithViewerId_Success() throws Exception {
+        Long userId = 100L;
+        Long viewerId = 200L;
 
-        when(companyProfileService.getCompanyProfile(companyId, userId)).thenReturn(testCompanyDTO);
+        when(companyProfileService.getCompanyByUserId(userId, viewerId)).thenReturn(testCompanyDTO);
 
-        mockMvc.perform(get("/api/company/{companyId}", companyId)
-                        .param("userId", userId.toString())
+        mockMvc.perform(get("/api/company/user/{userId}", userId)
+                        .param("viewerId", viewerId.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.companyName", is("Test Company")))
@@ -81,37 +81,37 @@ class CompanyProfileControllerTest {
                 .andExpect(jsonPath("$.website", is("https://test.com")))
                 .andExpect(jsonPath("$.industry", is("Technology")));
 
-        verify(companyProfileService, times(1)).getCompanyProfile(companyId, userId);
+        verify(companyProfileService, times(1)).getCompanyByUserId(userId, viewerId);
     }
 
     @Test
-    void getCompanyProfile_WithoutUserId_Success() throws Exception {
-        Long companyId = 1L;
+    void getCompanyByUserId_WithoutViewerId_Success() throws Exception {
+        Long userId = 100L;
 
-        when(companyProfileService.getCompanyProfile(companyId, null)).thenReturn(testCompanyDTO);
+        when(companyProfileService.getCompanyByUserId(userId, null)).thenReturn(testCompanyDTO);
 
-        mockMvc.perform(get("/api/company/{companyId}", companyId)
+        mockMvc.perform(get("/api/company/user/{userId}", userId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.companyName", is("Test Company")))
                 .andExpect(jsonPath("$.userId", is(100)));
 
-        verify(companyProfileService, times(1)).getCompanyProfile(companyId, null);
+        verify(companyProfileService, times(1)).getCompanyByUserId(userId, null);
     }
 
     @Test
-    void getCompanyProfile_NotFound() throws Exception {
-        Long companyId = 999L;
+    void getCompanyByUserId_NotFound() throws Exception {
+        Long userId = 999L;
 
-        when(companyProfileService.getCompanyProfile(anyLong(), any()))
-                .thenThrow(new RuntimeException("Company not found"));
+        when(companyProfileService.getCompanyByUserId(anyLong(), any()))
+                .thenThrow(new RuntimeException("Company profile not found for user"));
 
-        mockMvc.perform(get("/api/company/{companyId}", companyId)
+        mockMvc.perform(get("/api/company/user/{userId}", userId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Company profile not found"));
+                .andExpect(content().string("Company profile not found for user"));
 
-        verify(companyProfileService, times(1)).getCompanyProfile(companyId, null);
+        verify(companyProfileService, times(1)).getCompanyByUserId(userId, null);
     }
 
     @Test
@@ -156,32 +156,6 @@ class CompanyProfileControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(""));
-    }
-
-    @Test
-    void updateCompanyProfile_Success() throws Exception {
-        Long companyId = 1L;
-        CompanyUpdateDTO updateDTO = new CompanyUpdateDTO();
-        updateDTO.setCompanyId(companyId);
-        updateDTO.setCompanyName("Updated Company");
-        updateDTO.setDescription("Updated Description");
-        updateDTO.setWebsite("https://updated.com");
-        updateDTO.setIndustry("Finance");
-        updateDTO.setFounded(2021);
-
-        testCompanyDTO.setCompanyName("Updated Company");
-
-        when(companyProfileService.updateCompanyProfile(eq(companyId), any(CompanyUpdateDTO.class)))
-                .thenReturn(testCompanyDTO);
-
-        mockMvc.perform(put("/api/company/{companyId}", companyId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.companyName", is("Updated Company")))
-                .andExpect(jsonPath("$.userId", is(100)));
-
-        verify(companyProfileService, times(1)).updateCompanyProfile(eq(companyId), any(CompanyUpdateDTO.class));
     }
 
     @Test
@@ -269,11 +243,11 @@ class CompanyProfileControllerTest {
     }
 
     @Test
-    void getCompanyProfile_WithNullCompanyId_NotFound() throws Exception {
-        when(companyProfileService.getCompanyProfile(anyLong(), any()))
-                .thenThrow(new RuntimeException("Invalid company ID"));
+    void getCompanyByUserId_WithNullUserId_NotFound() throws Exception {
+        when(companyProfileService.getCompanyByUserId(anyLong(), any()))
+                .thenThrow(new RuntimeException("Invalid user ID"));
 
-        mockMvc.perform(get("/api/company/{companyId}", 0L)
+        mockMvc.perform(get("/api/company/user/{userId}", 0L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }

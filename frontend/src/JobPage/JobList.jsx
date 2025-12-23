@@ -159,12 +159,17 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {jobs.map(job => (
-              <JobCard
+              <div
                 key={job.jobId}
-                job={job}
-                onEdit={onEdit}
-                onDelete={setDeleteModal}
-              />
+                onDoubleClick={() => window.location.href = `/applications?jobId=${job.jobId}`}
+                style={{ cursor: 'pointer' }}
+              >
+                <JobCard
+                  job={job}
+                  onEdit={onEdit}
+                  onDelete={setDeleteModal}
+                />
+              </div>
             ))}
           </div>
           {totalPages > 1 && (

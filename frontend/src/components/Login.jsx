@@ -124,6 +124,7 @@ useEffect(() => {
     if (data.token) {
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userEmail', data.email);
+      localStorage.setItem('userType', data.userType);
       console.log("Login successful, token stored");
       
       // Fetch userId from backend
