@@ -1,7 +1,10 @@
 package com.example.auth.controller;
 
 import com.example.auth.dto.PostDTO;
+import com.example.auth.dto.ReportDTO;                 // NEW
+import com.example.auth.enums.ReportCategory;          // NEW
 import com.example.auth.service.PostService.PostService;
+import com.example.auth.service.ReportService.ReportService; // NEW
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +27,9 @@ class PostRestControllerTests {
     @Mock
     private PostService postService;
 
+    @Mock
+    private ReportService reportService; // NEW
+
     @InjectMocks
     private PostRestController postRestController;
 
@@ -31,6 +37,7 @@ class PostRestControllerTests {
 
     @BeforeEach
     void setUp() {
+
         postDTO = new PostDTO(1L, "Test post content", 100L, "JOB_SEEKER",
                 Arrays.asList(), new Timestamp(System.currentTimeMillis()));
     }
@@ -126,5 +133,39 @@ class PostRestControllerTests {
 
         // Assert
         verify(postService, times(1)).deleteById(1L);
+    }
+
+    // ================= NEW TESTS ONLY =================
+
+    @Test
+    void reportPost_ShouldReturnReportDTO() {
+        // Arrange
+        ReportDTO reportDTO = new ReportDTO();
+        reportDTO.setPostId(1L);
+
+        when(reportService.createReport(
+                1L, 2L, ReportCategory.SPAM_OR_SCAM, "Spam"
+        )).thenReturn(reportDTO);
+
+        // Act
+        ReportDTO result = postRestController.reportPost(
+                1L, 2L, ReportCategory.SPAM_OR_SCAM, "Spam"
+        );
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1L, result.getPostId());
+    }
+
+    @Test
+    void getReportCount_ShouldReturnCount() {
+        // Arrange
+        when(reportService.getReportCountForPost(1L)).thenReturn(3L);
+
+        // Act
+        long count = postRestController.getReportCount(1L);
+
+        // Assert
+        assertEquals(3L, count);
     }
 }

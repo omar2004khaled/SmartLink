@@ -22,7 +22,7 @@ import com.example.auth.dto.ReportDTO;
 import com.example.auth.enums.ReportCategory;
 import com.example.auth.service.PostService.PostService;
 import com.example.auth.service.ReportService.ReportService;
-
+ 
 @RestController
 @RequestMapping("/Post")
 @CrossOrigin(origins = "${app.frontend.base-url}")
