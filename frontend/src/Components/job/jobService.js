@@ -56,7 +56,6 @@ export const submitApplication = async (jobId, applicationData) => {
       // createdAt: null // Optional - let backend set
     };
 
-    console.log('Sending payload:', payload); // Debug log
 
     const response = await fetch(`${API_BASE_URL}/apply/post`, {
       method: 'POST',

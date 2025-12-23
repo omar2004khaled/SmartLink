@@ -63,9 +63,8 @@ public class JobApplicationService {
     }
 
     public ApplicationDTO addComment(String comment, Long applicationId){
-        Optional<JobApplication> optionalJobApplication = jobApplicationRepository.findById(applicationId);
-        if(optionalJobApplication.isEmpty()) throw new RuntimeException("there is no such application");
-        JobApplication jobApp = optionalJobApplication.get();
+
+        JobApplication jobApp = helper(applicationId);
         List<String> tmpComments = jobApp.getComments();
         tmpComments.add(comment);
         jobApp.setComments(tmpComments);
@@ -74,10 +73,15 @@ public class JobApplicationService {
         return toApplicationDTO(jobApp);
     }
 
-    public ApplicationDTO changeStatus(String status, Long applicationId){
+    private JobApplication helper(Long applicationId){
         Optional<JobApplication> optionalJobApplication = jobApplicationRepository.findById(applicationId);
         if(optionalJobApplication.isEmpty()) throw new RuntimeException("there is no such application");
         JobApplication jobApp = optionalJobApplication.get();
+        return jobApp;
+    }
+
+    public ApplicationDTO changeStatus(String status, Long applicationId){
+        JobApplication jobApp = helper(applicationId);
         jobApp.setApplicationStatus(ApplicationStatus.valueOf(status));
         jobApplicationRepository.save(jobApp);
         return toApplicationDTO(jobApp);

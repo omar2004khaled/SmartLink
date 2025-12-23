@@ -40,7 +40,6 @@ const ApplicationsPage = () => {
       if (!response.ok) throw new Error('Failed to save comment');
 
       const updatedApp = await response.json();
-      console.log('Comment saved successfully. Updated application:', updatedApp);
       
       // Update the application in state
       setApplications(applications.map(app => 
@@ -77,8 +76,7 @@ const ApplicationsPage = () => {
       setApplications(applications.map(app => 
         app.id === appId ? updatedApp : app
       ));
-      
-      console.log('Status changed for application', appId, 'to:', newStatus);
+    
     } catch (error) {
       console.error('Error changing status:', error);
     }

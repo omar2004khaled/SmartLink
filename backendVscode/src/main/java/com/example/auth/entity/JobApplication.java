@@ -33,9 +33,9 @@ public class JobApplication {
     @JoinColumn(name = "job_id")
     private Job job;
     @Column(name = "cv_erl")
-    String cvURL;
+    private String cvURL;
     @Column(name = "cover_letter")
-    String coverLetter;
+    private String coverLetter;
     @ElementCollection
     @CollectionTable(
             name = "job_application_comments",
