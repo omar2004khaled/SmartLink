@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS comments_attach;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS post_like;
 DROP TABLE IF EXISTS post_attach;
+DROP TABLE IF EXISTS reports;
 DROP TABLE IF EXISTS attachment;
 DROP TABLE IF EXISTS posts;
 
@@ -298,6 +299,35 @@ CREATE INDEX idx_status ON connections(status);
 
 
 -- ===================================
+-- REPORTS TABLE
+-- ===================================
+CREATE TABLE reports (
+    ReportId        BIGINT AUTO_INCREMENT PRIMARY KEY,
+    PostId          BIGINT NOT NULL,
+    ReporterId      BIGINT NOT NULL,
+    ReportCategory  ENUM(
+        'SEXUAL_HARASSMENT',
+        'HATE_SPEECH',
+        'SPAM_OR_SCAM',
+        'FALSE_INFORMATION',
+        'BULLYING_OR_HARASSMENT',
+        'INAPPROPRIATE_CONTENT',
+        'VIOLENCE_OR_THREATS',
+        'INTELLECTUAL_PROPERTY_VIOLATION',
+        'OTHER'
+    ) NOT NULL,
+    Description     VARCHAR(500),
+    Timestamp       DATETIME NOT NULL,
+    Status          ENUM('PENDING', 'REVIEWED', 'RESOLVED') NOT NULL DEFAULT 'PENDING',
+    
+    FOREIGN KEY (PostId) REFERENCES posts(PostId) ON DELETE CASCADE,
+    FOREIGN KEY (ReporterId) REFERENCES user(UserId) ON DELETE CASCADE,
+    
+    UNIQUE KEY unique_report (PostId, ReporterId)
+);
+
+CREATE INDEX ReportsByPost ON reports(PostId);
+CREATE INDEX ReportsByReporter ON reports(ReporterId);
 -- NOTIFICATIONS TABLE
 -- ===================================
 CREATE TABLE notifications (
