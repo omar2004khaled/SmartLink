@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import avatar from './avatar.png';
 import { Link } from 'react-router-dom';
-import { Delete, MoreVertical } from 'lucide-react';
+import { Delete, MoreVertical, Flag } from 'lucide-react';
 import { userIdFromLocalStorage } from "../FetchData/FetchData";
 
 function UserHeader({ 
@@ -36,10 +36,6 @@ function UserHeader({
         setMenuOpen(false);
         if (typeof onReport === 'function') {
             onReport();
-        } else {
-            if (onError) {
-                onError('Post reported. Thank you for your feedback.');
-            }
         }
     }
 
@@ -122,19 +118,29 @@ function UserHeader({
                     userIdFromLocalStorage() === userId ? (<>
                         <ul className="post-menu" role="menu">
                             <li>
-                                <button className="post-menu-item" role="menuitem" onClick={handleUpdate}>Edit post</button>
+                                <button className="post-menu-item" role="menuitem" onClick={handleUpdate}>
+                                    <span>Edit post</span>
+                                </button>
                             </li>
                             <li>
-                                <button className="post-menu-item" role="menuitem" onClick={handleDelete}>Delete post</button>
+                                <button className="post-menu-item delete-item" role="menuitem" onClick={handleDelete}>
+                                    <Delete size={16} />
+                                    <span>Delete post</span>
+                                </button>
                             </li>
                         </ul>
                     </>) : (<>
                         <ul className="post-menu" role="menu">
                             <li>
-                                <button className="post-menu-item" role="menuitem" onClick={handleReport}>Report post</button>
+                                <button className="post-menu-item report-item" role="menuitem" onClick={handleReport}>
+                                    <Flag size={16} />
+                                    <span>Report post</span>
+                                </button>
                             </li>
                             <li>
-                                <button className="post-menu-item" role="menuitem" onClick={handleSnooze}>Snooze {username} for 30 days</button>
+                                <button className="post-menu-item" role="menuitem" onClick={handleSnooze}>
+                                    <span>Snooze {username} for 30 days</span>
+                                </button>
                             </li>
                         </ul>
                     </>)

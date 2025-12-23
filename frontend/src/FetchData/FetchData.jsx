@@ -268,4 +268,57 @@ export const getUserReaction = async (postId, userId) => {
     throw error;
   }
 };
+
+export const reportPost = async (postId, reporterId, category, description = '') => {
+  try {
+    const response = await apiClient.post(`/Post/${postId}/report`, null, {
+      params: {
+        reporterId,
+        category,
+        description
+      }
+    });
+    console.log("Post reported successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error reporting post:", error);
+    throw error;
+  }
+};
+
+export const getReportsForPost = async (postId) => {
+  try {
+    const response = await apiClient.get(`/Post/${postId}/reports`);
+    console.log(`Reports for post ${postId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports:", error);
+    throw error;
+  }
+};
+
+export const getReportCount = async (postId) => {
+  try {
+    const response = await apiClient.get(`/Post/${postId}/report-count`);
+    console.log(`Report count for post ${postId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching report count:", error);
+    throw error;
+  }
+};
+
+export const hasUserReported = async (postId, reporterId) => {
+  try {
+    const response = await apiClient.get(`/Post/${postId}/has-reported`, {
+      params: { reporterId }
+    });
+    console.log(`User ${reporterId} has reported post ${postId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error checking if user reported:", error);
+    throw error;
+  }
+};
+
 export default apiClient;

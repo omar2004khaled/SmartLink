@@ -4,6 +4,7 @@ import Content from './Content';
 import Attachment from './Attachment';
 import Footer from './Footer';
 import CommentsPanel from './CommentsPanel';
+import ReportModal from './ReportModal';
 import { SaveComment, GetComments, GetUserInfo, userIdFromLocalStorage, UpdatePost, DeletePost } from '../FetchData/FetchData';
 import commentsSeed from '../data/commentsSeed';
 import './PostCard.css';
@@ -29,6 +30,7 @@ function PostItem({ post }) {
   const [editAttachment, setEditAttachment] = useState(null);
   const [editAttachmentUrl, setEditAttachmentUrl] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
 
   const showError = (message) => {
@@ -449,6 +451,7 @@ function PostItem({ post }) {
         avatarUrl={null}
         onDelete={handleDeletePost}
         onUpdate={handleEditPost}
+        onReport={() => setShowReportModal(true)}
         postId={post?.id || post?.postId}
         userType={userInfo?.userType || post.userType}
         onError={showError}
@@ -600,6 +603,17 @@ function PostItem({ post }) {
 
       {showComments && (
         <CommentsPanel comments={comments} onClose={closeComments} showAll={showAll} />
+      )}
+
+      {showReportModal && (
+        <ReportModal
+          postId={post?.id || post?.postId}
+          onClose={() => setShowReportModal(false)}
+          onReportSuccess={() => {
+            setShowReportModal(false);
+            // Optionally show a success message or refresh
+          }}
+        />
       )}
     </div>
   );
