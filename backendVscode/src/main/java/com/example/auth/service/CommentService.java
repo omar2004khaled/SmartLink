@@ -44,27 +44,20 @@ public class CommentService {
 
     @Transactional
     public Long addComment(CommentDTO commentDTO) {
-        System.out.println("Adding comment for userId: " + commentDTO.getUserId() +
-                ", postId: " + commentDTO.getPostId());
 
-        // Fetch entities with proper error handling
         User user = userRepository.findById(commentDTO.getUserId()).get();
         Post post = postRepository.findById(commentDTO.getPostId()).get();
 
         Attachment attachment = null;
-        System.out.println(commentDTO.getUrl() + " " + commentDTO.getType());
         if (commentDTO.getUrl() != null) {
 
-            System.out.println(commentDTO.getType().toUpperCase());
             attachment = Attachment.builder()
                     .AttachmentURL(commentDTO.getUrl())
                     .typeofAttachments(
                             commentDTO.getType() != null ? TypeofAttachments.valueOf(commentDTO.getType()) : null)
                     .build();
-            System.out.println("saving Attachments");
 
         }
-        // Build comment
         Comment comment = Comment.builder()
                 .user(user)
                 .post(post)
@@ -85,8 +78,7 @@ public class CommentService {
                         user.getFullName(),
                         post.getPostId());
             } catch (Exception e) {
-                // Log error but don't fail the comment operation
-                System.err.println("Failed to create post comment notification: " + e.getMessage());
+
             }
         }
 
