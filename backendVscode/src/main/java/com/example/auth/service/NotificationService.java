@@ -7,6 +7,7 @@ import com.example.auth.repository.NotificationRepository;
 import com.example.auth.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,14 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public NotificationService(NotificationRepository notificationRepository, UserRepository userRepository) {
+    public NotificationService(NotificationRepository notificationRepository,
+            UserRepository userRepository,
+            SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Transactional
@@ -39,7 +44,12 @@ public class NotificationService {
                 .isRead(false)
                 .build();
 
-        return notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
+
+        // Push notification via WebSocket for instant delivery
+        pushNotificationViaWebSocket(userId, savedNotification);
+
+        return savedNotification;
     }
 
     @Transactional(readOnly = true)
@@ -153,5 +163,15 @@ public class NotificationService {
                 likerName + " liked your comment",
                 commentId,
                 "COMMENT");
+    }
+
+    private void pushNotificationViaWebSocket(Long userId, Notification notification) {
+        try {
+            messagingTemplate.convertAndSend(
+                    "/topic/notifications/" + userId,
+                    notification);
+        } catch (Exception e) {
+            System.err.println("Failed to push notification via WebSocket for user " + userId + ": " + e.getMessage());
+        }
     }
 }

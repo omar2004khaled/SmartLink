@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Bell, X, Check, CheckCheck, UserPlus, UserCheck, Heart, MessageCircle, ThumbsUp, Briefcase, FileText, Edit3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import useWebSocket from '../hooks/useWebSocket';
 import './NotificationBell.css';
 
 const NotificationBell = () => {
@@ -12,9 +13,26 @@ const NotificationBell = () => {
     const [loading, setLoading] = useState(false);
     const dropdownRef = useRef(null);
 
+    const handleWebSocketNotification = useCallback((notification) => {
+        console.log('Real-time notification received:', notification);
+
+        setNotifications(prev => [notification, ...prev]);
+
+        if (!notification.isRead) {
+            setUnreadCount(prev => {
+                const newCount = prev + 1;
+                console.log('Unread count updated:', newCount);
+                return newCount;
+            });
+        }
+    }, []);
+
+    const userId = useMemo(() => localStorage.getItem('userId'), []);
+    useWebSocket(userId, handleWebSocketNotification);
+
     useEffect(() => {
         fetchUnreadCount();
-        const interval = setInterval(fetchUnreadCount, 3000); // Poll every 3 seconds for faster updates
+        const interval = setInterval(fetchUnreadCount, 30000);
         return () => clearInterval(interval);
     }, []);
 

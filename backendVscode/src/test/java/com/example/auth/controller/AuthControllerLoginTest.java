@@ -36,9 +36,25 @@ class AuthControllerLoginTest {
     @Autowired
     private JobSeekerProfileRepository jobSeekerProfileRepository;
 
+    @Autowired
+    private com.example.auth.repository.CommentRepo commentRepo;
+
+    @Autowired
+    private com.example.auth.repository.PostRepository postRepository;
+
+    @Autowired
+    private com.example.auth.repository.ConnectionRepository connectionRepository;
+
+    @Autowired
+    private com.example.auth.repository.NotificationRepository notificationRepository;
+
     @BeforeEach
     void setUp() {
         // Delete child entities first to avoid FK constraint violation
+        commentRepo.deleteAll();
+        postRepository.deleteAll();
+        connectionRepository.deleteAll();
+        notificationRepository.deleteAll();
         jobSeekerProfileRepository.deleteAll();
         userRepository.deleteAll();
 

@@ -30,27 +30,32 @@ public class CommentServiceTest {
     PostRepository postRepository;
     @Mock
     CommentRepo commentRepo;
+    @Mock
+    NotificationService notificationService;
     @InjectMocks
     CommentService commentService;
     @Captor
     ArgumentCaptor<Comment> commentArgumentCaptor;
     private CommentDTO commentDTO;
+
     @BeforeEach
-    void setUp(){
-        commentDTO =new CommentDTO();
+    void setUp() {
+        commentDTO = new CommentDTO();
         commentDTO.setType("Files");
         commentDTO.setCommentId(Integer.toUnsignedLong(1));
         commentDTO.setUrl("http//mock");
         commentDTO.setText("hello fromSmartLink");
         commentDTO.setUserId(Integer.toUnsignedLong(1));
     }
+
     @Test
-    public void removeComment_NonExistentObject(){
+    public void removeComment_NonExistentObject() {
         Mockito.when(commentRepo.findById(commentDTO.getUserId())).thenReturn(Optional.empty());
-        Assertions.assertThrows(NonExistentObject.class,()->{
+        Assertions.assertThrows(NonExistentObject.class, () -> {
             commentService.RemoveComment(commentDTO.getUserId());
         });
     }
+
     @Test
     public void removeComment_Success() {
         Comment existingComment = new Comment();
@@ -62,13 +67,15 @@ public class CommentServiceTest {
         commentService.RemoveComment(commentDTO.getCommentId());
         Mockito.verify(commentRepo).deleteById(commentDTO.getCommentId());
     }
+
     @Test
-    public void addComment_Success(){
+    public void addComment_Success() {
         User mockUser = new User();
         mockUser.setId(commentDTO.getUserId());
 
         Post mockPost = new Post();
         mockPost.setPostId(commentDTO.getPostId());
+        mockPost.setUserId(2L); // Different user to trigger notification
 
         Comment savedComment = new Comment();
         savedComment.setCommentId(1L);
@@ -77,13 +84,15 @@ public class CommentServiceTest {
         Mockito.when(userRepository.findById(commentDTO.getUserId())).thenReturn(Optional.of(mockUser));
         Mockito.when(postRepository.findById(commentDTO.getPostId())).thenReturn(Optional.of(mockPost));
         Mockito.when(commentRepo.save(any())).thenReturn(savedComment);
+        Mockito.when(notificationService.createPostCommentNotification(any(), any(), any(), any())).thenReturn(null);
         commentService.addComment(commentDTO);
         Mockito.verify(userRepository).findById(commentDTO.getUserId());
         Mockito.verify(postRepository).findById(commentDTO.getPostId());
 
     }
+
     @Test
-    public void addCommentText_Success(){
+    public void addCommentText_Success() {
         commentDTO.setType(null);
         commentDTO.setUrl(null);
         User mockUser = new User();
@@ -91,6 +100,7 @@ public class CommentServiceTest {
 
         Post mockPost = new Post();
         mockPost.setPostId(commentDTO.getPostId());
+        mockPost.setUserId(2L); // Different user to trigger notification
 
         Comment savedComment = new Comment();
         savedComment.setCommentId(1L);
@@ -99,28 +109,30 @@ public class CommentServiceTest {
         Mockito.when(userRepository.findById(commentDTO.getUserId())).thenReturn(Optional.of(mockUser));
         Mockito.when(postRepository.findById(commentDTO.getPostId())).thenReturn(Optional.of(mockPost));
         Mockito.when(commentRepo.save(any())).thenReturn(savedComment);
+        Mockito.when(notificationService.createPostCommentNotification(any(), any(), any(), any())).thenReturn(null);
         commentService.addComment(commentDTO);
         Mockito.verify(userRepository).findById(commentDTO.getUserId());
         Mockito.verify(postRepository).findById(commentDTO.getPostId());
 
     }
+
     @Test
-    public void Update_NotFound(){
+    public void Update_NotFound() {
         Mockito.when(commentRepo.findById(commentDTO.getCommentId())).thenReturn(Optional.empty());
-        Assertions.assertThrows(NonExistentObject.class,()->{
+        Assertions.assertThrows(NonExistentObject.class, () -> {
             commentService.update(commentDTO);
         });
     }
 
     @Test
-    public void UpdateText_Success(){
+    public void UpdateText_Success() {
         commentDTO.setUrl(null);
         commentDTO.setType(null);
         User mockUser = new User();
         mockUser.setId(commentDTO.getUserId());
         Post mockPost = new Post();
         mockPost.setPostId(commentDTO.getPostId());
-        
+
         Comment comment = Comment.builder()
                 .commentId(commentDTO.getCommentId())
                 .content(commentDTO.getText())
@@ -136,13 +148,13 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void UpdateAttach_Success(){
+    public void UpdateAttach_Success() {
         commentDTO.setText(null);
         User mockUser = new User();
         mockUser.setId(commentDTO.getUserId());
         Post mockPost = new Post();
         mockPost.setPostId(commentDTO.getPostId());
-        
+
         Comment comment = Comment.builder()
                 .commentId(commentDTO.getCommentId())
                 .user(mockUser)
@@ -159,13 +171,14 @@ public class CommentServiceTest {
         Mockito.verify(commentRepo).findById(commentDTO.getCommentId());
         Mockito.verify(commentRepo).save(comment);
     }
+
     @Test
-    public void UpdateTextAttach_Success(){
+    public void UpdateTextAttach_Success() {
         User mockUser = new User();
         mockUser.setId(commentDTO.getUserId());
         Post mockPost = new Post();
         mockPost.setPostId(commentDTO.getPostId());
-        
+
         Comment comment = Comment.builder()
                 .commentId(commentDTO.getCommentId())
                 .content(commentDTO.getText())
@@ -183,6 +196,5 @@ public class CommentServiceTest {
         Mockito.verify(commentRepo).findById(commentDTO.getCommentId());
         Mockito.verify(commentRepo).save(comment);
     }
-
 
 }
