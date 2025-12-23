@@ -310,7 +310,8 @@ CREATE TABLE notifications (
         'POST_COMMENT',
         'COMMENT_LIKE',
         'JOB_APPLICATION',
-        'JOB_APPLICATION_STATUS_CHANGE'
+        'JOB_APPLICATION_STATUS_CHANGE',
+        'NEW_POST'
     ) NOT NULL,
     title               VARCHAR(255) NOT NULL,
     message             VARCHAR(1000) NOT NULL,

@@ -18,12 +18,17 @@ public class LikeService {
     LikeCommentRepo likeCommentRepo;
     UserRepository userRepository;
     CommentRepo commentRepo;
+    NotificationService notificationService;
+
     @Autowired
-    public LikeService(LikeCommentRepo likeCommentRepo,UserRepository userRepository,CommentRepo commentRepo) {
+    public LikeService(LikeCommentRepo likeCommentRepo, UserRepository userRepository,
+            CommentRepo commentRepo, NotificationService notificationService) {
         this.likeCommentRepo = likeCommentRepo;
-        this.userRepository=userRepository;
-        this.commentRepo=commentRepo;
+        this.userRepository = userRepository;
+        this.commentRepo = commentRepo;
+        this.notificationService = notificationService;
     }
+
     @Transactional
     public void makeOrDeleteLike(Long userId, Long commentId) throws NotEnoughInformationException {
 
@@ -36,13 +41,29 @@ public class LikeService {
         CommentsLikeId commentsLikeId = new CommentsLikeId(userId, commentId);
 
         if (likeCommentRepo.existsById(commentsLikeId)) {
+            // User is removing their like - no notification
             likeCommentRepo.deleteById(commentsLikeId);
         } else {
+            // User is adding a new like - create notification
             CommentsLike like = new CommentsLike();
             like.setId(commentsLikeId);
             like.setUser(user);
             like.setComment(comment);
             likeCommentRepo.save(like);
+
+            // Create notification for comment owner (if not liking own comment)
+            if (!comment.getUser().getId().equals(userId)) {
+                try {
+                    notificationService.createCommentLikeNotification(
+                            comment.getUser().getId(),
+                            userId,
+                            user.getFullName(),
+                            commentId);
+                } catch (Exception e) {
+                    // Log error but don't fail the like operation
+                    System.err.println("Failed to create comment like notification: " + e.getMessage());
+                }
+            }
         }
     }
 }

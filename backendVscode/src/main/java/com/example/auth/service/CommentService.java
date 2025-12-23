@@ -31,12 +31,17 @@ public class CommentService {
     UserRepository userRepository;
     @Autowired
     AttacchmentsRepository attachmentsRepository;
-    public boolean RemoveComment(Long ID){
-        Optional<Comment> c=commentRepo.findById(ID);
-        if(c.isEmpty()) throw new NonExistentObject("Object Does not exist");
+    @Autowired
+    NotificationService notificationService;
+
+    public boolean RemoveComment(Long ID) {
+        Optional<Comment> c = commentRepo.findById(ID);
+        if (c.isEmpty())
+            throw new NonExistentObject("Object Does not exist");
         commentRepo.deleteById(ID);
         return true;
     }
+
     @Transactional
     public Long addComment(CommentDTO commentDTO) {
         System.out.println("Adding comment for userId: " + commentDTO.getUserId() +
@@ -46,15 +51,15 @@ public class CommentService {
         User user = userRepository.findById(commentDTO.getUserId()).get();
         Post post = postRepository.findById(commentDTO.getPostId()).get();
 
-
-        Attachment attachment =null;
-        System.out.println(commentDTO.getUrl()+" "+commentDTO.getType());
-        if(commentDTO.getUrl() != null) {
+        Attachment attachment = null;
+        System.out.println(commentDTO.getUrl() + " " + commentDTO.getType());
+        if (commentDTO.getUrl() != null) {
 
             System.out.println(commentDTO.getType().toUpperCase());
             attachment = Attachment.builder()
                     .AttachmentURL(commentDTO.getUrl())
-                    .typeofAttachments(commentDTO.getType() != null ? TypeofAttachments.valueOf(commentDTO.getType()) : null)
+                    .typeofAttachments(
+                            commentDTO.getType() != null ? TypeofAttachments.valueOf(commentDTO.getType()) : null)
                     .build();
             System.out.println("saving Attachments");
 
@@ -71,36 +76,55 @@ public class CommentService {
         // Save comment
         Comment savedComment = commentRepo.save(comment);
 
+        // Create notification for post owner (if not commenting on own post)
+        if (!post.getUserId().equals(commentDTO.getUserId())) {
+            try {
+                notificationService.createPostCommentNotification(
+                        post.getUserId(),
+                        user.getId(),
+                        user.getFullName(),
+                        post.getPostId());
+            } catch (Exception e) {
+                // Log error but don't fail the comment operation
+                System.err.println("Failed to create post comment notification: " + e.getMessage());
+            }
+        }
+
         return savedComment.getCommentId();
     }
+
     @Transactional
-    public List<CommentDTO> getCommentsByPostId(int pageNo,int pageSize,Long postId){
-        Pageable pageable=PageRequest.of(pageNo,pageSize);
-        List<Comment> tmpComments=commentRepo.findByPostIdNative(postId,pageable).getContent();
+    public List<CommentDTO> getCommentsByPostId(int pageNo, int pageSize, Long postId) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        List<Comment> tmpComments = commentRepo.findByPostIdNative(postId, pageable).getContent();
         return tmpComments.stream().map(this::ConvertToDTO).toList();
     }
-    private CommentDTO ConvertToDTO(Comment comment){
-        CommentDTO c= CommentDTO.builder()
+
+    private CommentDTO ConvertToDTO(Comment comment) {
+        CommentDTO c = CommentDTO.builder()
                 .commentId(comment.getCommentId())
                 .userId(comment.getUser().getId())
                 .text(comment.getContent())
                 .postId(comment.getPost().getPostId())
                 .build();
-        if(comment.getAttachment() != null) {
+        if (comment.getAttachment() != null) {
             c.setUrl(comment.getAttachment().getAttachmentURL());
-            if(comment.getAttachment().getTypeofAttachments()!=null)
+            if (comment.getAttachment().getTypeofAttachments() != null)
                 c.setType(comment.getAttachment().getTypeofAttachments().toString());
         }
         return c;
     }
+
     @Transactional
-    public CommentDTO update(CommentDTO commentDTO){
-        Optional<Comment> c=commentRepo.findById(commentDTO.getCommentId());
-        if(c.isEmpty()) throw new NonExistentObject("Object Does Not exist");
-        Comment comment=c.get();
+    public CommentDTO update(CommentDTO commentDTO) {
+        Optional<Comment> c = commentRepo.findById(commentDTO.getCommentId());
+        if (c.isEmpty())
+            throw new NonExistentObject("Object Does Not exist");
+        Comment comment = c.get();
         comment.setAttachment(Attachment.builder()
                 .AttachmentURL(commentDTO.getUrl())
-                .typeofAttachments(commentDTO.getType()!=null?TypeofAttachments.valueOf(commentDTO.getType()):null)
+                .typeofAttachments(
+                        commentDTO.getType() != null ? TypeofAttachments.valueOf(commentDTO.getType()) : null)
                 .build());
         comment.setContent(commentDTO.getText());
         comment.setCreatedAt(LocalDateTime.now());

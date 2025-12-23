@@ -14,20 +14,21 @@ import java.util.List;
 
 @Service
 public class NotificationService {
-    
+
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
-    
+
     public NotificationService(NotificationRepository notificationRepository, UserRepository userRepository) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
     }
 
     @Transactional
-    public Notification createNotification(Long userId, NotificationType type, String title, String message, Long relatedEntityId, String relatedEntityType) {
+    public Notification createNotification(Long userId, NotificationType type, String title, String message,
+            Long relatedEntityId, String relatedEntityType) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-        
+
         Notification notification = Notification.builder()
                 .user(user)
                 .type(type)
@@ -37,16 +38,14 @@ public class NotificationService {
                 .relatedEntityType(relatedEntityType)
                 .isRead(false)
                 .build();
-        
+
         return notificationRepository.save(notification);
     }
-    
 
     @Transactional(readOnly = true)
     public Page<Notification> getUserNotifications(Long userId, Pageable pageable) {
         return notificationRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable);
     }
-    
 
     @Transactional(readOnly = true)
     public List<Notification> getUserNotifications(Long userId) {
@@ -57,13 +56,11 @@ public class NotificationService {
     public List<Notification> getUnreadNotifications(Long userId) {
         return notificationRepository.findByUser_IdAndIsReadFalseOrderByCreatedAtDesc(userId);
     }
-    
 
     @Transactional(readOnly = true)
     public Long getUnreadNotificationCount(Long userId) {
         return notificationRepository.countUnreadByUserId(userId);
     }
-    
 
     @Transactional
     public void markAsRead(Long notificationId, Long userId) {
@@ -77,20 +74,18 @@ public class NotificationService {
     public void markAllAsRead(Long userId) {
         notificationRepository.markAllAsReadByUserId(userId);
     }
-    
 
     @Transactional
     public void deleteNotification(Long notificationId, Long userId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
-        
+
         if (!notification.getUser().getId().equals(userId)) {
             throw new RuntimeException("User does not have permission to delete this notification");
         }
-        
+
         notificationRepository.delete(notification);
     }
-    
 
     @Transactional(readOnly = true)
     public List<Notification> getNotificationsByType(Long userId, NotificationType type) {
@@ -102,7 +97,6 @@ public class NotificationService {
         return notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found with id: " + notificationId));
     }
-    
 
     @Transactional
     public Notification createConnectionRequestNotification(Long receiverId, Long senderId, String senderName) {
@@ -112,10 +106,8 @@ public class NotificationService {
                 "New Connection Request",
                 senderName + " sent you a connection request",
                 senderId,
-                "USER"
-        );
+                "USER");
     }
-    
 
     @Transactional
     public Notification createConnectionAcceptedNotification(Long userId, Long acceptedById, String acceptedByName) {
@@ -125,10 +117,8 @@ public class NotificationService {
                 "Connection Accepted",
                 acceptedByName + " accepted your connection request",
                 acceptedById,
-                "USER"
-        );
+                "USER");
     }
-    
 
     @Transactional
     public Notification createPostLikeNotification(Long postOwnerId, Long likerId, String likerName, Long postId) {
@@ -138,33 +128,30 @@ public class NotificationService {
                 "Post Liked",
                 likerName + " liked your post",
                 postId,
-                "POST"
-        );
+                "POST");
     }
-    
 
     @Transactional
-    public Notification createPostCommentNotification(Long postOwnerId, Long commenterId, String commenterName, Long postId) {
+    public Notification createPostCommentNotification(Long postOwnerId, Long commenterId, String commenterName,
+            Long postId) {
         return createNotification(
                 postOwnerId,
                 NotificationType.POST_COMMENT,
                 "New Comment",
                 commenterName + " commented on your post",
                 postId,
-                "POST"
-        );
+                "POST");
     }
 
     @Transactional
-    public Notification createCommentLikeNotification(Long commentOwnerId, Long likerId, String likerName, Long commentId) {
+    public Notification createCommentLikeNotification(Long commentOwnerId, Long likerId, String likerName,
+            Long commentId) {
         return createNotification(
                 commentOwnerId,
                 NotificationType.COMMENT_LIKE,
                 "Comment Liked",
                 likerName + " liked your comment",
                 commentId,
-                "COMMENT"
-        );
+                "COMMENT");
     }
 }
-
