@@ -9,6 +9,7 @@ import com.example.auth.repository.UserRepository;
 import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepository;
 import com.example.auth.repository.PostRepository;
 import com.example.auth.repository.CommentRepo;
+import com.example.auth.repository.ReportRepository;
 import com.example.auth.service.EmailService;
 
 class AdminDashboardUnitTest {
@@ -21,9 +22,10 @@ class AdminDashboardUnitTest {
         JobSeekerProfileRepository mockJobRepo = mock(JobSeekerProfileRepository.class);
         PostRepository mockPostRepo = mock(PostRepository.class);
         CommentRepo mockCommentRepo = mock(CommentRepo.class);
+        ReportRepository mockReportRepo = mock(ReportRepository.class);
 
         AdminController controller =
-                new AdminController(mockUserRepository, mockEmailService, mockJobRepo, mockPostRepo, mockCommentRepo);
+                new AdminController(mockUserRepository, mockEmailService, mockJobRepo, mockPostRepo, mockCommentRepo, mockReportRepo);
 
         // Act
         String result = controller.adminDashboard();
@@ -40,10 +42,11 @@ class AdminDashboardUnitTest {
         JobSeekerProfileRepository mockJobRepo = mock(JobSeekerProfileRepository.class);
         PostRepository mockPostRepo = mock(PostRepository.class);
         CommentRepo mockCommentRepo = mock(CommentRepo.class);
+        ReportRepository mockReportRepo = mock(ReportRepository.class);
 
         // Act
         AdminController controller =
-                new AdminController(mockUserRepository, mockEmailService, mockJobRepo, mockPostRepo, mockCommentRepo);
+                new AdminController(mockUserRepository, mockEmailService, mockJobRepo, mockPostRepo, mockCommentRepo, mockReportRepo);
 
         // Assert
         assertEquals(AdminController.class, controller.getClass());
@@ -57,9 +60,10 @@ class AdminDashboardUnitTest {
         JobSeekerProfileRepository mockJobRepo = mock(JobSeekerProfileRepository.class);
         PostRepository mockPostRepo = mock(PostRepository.class);
         CommentRepo mockCommentRepo = mock(CommentRepo.class);
+        ReportRepository mockReportRepo = mock(ReportRepository.class);
 
         AdminController controller =
-                new AdminController(mockUserRepository, mockEmailService, mockJobRepo, mockPostRepo, mockCommentRepo);
+                new AdminController(mockUserRepository, mockEmailService, mockJobRepo, mockPostRepo, mockCommentRepo, mockReportRepo);
 
         // Act
         String result1 = controller.adminDashboard();
