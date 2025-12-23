@@ -11,8 +11,6 @@ import './CompanyProfile.css';
 import { API_BASE_URL,CLOUDINARY_UPLOAD_URL } from '../../../../config';
 
 
-const PLACEHOLDER_LOGO = '/profilePlaceholder.jpg';
-const PLACEHOLDER_COVER = '/coverPlaceholder.webp';
 
 export default function CompanyProfile({ companyId, userId, targetUserId, currentUserId }) {
   const [activeTab, setActiveTab] = useState('About');
@@ -33,99 +31,8 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
     if (companyId || profileOwnerId || viewerId) {
       fetchCompanyBasicData();
     }
-  }, [companyId, profileOwnerId, viewerId]);
+  }, [profileOwnerId, viewerId]);
 
-  const fetchImageAsBlob = async (imagePath) => {
-    try {
-      const response = await fetch(imagePath);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${imagePath}`);
-      }
-      const blob = await response.blob();
-      return blob;
-    } catch (error) {
-      console.error('Error fetching image as blob:', error);
-      throw error;
-    }
-  };
-
-  const uploadPlaceholderToCloudinary = async (type) => {
-    try {
-      const imagePath = type === 'logo' ? PLACEHOLDER_LOGO : PLACEHOLDER_COVER;
-      const blob = await fetchImageAsBlob(imagePath);
-      
-      const formData = new FormData();
-      formData.append('file', blob, `placeholder-${type}.png`);
-      formData.append('upload_preset', 'dyk7gqqw');
-
-      const response = await fetch(CLOUDINARY_UPLOAD_URL, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Cloudinary upload failed');
-      }
-
-      const data = await response.json();
-      return data.secure_url;
-    } catch (err) {
-      console.error(`Error uploading placeholder ${type}:`, err);
-      return null;
-    }
-  };
-
-  const checkAndUploadPlaceholders = async (data) => {
-    const updates = {};
-    let needsUpdate = false;
-
-    if (!data.logoUrl) {
-      const logoUrl = await uploadPlaceholderToCloudinary('logo');
-      if (logoUrl) {
-        updates.logoUrl = logoUrl;
-        needsUpdate = true;
-      }
-    }
-
-    if (!data.coverUrl && !data.coverImageUrl) {
-      const coverUrl = await uploadPlaceholderToCloudinary('cover');
-      if (coverUrl) {
-        updates.coverImageUrl = coverUrl;
-        needsUpdate = true;
-      }
-    }
-
-    if (needsUpdate) {
-      try {
-        const token = localStorage.getItem('authToken');
-        const headers = {
-          'Content-Type': 'application/json',
-        };
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        const currentCompanyId = data.companyProfileId;
-        const response = await fetch(`${API_BASE_URL}/api/company/${currentCompanyId}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({
-            companyId: currentCompanyId,
-            ...updates
-          }),
-        });
-
-        if (response.ok) {
-          const updatedData = await response.json();
-          return updatedData;
-        }
-      } catch (err) {
-        console.error('Error saving placeholder images:', err);
-      }
-    }
-
-    return data;
-  };
 
   const fetchCompanyBasicData = async () => {
     try {
@@ -137,6 +44,8 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
         url = new URL(`${API_BASE_URL}/api/company/user/${Number(profileOwnerId)}`);
         if (viewerId) {
           url.searchParams.append('viewerId', Number(viewerId));
+        }else{
+          return;
         }
       } else {
         url = new URL(`${API_BASE_URL}/api/company/user/${Number(viewerId)}`);
@@ -168,14 +77,19 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
 
       let data = await response.json();
       // console.log('Company data received:', data);
-      data = await checkAndUploadPlaceholders(data);
       setCompanyData(data);
       
       const followingStatus = data.isFollowing || false;
-      const ownerStatus = Number(data.userId) === Number(viewerId);
+      let ownerStatus;
+      if(profileOwnerId ==undefined){
+        ownerStatus = Number(data.userId) === Number(viewerId);
+      }else{
+         ownerStatus = Number(profileOwnerId) === Number(viewerId);
+      }
       
-      setIsFollowing(followingStatus);
-      setIsOwner(ownerStatus);
+      
+      setIsFollowing(()=>followingStatus);
+      setIsOwner(()=>ownerStatus);
 
       setTabData({
         description: data.description,
