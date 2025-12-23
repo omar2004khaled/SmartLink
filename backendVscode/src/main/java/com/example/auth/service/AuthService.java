@@ -11,6 +11,8 @@ import com.example.auth.entity.ProfileEntities.JobSeekerProfile;
 import com.example.auth.dto.RegisterRequest;
 import com.example.auth.config.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.auth.repository.CompanyProfileRepo;
+import com.example.auth.entity.CompanyProfile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +26,7 @@ public class AuthService {
     private final EmailService emailService;
     private final JwtService jwtService;
     private final JobSeekerProfileRepository profileRepo;
-    private final com.example.auth.repository.CompanyProfileRepo companyRepo;
+    private final CompanyProfileRepo companyRepo;
 
     public AuthService(UserRepository userRepo,
                        VerificationTokenRepository tokenRepo,
@@ -32,7 +34,7 @@ public class AuthService {
                        EmailService emailService,
                        JwtService jwtService,
                        JobSeekerProfileRepository profileRepo,
-                       com.example.auth.repository.CompanyProfileRepo companyRepo) {
+                       CompanyProfileRepo companyRepo) {
         this.userRepo = userRepo;
         this.tokenRepo = tokenRepo;
         this.passwordEncoder = passwordEncoder;
@@ -79,8 +81,8 @@ public class AuthService {
         userRepo.save(user);
 
         
-        com.example.auth.entity.CompanyProfile companyProfile = new com.example.auth.entity.CompanyProfile();
-        companyProfile.setUserId(user.getId());
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setUser(user);
         companyProfile.setCompanyName(request.getCompanyName());
         companyProfile.setWebsite(request.getWebsite());
         companyProfile.setIndustry(request.getIndustry());

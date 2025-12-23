@@ -1,6 +1,7 @@
 import React from 'react';
 import { Camera } from 'lucide-react';
 import './CompanyLogo.css';
+import { PROFILE_PLACEHOLDER, COVER_PLACEHOLDER } from '../../../../assets/placeholders';
 
 export default function CompanyLogo({ 
   logoUrl, 
@@ -13,7 +14,7 @@ export default function CompanyLogo({
   return (
     <div className="company-logo-wrapper">
       <div className="cover-image-container">
-        <img src={coverUrl} alt={companyName} className="cover-image" />
+        <img src={coverUrl || COVER_PLACEHOLDER} alt={companyName} className="cover-image" />
         {isOwner && (
           
             <button className="edit-cover-btn" onClick={onEditCover} title="Edit cover">
@@ -23,7 +24,7 @@ export default function CompanyLogo({
         )}
       </div>
       <div className="logo-image-container">
-        <img src={logoUrl} alt={companyName} className="logo-image" />
+        <img src={logoUrl || PROFILE_PLACEHOLDER} alt={companyName} className="logo-image" />
         {isOwner && (
           <button className="edit-logo-btn" onClick={onEditLogo} title="Edit logo">
             <Camera size={16} />
