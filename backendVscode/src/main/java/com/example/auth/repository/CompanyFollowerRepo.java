@@ -1,6 +1,7 @@
 package com.example.auth.repository;
 
 import com.example.auth.entity.CompanyFollower;
+import com.example.auth.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,12 +11,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CompanyFollowerRepo extends JpaRepository<CompanyFollower, CompanyFollower.CompanyFollowerId> {
 
-    boolean existsByFollowerIdAndCompanyId(Long followerId, Long companyId);
+    boolean existsByFollowerAndCompany(User follower, User company);
 
     @Modifying
-    @Query("DELETE FROM CompanyFollower cf WHERE cf.followerId = :followerId AND cf.companyId = :companyId")
-    void deleteByFollowerIdAndCompanyId(@Param("followerId") Long followerId, @Param("companyId") Long companyId);
+    @Query("DELETE FROM CompanyFollower cf WHERE cf.follower = :follower AND cf.company = :company")
+    void deleteByFollowerAndCompany(@Param("follower") User follower, @Param("company") User company);
 
-//    @Query("SELECT COUNT(cf) FROM CompanyFollower cf WHERE cf.companyId = :companyId")
-//    Long countFollowersByCompanyId(@Param("companyId") Long companyId);
+    @Query("SELECT COUNT(cf) FROM CompanyFollower cf WHERE cf.company = :company")
+    Long countFollowersByCompany(@Param("company") User company);
 }

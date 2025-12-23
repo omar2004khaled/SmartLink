@@ -30,6 +30,9 @@ class ConnectionServiceTest {
     @Mock
     private UserRepository userRepo;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private ConnectionService connectionService;
 
@@ -56,20 +59,21 @@ class ConnectionServiceTest {
 
     @Test
     void sendRequest_WithValidUsers_ShouldCreateConnection() {
- 
+
         when(connectionRepo.findConnectionBetweenUsers(1L, 2L)).thenReturn(Optional.empty());
         when(userRepo.findById(1L)).thenReturn(Optional.of(sender));
         when(userRepo.findById(2L)).thenReturn(Optional.of(receiver));
         when(connectionRepo.save(any(Connection.class))).thenReturn(connection);
-
+        when(notificationService.createConnectionRequestNotification(anyLong(), anyLong(), anyString()))
+                .thenReturn(null);
 
         ConnectionDto result = connectionService.sendRequest(1L, 2L);
-
 
         assertNotNull(result);
         assertEquals(1L, result.getSenderId());
         assertEquals(2L, result.getReceiverId());
         verify(connectionRepo).save(any(Connection.class));
+        verify(notificationService).createConnectionRequestNotification(2L, 1L, "John Doe");
     }
 
     @Test
@@ -98,7 +102,8 @@ class ConnectionServiceTest {
     @Test
     void cancelRequest_WithInvalidSender_ShouldThrowException() {
         when(connectionRepo.findById(1L)).thenReturn(Optional.of(connection));
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,() -> connectionService.cancelRequest(1L, 2L));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> connectionService.cancelRequest(1L, 2L));
         assertEquals("Only sender can cancel the request", exception.getMessage());
     }
 
@@ -111,18 +116,22 @@ class ConnectionServiceTest {
         acceptedConnection.setReceiver(receiver);
         acceptedConnection.setStatus(ConnectionStatus.ACCEPTED);
         when(connectionRepo.save(any(Connection.class))).thenReturn(acceptedConnection);
-        
+        when(notificationService.createConnectionAcceptedNotification(anyLong(), anyLong(), anyString()))
+                .thenReturn(null);
+
         ConnectionDto result = connectionService.acceptRequest(1L, 2L);
 
         assertNotNull(result);
         assertEquals("ACCEPTED", result.getStatus());
         verify(connectionRepo).save(any(Connection.class));
+        verify(notificationService).createConnectionAcceptedNotification(1L, 2L, "Jane Smith");
     }
 
     @Test
     void acceptRequest_WithInvalidReceiver_ShouldThrowException() {
         when(connectionRepo.findById(1L)).thenReturn(Optional.of(connection));
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,() -> connectionService.acceptRequest(1L, 1L));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> connectionService.acceptRequest(1L, 1L));
         assertEquals("receiver only accept the request", exception.getMessage());
     }
 
@@ -135,9 +144,9 @@ class ConnectionServiceTest {
         rejectedConnection.setReceiver(receiver);
         rejectedConnection.setStatus(ConnectionStatus.REJECTED);
         when(connectionRepo.save(any(Connection.class))).thenReturn(rejectedConnection);
-        
+
         ConnectionDto result = connectionService.rejectRequest(1L, 2L);
-        
+
         assertNotNull(result);
         assertEquals("REJECTED", result.getStatus());
         verify(connectionRepo).save(any(Connection.class));

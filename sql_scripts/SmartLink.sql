@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS education;
 DROP TABLE IF EXISTS job_seeker_profile;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS notifications;
 
 
 -- ===================================
@@ -327,3 +328,31 @@ CREATE TABLE reports (
 
 CREATE INDEX ReportsByPost ON reports(PostId);
 CREATE INDEX ReportsByReporter ON reports(ReporterId);
+-- NOTIFICATIONS TABLE
+-- ===================================
+CREATE TABLE notifications (
+    notification_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id             BIGINT NOT NULL,
+    type                ENUM(
+        'CONNECTION_REQUEST',
+        'CONNECTION_ACCEPTED',
+        'POST_LIKE',
+        'POST_COMMENT',
+        'COMMENT_LIKE',
+        'JOB_APPLICATION',
+        'JOB_APPLICATION_STATUS_CHANGE',
+        'NEW_POST'
+    ) NOT NULL,
+    title               VARCHAR(255) NOT NULL,
+    message             VARCHAR(1000) NOT NULL,
+    is_read             BOOLEAN NOT NULL DEFAULT FALSE,
+    related_entity_id   BIGINT,
+    related_entity_type VARCHAR(50),
+    created_at          DATETIME NOT NULL,
+    
+    FOREIGN KEY (user_id) REFERENCES user(UserId) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_notification_user ON notifications(user_id);
+CREATE INDEX idx_notification_user_read ON notifications(user_id, is_read);
+CREATE INDEX idx_notification_created_at ON notifications(created_at DESC);
