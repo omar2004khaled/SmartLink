@@ -40,7 +40,7 @@ public class CommentController {
     public ResponseEntity<Boolean> removeComment(@PathVariable Long id) throws Exception{
         try {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(commentService.RemoveComment(id));
+                    .body(commentService.removeComment(id));
         }catch (NonExistentObject nonExistenceObject){
             throw new NonExistentObject(nonExistenceObject.getMessage());
         }

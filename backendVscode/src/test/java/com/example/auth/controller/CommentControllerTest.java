@@ -69,7 +69,7 @@ class CommentControllerTest {
     @Test
     @WithMockUser(username = "ali",roles = "USER")
     void testRemoveComment_success() throws Exception {
-        Mockito.when(commentService.RemoveComment(1L)).thenReturn(true);
+        Mockito.when(commentService.removeComment(1L)).thenReturn(true);
 
         mockMvc.perform(delete("/comment/delete/1"))
                 .andExpect(status().isOk())
@@ -79,7 +79,7 @@ class CommentControllerTest {
     @Test
     @WithMockUser(username = "ali",roles = "USER")
     void testRemoveComment_notFound() throws Exception {
-        Mockito.when(commentService.RemoveComment(1L))
+        Mockito.when(commentService.removeComment(1L))
                 .thenThrow(new NonExistentObject("Not found"));
 
         mockMvc.perform(delete("/comment/delete/1"))

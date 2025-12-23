@@ -34,7 +34,7 @@ public class CommentService {
     @Autowired
     NotificationService notificationService;
 
-    public boolean RemoveComment(Long ID) {
+    public boolean removeComment(Long ID) {
         Optional<Comment> c = commentRepo.findById(ID);
         if (c.isEmpty())
             throw new NonExistentObject("Object Does not exist");
@@ -89,10 +89,10 @@ public class CommentService {
     public List<CommentDTO> getCommentsByPostId(int pageNo, int pageSize, Long postId) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         List<Comment> tmpComments = commentRepo.findByPostIdNative(postId, pageable).getContent();
-        return tmpComments.stream().map(this::ConvertToDTO).toList();
+        return tmpComments.stream().map(this::convertToDTO).toList();
     }
 
-    private CommentDTO ConvertToDTO(Comment comment) {
+    private CommentDTO convertToDTO(Comment comment) {
         CommentDTO c = CommentDTO.builder()
                 .commentId(comment.getCommentId())
                 .userId(comment.getUser().getId())
@@ -120,6 +120,6 @@ public class CommentService {
                 .build());
         comment.setContent(commentDTO.getText());
         comment.setCreatedAt(LocalDateTime.now());
-        return ConvertToDTO(commentRepo.save(comment));
+        return convertToDTO(commentRepo.save(comment));
     }
 }

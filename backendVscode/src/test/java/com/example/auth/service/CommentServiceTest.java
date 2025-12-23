@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigInteger;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +51,7 @@ public class CommentServiceTest {
     public void removeComment_NonExistentObject() {
         Mockito.when(commentRepo.findById(commentDTO.getUserId())).thenReturn(Optional.empty());
         Assertions.assertThrows(NonExistentObject.class, () -> {
-            commentService.RemoveComment(commentDTO.getUserId());
+            commentService.removeComment(commentDTO.getUserId());
         });
     }
 
@@ -64,7 +63,7 @@ public class CommentServiceTest {
         Mockito.when(commentRepo.findById(commentDTO.getCommentId()))
                 .thenReturn(Optional.of(existingComment));
 
-        commentService.RemoveComment(commentDTO.getCommentId());
+        commentService.removeComment(commentDTO.getCommentId());
         Mockito.verify(commentRepo).deleteById(commentDTO.getCommentId());
     }
 
