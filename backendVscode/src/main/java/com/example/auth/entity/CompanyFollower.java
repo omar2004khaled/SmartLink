@@ -17,12 +17,12 @@ import java.time.LocalDateTime;
 public class CompanyFollower {
 
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FollowerId", nullable = false)
     private User follower;
 
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CompanyId", nullable = false)
     private User company;
 
