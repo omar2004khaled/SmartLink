@@ -17,7 +17,8 @@ public class ProfileService {
     private final UserRepository userRepo;
     private final LocationRepository locationRepo;
 
-    public ProfileService(JobSeekerProfileRepository profileRepo,UserRepository userRepo,LocationRepository locationRepo) {
+    public ProfileService(JobSeekerProfileRepository profileRepo, UserRepository userRepo,
+            LocationRepository locationRepo) {
         this.profileRepo = profileRepo;
         this.userRepo = userRepo;
         this.locationRepo = locationRepo;
@@ -26,14 +27,14 @@ public class ProfileService {
     @Transactional(readOnly = true)
     public JobSeekerProfileResponse getProfile(Long id) {
         JobSeekerProfile p = profileRepo.findById(id)
-        .orElseThrow(() -> new RuntimeException("Profile not found with id " + id));
+                .orElseThrow(() -> new RuntimeException("Profile not found with id " + id));
         return toResponse(p);
     }
 
     @Transactional(readOnly = true)
     public JobSeekerProfileResponse getProfileByUserId(Long userId) {
         JobSeekerProfile p = profileRepo.findByUser_Id(userId)
-        .orElseThrow(() -> new RuntimeException("Profile not found for user id " + userId));
+                .orElseThrow(() -> new RuntimeException("Profile not found for user id " + userId));
         return toResponse(p);
     }
 
@@ -45,11 +46,22 @@ public class ProfileService {
 
         if (req.getUserId() != null) {
             User u = userRepo.findById(req.getUserId())
-            .orElseThrow(() -> new RuntimeException("User not found with id " + req.getUserId()));
-            p.setUser(u); }
+                    .orElseThrow(() -> new RuntimeException("User not found with id " + req.getUserId()));
+            p.setUser(u);
+
+            // Set default profile picture if not provided
+            if (p.getProfilePicUrl() == null || p.getProfilePicUrl().isEmpty()) {
+                String userName = u.getFullName() != null ? u.getFullName() : "User";
+                String defaultPicUrl = "https://ui-avatars.com/api/?name=" +
+                        userName.replace(" ", "+") +
+                        "&background=random&size=200&bold=true";
+                p.setProfilePicUrl(defaultPicUrl);
+            }
+        }
+
         if (req.getLocationId() != null) {
             Location loc = locationRepo.findById(req.getLocationId())
-            .orElseThrow(() -> new RuntimeException("Location not found with id " + req.getLocationId()));
+                    .orElseThrow(() -> new RuntimeException("Location not found with id " + req.getLocationId()));
             p.setLocation(loc);
         }
 
@@ -60,21 +72,21 @@ public class ProfileService {
     @Transactional
     public JobSeekerProfileResponse updateProfile(Long id, JobSeekerProfileRequest req) {
         JobSeekerProfile p = profileRepo.findById(id)
-        .orElseThrow(() -> new RuntimeException("Profile not found with id " + id));
-        
+                .orElseThrow(() -> new RuntimeException("Profile not found with id " + id));
+
         applyRequestToEntity(p, req);
 
         // Don't update user if not provided
         if (req.getUserId() != null && !req.getUserId().equals(p.getUser().getId())) {
             User u = userRepo.findById(req.getUserId())
-            .orElseThrow(() -> new RuntimeException("User not found with id " + req.getUserId()));
+                    .orElseThrow(() -> new RuntimeException("User not found with id " + req.getUserId()));
             p.setUser(u);
         }
-        
+
         // Update location if provided
         if (req.getLocationId() != null) {
             Location loc = locationRepo.findById(req.getLocationId())
-            .orElseThrow(() -> new RuntimeException("Location not found with id " + req.getLocationId()));
+                    .orElseThrow(() -> new RuntimeException("Location not found with id " + req.getLocationId()));
             p.setLocation(loc);
         }
 
@@ -90,10 +102,14 @@ public class ProfileService {
     }
 
     private void applyRequestToEntity(JobSeekerProfile p, JobSeekerProfileRequest req) {
-        if (req.getProfilePicUrl() != null) p.setProfilePicUrl(req.getProfilePicUrl());
-        if (req.getBio() != null) p.setBio(req.getBio());
-        if (req.getHeadline() != null) p.setHeadline(req.getHeadline());
-        if (req.getBirthDate() != null) p.setBirthDate(req.getBirthDate());
+        if (req.getProfilePicUrl() != null)
+            p.setProfilePicUrl(req.getProfilePicUrl());
+        if (req.getBio() != null)
+            p.setBio(req.getBio());
+        if (req.getHeadline() != null)
+            p.setHeadline(req.getHeadline());
+        if (req.getBirthDate() != null)
+            p.setBirthDate(req.getBirthDate());
         if (req.getGender() != null) {
             try {
                 p.setGender(JobSeekerProfile.Gender.valueOf(req.getGender()));

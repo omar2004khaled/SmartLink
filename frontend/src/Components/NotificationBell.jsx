@@ -14,7 +14,7 @@ const NotificationBell = () => {
     const dropdownRef = useRef(null);
 
     const handleWebSocketNotification = useCallback((notification) => {
-        console.log('Real-time notification received:', notification);
+        ////console.log('Real-time notification received:', notification);
 
         setNotifications(prev => [notification, ...prev]);
 
@@ -22,7 +22,7 @@ const NotificationBell = () => {
         if (notification.isRead !== true) {
             setUnreadCount(prev => {
                 const newCount = prev + 1;
-                //console.log('Unread count updated from', prev, 'to', newCount);
+                ////console.log('Unread count updated from', prev, 'to', newCount);
                 return newCount;
             });
         }

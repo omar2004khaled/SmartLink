@@ -5,8 +5,10 @@ import Navbar from '../Navbar';
 import JobFilters from './JobFilters';
 import JobCard from './JobCard';
 import ApplicationDialog from './ApplicationDialog';
+import { useAlert } from '../../hooks/useAlert';
 
 const JobsPage = () => {
+  const { showSuccess, showError } = useAlert();
   const [showSearch, setShowSearch] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ const JobsPage = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    console.log('Filters from form:', filters);
+    //console.log('Filters from form:', filters);
     setLoading(true);
     const data = await fetchJobs(filters);
     setJobs(data);
@@ -62,20 +64,20 @@ const JobsPage = () => {
 
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
-    console.log('Application submitted:', applicationData, 'for job:', selectedJob);
+    //console.log('Application submitted:', applicationData, 'for job:', selectedJob);
 
     try {
       setLoading(true);
       setUploadProgress('Preparing application...');
 
       const result = await submitApplication(selectedJob.jobId, applicationData, setUploadProgress);
-      //console.log('Application result:', result);
+      ////console.log('Application result:', result);
 
       setUploadProgress('Success!');
 
       // Show success message after a brief delay
       setTimeout(() => {
-        alert('Application submitted successfully!');
+        showSuccess('Application submitted successfully!');
         setShowApplyDialog(false);
         setApplicationData({ name: '', email: '', cv: null, coverLetter: '' });
         setUploadProgress('');
@@ -84,7 +86,7 @@ const JobsPage = () => {
     } catch (error) {
       console.error('Failed to submit application:', error);
       setUploadProgress('');
-      alert('Failed to submit application. Please try again.');
+      showError('Failed to submit application. Please try again.');
     } finally {
       setLoading(false);
     }

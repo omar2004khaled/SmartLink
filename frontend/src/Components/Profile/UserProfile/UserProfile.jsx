@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useAlert } from "../../../hooks/useAlert";
 import ConnectionsTab from "./ConnectionsTab";
 import Navbar from "../../Navbar";
 import CompanyNavbar from "../../CompanyNavbar";
@@ -22,6 +23,7 @@ const API_BASE = `${API_BASE_URL}/api/profiles`;
 export default function UserProfile() {
   const navigate = useNavigate();
   const { userId: urlUserId } = useParams();
+  const { showError, showSuccess } = useAlert();
   const loggedInUserId = localStorage.getItem('userId');
   const userType = localStorage.getItem('userType');
   const userId = urlUserId || loggedInUserId;
@@ -165,8 +167,9 @@ export default function UserProfile() {
         body: JSON.stringify({ senderId: parseInt(loggedInUserId), receiverId: parseInt(userId) })
       });
       checkConnectionStatus();
+      showSuccess('Connection request sent!');
     } catch (err) {
-      alert('Failed to send connection request');
+      showError('Failed to send connection request');
     }
   };
 
@@ -178,8 +181,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection request cancelled');
     } catch (err) {
-      alert('Failed to cancel connection');
+      showError('Failed to cancel connection');
     }
   };
 
@@ -191,8 +195,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection accepted!');
     } catch (err) {
-      alert('Failed to accept connection');
+      showError('Failed to accept connection');
     }
   };
 
@@ -204,8 +209,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection rejected');
     } catch (err) {
-      alert('Failed to reject connection');
+      showError('Failed to reject connection');
     }
   };
 
@@ -217,8 +223,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection removed');
     } catch (err) {
-      alert('Failed to remove connection');
+      showError('Failed to remove connection');
     }
   };
 
@@ -230,7 +237,33 @@ export default function UserProfile() {
     return null;
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: '#f5f5f5'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          border: '4px solid #f3f3f3',
+          borderTop: '4px solid #3498db',
+          borderRadius: '50%',
+          width: '40px',
+          height: '40px',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto'
+        }}></div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!profile) return <div>No profile found.</div>;
 
@@ -238,17 +271,17 @@ export default function UserProfile() {
   const handleEditProfile = () => isOwnProfile && setEditProfile(true);
   const handleSaveProfile = async (form) => {
     try {
-      console.log('Starting profile save with form:', form);
+      //console.log('Starting profile save with form:', form);
       const token = localStorage.getItem('authToken');
       let locationId = profile.locationId;
 
       // If location changed, find or create location
       if (form.country && form.city && (form.country !== profile.country || form.city !== profile.city)) {
-        console.log('Location changed, processing...');
+        //console.log('Location changed, processing...');
         // Try to find existing location
         let loc = locations.find(l => l.country === form.country && l.city === form.city);
         if (!loc) {
-          console.log('Creating new location...');
+          //console.log('Creating new location...');
           // Create new location
           const locRes = await fetch(`${API_BASE_URL}/api/locations`, {
             method: 'POST',
@@ -264,7 +297,7 @@ export default function UserProfile() {
             throw new Error('Failed to create location: ' + errorText);
           }
           loc = await locRes.json();
-          console.log('New location created:', loc);
+          //console.log('New location created:', loc);
           // Refresh locations
           const allLocRes = await fetch(`${API_BASE_URL}/api/locations`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -285,8 +318,8 @@ export default function UserProfile() {
         locationId: locationId
       };
 
-      console.log('Sending profile update:', profilePayload);
-      console.log('URL:', `${API_BASE}/${profileId}`);
+      //console.log('Sending profile update:', profilePayload);
+      //console.log('URL:', `${API_BASE}/${profileId}`);
 
       const res = await fetch(`${API_BASE}/${profileId}`, {
         method: 'PUT',
@@ -297,8 +330,8 @@ export default function UserProfile() {
         body: JSON.stringify(profilePayload)
       });
 
-      console.log('Response status:', res.status);
-      console.log('Response headers:', res.headers);
+      //console.log('Response status:', res.status);
+      //console.log('Response headers:', res.headers);
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -307,12 +340,13 @@ export default function UserProfile() {
       }
 
       const updated = await res.json();
-      console.log('Profile updated successfully:', updated);
+      //console.log('Profile updated successfully:', updated);
       setProfile(updated);
       setEditProfile(false);
+      showSuccess('Profile updated successfully!');
     } catch (err) {
       console.error('Profile update error:', err);
-      alert(`Profile update failed: ${err.message}`);
+      showError(`Profile update failed: ${err.message}`);
     }
   };
   const handleCancelProfile = () => setEditProfile(false);
@@ -343,8 +377,9 @@ export default function UserProfile() {
       });
       setExperience(await expRes.json());
       setEditExperienceId(null);
+      showSuccess(editExperienceId === 'new' ? 'Experience added successfully!' : 'Experience updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelExperience = () => setEditExperienceId(null);
@@ -360,8 +395,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setExperience(await expRes.json());
+      showSuccess('Experience deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 
@@ -390,8 +426,9 @@ export default function UserProfile() {
       });
       setSkills(await skillRes.json());
       setEditSkillId(null);
+      showSuccess(editSkillId === 'new' ? 'Skill added successfully!' : 'Skill updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelSkill = () => setEditSkillId(null);
@@ -407,8 +444,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setSkills(await skillRes.json());
+      showSuccess('Skill deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 
@@ -443,8 +481,9 @@ export default function UserProfile() {
       });
       setProjects(await projRes.json());
       setEditProjectId(null);
+      showSuccess(editProjectId === 'new' ? 'Project added successfully!' : 'Project updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelProject = () => setEditProjectId(null);
@@ -460,8 +499,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setProjects(await projRes.json());
+      showSuccess('Project deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 
@@ -490,8 +530,9 @@ export default function UserProfile() {
       });
       setEducation(await eduRes.json());
       setEditEducationId(null);
+      showSuccess(editEducationId === 'new' ? 'Education added successfully!' : 'Education updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelEducation = () => setEditEducationId(null);
@@ -507,8 +548,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setEducation(await eduRes.json());
+      showSuccess('Education deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 

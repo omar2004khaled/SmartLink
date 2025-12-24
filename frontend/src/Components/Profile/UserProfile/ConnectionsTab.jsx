@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../../config";
+import { useAlert } from "../../../hooks/useAlert";
 
 const API_BASE = `${API_BASE_URL}/api`;
 
 export default function ConnectionsTab() {
   const navigate = useNavigate();
+  const { showError, showSuccess } = useAlert();
   const userId = localStorage.getItem('userId');
   const [sentRequests, setSentRequests] = useState([]);
   const [receivedRequests, setReceivedRequests] = useState([]);
@@ -80,8 +82,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Request cancelled');
     } catch (err) {
-      alert('Failed to cancel request');
+      showError('Failed to cancel request');
     }
   };
 
@@ -93,8 +96,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Connection accepted!');
     } catch (err) {
-      alert('Failed to accept request');
+      showError('Failed to accept request');
     }
   };
 
@@ -106,8 +110,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Request rejected');
     } catch (err) {
-      alert('Failed to reject request');
+      showError('Failed to reject request');
     }
   };
 
@@ -119,8 +124,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Connection removed');
     } catch (err) {
-      alert('Failed to remove connection');
+      showError('Failed to remove connection');
     }
   };
 
@@ -142,7 +148,7 @@ export default function ConnectionsTab() {
             sentRequests.map(req => (
               <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f3f6f9' }}>
                 <div>
-                  <div 
+                  <div
                     style={{ fontWeight: 600, color: '#0066cc', cursor: 'pointer' }}
                     onClick={() => {
                       navigate(`/profile/${req.receiverId}`);
@@ -172,7 +178,7 @@ export default function ConnectionsTab() {
             receivedRequests.map(req => (
               <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f3f6f9' }}>
                 <div>
-                  <div 
+                  <div
                     style={{ fontWeight: 600, color: '#0066cc', cursor: 'pointer' }}
                     onClick={() => {
                       navigate(`/profile/${req.senderId}`);
@@ -205,7 +211,7 @@ export default function ConnectionsTab() {
             connections.map(conn => (
               <div key={conn.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f3f6f9' }}>
                 <div>
-                  <div 
+                  <div
                     style={{ fontWeight: 600, color: '#0066cc', cursor: 'pointer' }}
                     onClick={() => {
                       navigate(`/profile/${conn.otherId}`);

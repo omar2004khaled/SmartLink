@@ -24,8 +24,8 @@ const uploadToCloudinary = async (file) => {
     }
 
     const data = await res.json();
-    console.log('Upload response:', data);
-    console.log('Secure URL:', data.secure_url);
+    //console.log('Upload response:', data);
+    //console.log('Secure URL:', data.secure_url);
     return data.secure_url;
   } catch (err) {
     console.error('Upload error:', err);

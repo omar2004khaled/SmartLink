@@ -11,7 +11,7 @@ const CompanyNavbar = () => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login-select');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path;
