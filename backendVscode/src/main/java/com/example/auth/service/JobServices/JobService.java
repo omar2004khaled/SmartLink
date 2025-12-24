@@ -12,6 +12,8 @@ import com.example.auth.repository.JobApplicationRepository;
 import com.example.auth.repository.JobRepository;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.service.NotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,8 @@ import java.util.List;
 
 @Service
 public class JobService {
+    private static final Logger logger = LoggerFactory.getLogger(JobService.class);
+
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
@@ -110,11 +114,12 @@ public class JobService {
                             saved.getTitle(),
                             saved.getJobId());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Failed to create job post notification for follower {}: {}",
+                            follower.getFollower().getId(), e.getMessage());
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to notify followers about new job post: {}", e.getMessage());
         }
 
         return getResponse(company, saved);

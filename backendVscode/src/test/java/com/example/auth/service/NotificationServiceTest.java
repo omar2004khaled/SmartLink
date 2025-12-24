@@ -71,8 +71,7 @@ class NotificationServiceTest {
                 "Post Liked",
                 "Jane Smith liked your post",
                 123L,
-                "POST"
-        );
+                "POST");
 
         assertNotNull(result);
         assertEquals(NotificationType.POST_LIKE, result.getType());
@@ -92,8 +91,7 @@ class NotificationServiceTest {
                         "Title",
                         "Message",
                         123L,
-                        "POST"
-                ));
+                        "POST"));
 
         assertEquals("User not found with id: 999", exception.getMessage());
         verify(notificationRepository, never()).save(any());
@@ -369,5 +367,119 @@ class NotificationServiceTest {
         assertEquals(456L, result.getRelatedEntityId());
         verify(notificationRepository).save(any(Notification.class));
     }
-}
 
+    @Test
+    void createCompanyFollowedNotification_ShouldCreateCorrectNotification() {
+        Notification expectedNotification = Notification.builder()
+                .notificationId(7L)
+                .user(user)
+                .type(NotificationType.COMPANY_FOLLOWED)
+                .title("New Follower")
+                .message("Jane Smith started following your company")
+                .isRead(false)
+                .relatedEntityId(2L)
+                .relatedEntityType("USER")
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(notificationRepository.save(any(Notification.class))).thenReturn(expectedNotification);
+
+        Notification result = notificationService.createCompanyFollowedNotification(1L, 2L, "Jane Smith");
+
+        assertNotNull(result);
+        assertEquals(NotificationType.COMPANY_FOLLOWED, result.getType());
+        assertEquals("New Follower", result.getTitle());
+        assertTrue(result.getMessage().contains("Jane Smith"));
+        assertTrue(result.getMessage().contains("following your company"));
+        assertEquals(2L, result.getRelatedEntityId());
+        assertEquals("USER", result.getRelatedEntityType());
+        verify(notificationRepository).save(any(Notification.class));
+    }
+
+    @Test
+    void createApplicationStatusChangeNotification_ShouldCreateCorrectNotification() {
+        Notification expectedNotification = Notification.builder()
+                .notificationId(8L)
+                .user(user)
+                .type(NotificationType.JOB_APPLICATION_STATUS_CHANGE)
+                .title("Application Status Updated")
+                .message("Your application for Senior Developer has been updated to ACCEPTED")
+                .isRead(false)
+                .relatedEntityId(123L)
+                .relatedEntityType("APPLICATION")
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(notificationRepository.save(any(Notification.class))).thenReturn(expectedNotification);
+
+        Notification result = notificationService.createApplicationStatusChangeNotification(
+                1L, "Senior Developer", "ACCEPTED", 123L);
+
+        assertNotNull(result);
+        assertEquals(NotificationType.JOB_APPLICATION_STATUS_CHANGE, result.getType());
+        assertEquals("Application Status Updated", result.getTitle());
+        assertTrue(result.getMessage().contains("Senior Developer"));
+        assertTrue(result.getMessage().contains("ACCEPTED"));
+        assertEquals(123L, result.getRelatedEntityId());
+        assertEquals("APPLICATION", result.getRelatedEntityType());
+        verify(notificationRepository).save(any(Notification.class));
+    }
+
+    @Test
+    void createApplicationCommentNotification_ShouldCreateCorrectNotification() {
+        Notification expectedNotification = Notification.builder()
+                .notificationId(9L)
+                .user(user)
+                .type(NotificationType.APPLICATION_COMMENT)
+                .title("New Comment on Application")
+                .message("Tech Corp commented on your application for Senior Developer")
+                .isRead(false)
+                .relatedEntityId(123L)
+                .relatedEntityType("APPLICATION")
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(notificationRepository.save(any(Notification.class))).thenReturn(expectedNotification);
+
+        Notification result = notificationService.createApplicationCommentNotification(
+                1L, "Tech Corp", "Senior Developer", 123L);
+
+        assertNotNull(result);
+        assertEquals(NotificationType.APPLICATION_COMMENT, result.getType());
+        assertEquals("New Comment on Application", result.getTitle());
+        assertTrue(result.getMessage().contains("Tech Corp"));
+        assertTrue(result.getMessage().contains("Senior Developer"));
+        assertEquals(123L, result.getRelatedEntityId());
+        assertEquals("APPLICATION", result.getRelatedEntityType());
+        verify(notificationRepository).save(any(Notification.class));
+    }
+
+    @Test
+    void createNewJobPostNotification_ShouldCreateCorrectNotification() {
+        Notification expectedNotification = Notification.builder()
+                .notificationId(10L)
+                .user(user)
+                .type(NotificationType.NEW_JOB_FROM_FOLLOWED_COMPANY)
+                .title("New Job Posted")
+                .message("Tech Corp posted a new job: Senior Developer")
+                .isRead(false)
+                .relatedEntityId(456L)
+                .relatedEntityType("JOB")
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(notificationRepository.save(any(Notification.class))).thenReturn(expectedNotification);
+
+        Notification result = notificationService.createNewJobPostNotification(
+                1L, "Tech Corp", "Senior Developer", 456L);
+
+        assertNotNull(result);
+        assertEquals(NotificationType.NEW_JOB_FROM_FOLLOWED_COMPANY, result.getType());
+        assertEquals("New Job Posted", result.getTitle());
+        assertTrue(result.getMessage().contains("Tech Corp"));
+        assertTrue(result.getMessage().contains("Senior Developer"));
+        assertEquals(456L, result.getRelatedEntityId());
+        assertEquals("JOB", result.getRelatedEntityType());
+        verify(notificationRepository).save(any(Notification.class));
+    }
+}

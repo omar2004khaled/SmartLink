@@ -6,6 +6,8 @@ import com.example.auth.entity.User;
 import com.example.auth.enums.NotificationType;
 import com.example.auth.repository.NotificationRepository;
 import com.example.auth.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,6 +18,7 @@ import java.util.List;
 
 @Service
 public class NotificationService {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
@@ -231,7 +234,7 @@ public class NotificationService {
                     "/topic/notifications/" + userId,
                     dto);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to push notification via WebSocket for user {}: {}", userId, e.getMessage());
         }
     }
 }

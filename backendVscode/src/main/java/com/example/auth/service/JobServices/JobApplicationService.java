@@ -12,6 +12,8 @@ import com.example.auth.repository.JobRepository;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.service.NotificationService;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class JobApplicationService {
+    private static final Logger logger = LoggerFactory.getLogger(JobApplicationService.class);
+
     JobRepository jobRepository;
     UserRepository userRepository;
     JobApplicationRepository jobApplicationRepository;
@@ -113,7 +117,7 @@ public class JobApplicationService {
                     jobApp.getJob().getTitle(),
                     applicationId);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to create comment notification: {}", e.getMessage());
         }
 
         return toApplicationDTO(jobApp);
@@ -144,7 +148,7 @@ public class JobApplicationService {
                         newStatus.toString(),
                         applicationId);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Failed to create status change notification: {}", e.getMessage());
             }
         }
 

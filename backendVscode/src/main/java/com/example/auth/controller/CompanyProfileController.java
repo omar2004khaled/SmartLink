@@ -3,6 +3,8 @@ package com.example.auth.controller;
 import com.example.auth.dto.*;
 import com.example.auth.service.CompanyProfileService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,7 @@ import java.util.List;
 @RequestMapping("/api/company")
 @RequiredArgsConstructor
 public class CompanyProfileController {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyProfileController.class);
 
     private final CompanyProfileService companyProfileService;
 
@@ -71,7 +74,7 @@ public class CompanyProfileController {
             companyProfileService.followCompany(companyId, request.getUserId());
             return ResponseEntity.ok("Successfully followed company");
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            logger.error("Error in followCompany endpoint: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }

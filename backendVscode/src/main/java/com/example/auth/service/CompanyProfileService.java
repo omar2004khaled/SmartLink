@@ -15,6 +15,8 @@ import com.example.auth.repository.LocationRepo;
 import com.example.auth.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CompanyProfileService {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyProfileService.class);
 
     private final CompanyProfileRepo companyProfileRepo;
     private final CompanyFollowerRepo companyFollowerRepo;
@@ -199,8 +202,7 @@ public class CompanyProfileService {
         try {
             notificationService.createCompanyFollowedNotification(companyUserId, followerUserId, followerName);
         } catch (Exception e) {
-            // Log error but don't fail the follow operation
-            e.printStackTrace();
+            logger.error("Failed to create company follow notification: {}", e.getMessage());
         }
     }
 
