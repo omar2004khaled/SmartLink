@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { Plus } from 'lucide-react';
 import CompanyNavbar from './CompanyNavbar';
 import Posts from './Posts';
 import PostComposotion from '../PostComposotion/PostComposotion';
+import RecommendJobButton from './RecommendJobButton';
+import JobRecommendationTrigger from './JobRecommendationTrigger';
 import './MainPage.css';
 
 const CompanyHome = () => {
@@ -16,7 +18,6 @@ const CompanyHome = () => {
   }, []);
   return (
     <div className="home-page">
-      {userId && <JobRecommendationTrigger userId={userId} />}
       <CompanyNavbar />
       
       <div className="home-content">

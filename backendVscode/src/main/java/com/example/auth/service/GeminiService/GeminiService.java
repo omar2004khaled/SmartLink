@@ -134,12 +134,20 @@ public class GeminiService {
     }
     public List<JobResponse> callGoogleApi(Long profileId) {
         try {
+            this.getJobs();
+            if (semiJobs.isEmpty()) {
+                return new ArrayList<>();
+            }
             List<JobResponse> recommendedJobs = redisService.getRecommendedJobs(profileId);
-            if (!recommendedJobs.isEmpty()) {
-                return recommendedJobs;
+            if (!recommendedJobs.isEmpty() && recommendedJobs.size() == semiJobs.size()) {
+                List<Long> id_semiJobs = semiJobs.stream().map(SemiJobDto::getJobId).collect(Collectors.toList());
+                List<Long> id_recommendedJobs = recommendedJobs.stream().map(JobResponse::getJobId).collect(Collectors.toList());
+                id_semiJobs.removeAll(id_recommendedJobs);
+                if (id_semiJobs.isEmpty()) {
+                    return recommendedJobs;
+                }
             }
             this.getPersonSkillsAndEducation(profileId);
-            this.getJobs();
             String Prompt = "You are given a user profile and a list of jobs.\n" +
                     "\n" +
                     "INPUT:\n" +
