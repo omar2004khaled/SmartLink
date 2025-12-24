@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useAlert } from "../../../hooks/useAlert";
 import ConnectionsTab from "./ConnectionsTab";
 import Navbar from "../../Navbar";
 import CompanyNavbar from "../../CompanyNavbar";
@@ -22,6 +23,7 @@ const API_BASE = `${API_BASE_URL}/api/profiles`;
 export default function UserProfile() {
   const navigate = useNavigate();
   const { userId: urlUserId } = useParams();
+  const { showError, showSuccess } = useAlert();
   const loggedInUserId = localStorage.getItem('userId');
   const userType = localStorage.getItem('userType');
   const userId = urlUserId || loggedInUserId;
@@ -165,8 +167,9 @@ export default function UserProfile() {
         body: JSON.stringify({ senderId: parseInt(loggedInUserId), receiverId: parseInt(userId) })
       });
       checkConnectionStatus();
+      showSuccess('Connection request sent!');
     } catch (err) {
-      alert('Failed to send connection request');
+      showError('Failed to send connection request');
     }
   };
 
@@ -178,8 +181,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection request cancelled');
     } catch (err) {
-      alert('Failed to cancel connection');
+      showError('Failed to cancel connection');
     }
   };
 
@@ -191,8 +195,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection accepted!');
     } catch (err) {
-      alert('Failed to accept connection');
+      showError('Failed to accept connection');
     }
   };
 
@@ -204,8 +209,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection rejected');
     } catch (err) {
-      alert('Failed to reject connection');
+      showError('Failed to reject connection');
     }
   };
 
@@ -217,8 +223,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       checkConnectionStatus();
+      showSuccess('Connection removed');
     } catch (err) {
-      alert('Failed to remove connection');
+      showError('Failed to remove connection');
     }
   };
 
@@ -310,9 +317,10 @@ export default function UserProfile() {
       console.log('Profile updated successfully:', updated);
       setProfile(updated);
       setEditProfile(false);
+      showSuccess('Profile updated successfully!');
     } catch (err) {
       console.error('Profile update error:', err);
-      alert(`Profile update failed: ${err.message}`);
+      showError(`Profile update failed: ${err.message}`);
     }
   };
   const handleCancelProfile = () => setEditProfile(false);
@@ -343,8 +351,9 @@ export default function UserProfile() {
       });
       setExperience(await expRes.json());
       setEditExperienceId(null);
+      showSuccess(editExperienceId === 'new' ? 'Experience added successfully!' : 'Experience updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelExperience = () => setEditExperienceId(null);
@@ -360,8 +369,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setExperience(await expRes.json());
+      showSuccess('Experience deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 
@@ -390,8 +400,9 @@ export default function UserProfile() {
       });
       setSkills(await skillRes.json());
       setEditSkillId(null);
+      showSuccess(editSkillId === 'new' ? 'Skill added successfully!' : 'Skill updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelSkill = () => setEditSkillId(null);
@@ -407,8 +418,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setSkills(await skillRes.json());
+      showSuccess('Skill deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 
@@ -443,8 +455,9 @@ export default function UserProfile() {
       });
       setProjects(await projRes.json());
       setEditProjectId(null);
+      showSuccess(editProjectId === 'new' ? 'Project added successfully!' : 'Project updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelProject = () => setEditProjectId(null);
@@ -460,8 +473,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setProjects(await projRes.json());
+      showSuccess('Project deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 
@@ -490,8 +504,9 @@ export default function UserProfile() {
       });
       setEducation(await eduRes.json());
       setEditEducationId(null);
+      showSuccess(editEducationId === 'new' ? 'Education added successfully!' : 'Education updated successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
   const handleCancelEducation = () => setEditEducationId(null);
@@ -507,8 +522,9 @@ export default function UserProfile() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setEducation(await eduRes.json());
+      showSuccess('Education deleted successfully!');
     } catch (err) {
-      alert(err.message);
+      showError(err.message);
     }
   };
 

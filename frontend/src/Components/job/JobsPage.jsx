@@ -5,8 +5,10 @@ import Navbar from '../Navbar';
 import JobFilters from './JobFilters';
 import JobCard from './JobCard';
 import ApplicationDialog from './ApplicationDialog';
+import { useAlert } from '../../hooks/useAlert';
 
 const JobsPage = () => {
+  const { showSuccess, showError } = useAlert();
   const [showSearch, setShowSearch] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,7 @@ const JobsPage = () => {
 
       // Show success message after a brief delay
       setTimeout(() => {
-        alert('Application submitted successfully!');
+        showSuccess('Application submitted successfully!');
         setShowApplyDialog(false);
         setApplicationData({ name: '', email: '', cv: null, coverLetter: '' });
         setUploadProgress('');
@@ -84,7 +86,7 @@ const JobsPage = () => {
     } catch (error) {
       console.error('Failed to submit application:', error);
       setUploadProgress('');
-      alert('Failed to submit application. Please try again.');
+      showError('Failed to submit application. Please try again.');
     } finally {
       setLoading(false);
     }

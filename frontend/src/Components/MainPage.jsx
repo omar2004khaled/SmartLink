@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Plus, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
@@ -8,11 +8,24 @@ import './MainPage.css';
 
 const MainPage = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const postsRef = useRef(null);
+
+  const handlePostCreated = () => {
+    console.log('Post created! Refreshing posts...');
+    // Refresh posts to show the new post
+    if (postsRef.current) {
+      postsRef.current.refreshPosts();
+    } else {
+      console.error('postsRef.current is null!');
+    }
+    // Close the modal
+    setShowCreatePost(false);
+  };
 
   return (
     <div className="home-page">
       <Navbar showSearch={true} />
-      
+
       <div className="home-content">
         {/* Home Header */}
         <div className="home-header">
@@ -33,7 +46,7 @@ const MainPage = () => {
               </button>
             </div>
           </div>
-          <Posts />
+          <Posts ref={postsRef} />
         </div>
       </div>
 
@@ -41,7 +54,7 @@ const MainPage = () => {
       {showCreatePost && (
         <div className="modal-overlay" onClick={() => setShowCreatePost(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <PostComposotion onClose={() => setShowCreatePost(false)} />
+            <PostComposotion onPostCreated={handlePostCreated} />
           </div>
         </div>
       )}

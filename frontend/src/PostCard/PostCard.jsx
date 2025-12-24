@@ -6,22 +6,19 @@ import Footer from './Footer';
 import CommentsPanel from './CommentsPanel';
 import ReportModal from './ReportModal';
 import { SaveComment, GetComments, GetUserInfo, userIdFromLocalStorage, UpdatePost, DeletePost } from '../FetchData/FetchData';
-import commentsSeed from '../data/commentsSeed';
 import './PostCard.css';
 import { API_BASE_URL, CLOUDINARY_UPLOAD_URL } from '../config';
 
 function PostItem({ post }) {
   const [showComments, setShowComments] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [inlineVisible, setInlineVisible] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
   const [commentUsersInfo, setCommentUsersInfo] = useState({});
-  const [errorMessage, setErrorMessage] = useState(null); 
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const initialComments = post?.comments || commentsSeed;
-  const [comments, setComments] = useState(initialComments);
+  const [comments, setComments] = useState([]);
 
   const [commentText, setCommentText] = useState('');
   const [attachedFile, setAttachedFile] = useState(null);
@@ -40,9 +37,7 @@ function PostItem({ post }) {
     }, 5000);
   };
 
-  useEffect(() => {
-    setComments(post?.comments || commentsSeed);
-  }, [post]);
+  // Remove the useEffect that sets comments from post.comments
 
   useEffect(() => {
     if (isEditing) {
@@ -78,6 +73,14 @@ function PostItem({ post }) {
       if (attachedFile && attachedFile.preview) URL.revokeObjectURL(attachedFile.preview);
     };
   }, [attachedFile]);
+
+  // Auto-fetch comments when post loads
+  useEffect(() => {
+    const postId = post?.id || post?.postId;
+    if (postId) {
+      fetchCommentsFromServer();
+    }
+  }, [post?.id, post?.postId]);
 
   const uploadToCloudinary = async (file) => {
     try {
@@ -233,10 +236,8 @@ function PostItem({ post }) {
     }
   };
 
-  const openComments = async (showAllFlag = false) => {
-    setShowAll(!!showAllFlag);
-    setShowComments(true);
-    await fetchCommentsFromServer();
+  const toggleComments = () => {
+    setShowComments(!showComments);
   };
 
   const closeComments = () => setShowComments(false);
@@ -544,12 +545,12 @@ function PostItem({ post }) {
         </>
       )}
 
-      <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} postId={post?.id || post?.postId} userId={userIdFromLocalStorage()} />
+      <Footer onCommentClick={toggleComments} postId={post?.id || post?.postId} userId={userIdFromLocalStorage()} />
 
-      {inlineVisible && (
+      {/* Show comments based on showComments state */}
+      {showComments && comments.length > 0 && (
         <div className="inline-comments">
           {loadingComments && <div className="no-comments">Loading comments…</div>}
-          {!loadingComments && comments.length === 0 && <div className="no-comments">No comments yet</div>}
           {!loadingComments && comments.map((c, i) => (
             <div key={c.commentId ?? i} className="comment-item">
               <img src={c.avatar || '/src/PostCard/avatar.png'} className="comment-avatar" alt="avatar" />
@@ -564,6 +565,38 @@ function PostItem({ post }) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Show only 1 most recent comment when comments are hidden */}
+      {!showComments && comments.length > 0 && (
+        <div className="inline-comments">
+          {loadingComments && <div className="no-comments">Loading comments…</div>}
+          {!loadingComments && comments.slice(0, 1).map((c, i) => (
+            <div key={c.commentId ?? i} className="comment-item">
+              <img src={c.avatar || '/src/PostCard/avatar.png'} className="comment-avatar" alt="avatar" />
+              <div className="comment-body">
+                <div className="comment-author">{c.author || 'Anonymous'}</div>
+                <div className="comment-text">{c.text}</div>
+                {c.attachment && (
+                  <div style={{ marginTop: 8 }}>
+                    <img src={c.attachment} alt="attachment" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {!loadingComments && comments.length > 1 && (
+            <div className="view-all-comments" onClick={toggleComments} style={{
+              padding: '8px 12px',
+              color: '#666',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 500
+            }}>
+              View all {comments.length} comments
+            </div>
+          )}
         </div>
       )}
 
@@ -600,10 +633,6 @@ function PostItem({ post }) {
           </div>
         </div>
       </div>
-
-      {showComments && (
-        <CommentsPanel comments={comments} onClose={closeComments} showAll={showAll} />
-      )}
 
       {showReportModal && (
         <ReportModal
