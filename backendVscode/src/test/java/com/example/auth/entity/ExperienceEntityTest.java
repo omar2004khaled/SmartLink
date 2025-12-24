@@ -4,14 +4,11 @@ import com.example.auth.entity.ProfileEntities.Experience;
 import com.example.auth.entity.ProfileEntities.JobSeekerProfile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
-@AutoConfigureMockMvc
-@SpringBootTest
+
 class ExperienceEntityTest {
 
     private Experience experience;
