@@ -7,8 +7,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import com.example.auth.dto.LoginRequest;
@@ -16,8 +14,7 @@ import com.example.auth.entity.User;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.service.AuthService;
 import com.example.auth.service.PasswordResetService;
-@AutoConfigureMockMvc
-@SpringBootTest
+
 class CompanyAuthUnitTest {
 
     @Test
