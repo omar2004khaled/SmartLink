@@ -18,6 +18,7 @@ const CompanyHome = () => {
             <h1 className="home-title">Company Dashboard</h1>
             <p className="home-subtitle">Welcome back! Manage your company presence and connect with talent.</p>
           </div>
+          
         </div>
 
         <div className="main-content">
