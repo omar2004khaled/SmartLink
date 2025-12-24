@@ -2,17 +2,18 @@ package com.example.auth.entity;
 
 import com.example.auth.enums.ApplicationStatus;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "job_application")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class JobApplication {
     @Id
@@ -32,7 +33,14 @@ public class JobApplication {
     @JoinColumn(name = "job_id")
     private Job job;
     @Column(name = "cv_erl")
-    String cvURL;
+    private String cvURL;
     @Column(name = "cover_letter")
-    String coverLetter;
+    private String coverLetter;
+    @ElementCollection
+    @CollectionTable(
+            name = "job_application_comments",
+            joinColumns = @JoinColumn(name = "application_id")
+    )
+    @Column(name = "comment")
+    private List<String> comments;
 }

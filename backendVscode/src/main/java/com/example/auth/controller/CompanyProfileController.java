@@ -17,24 +17,15 @@ public class CompanyProfileController {
     private final CompanyProfileService companyProfileService;
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId) {
+    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId,@RequestParam(required = false) Long viewerId ) {
         try {
-            CompanyDTO company = companyProfileService.getCompanyByUserId(userId);
+            CompanyDTO company = companyProfileService.getCompanyByUserId(userId, viewerId);
             return ResponseEntity.ok(company);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found for user");
         }
     }
-
-    @GetMapping("/{companyId}")
-    public ResponseEntity<?> getCompanyProfile(@PathVariable Long companyId, @RequestParam(required = false) Long userId) {
-        try {
-            CompanyDTO company = companyProfileService.getCompanyProfile(companyId, userId);
-            return ResponseEntity.ok(company);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found");
-        }
-    }
+    
 
     @GetMapping("/{companyId}/about")
     public ResponseEntity<?> getCompanyAbout(@PathVariable Long companyId) {
