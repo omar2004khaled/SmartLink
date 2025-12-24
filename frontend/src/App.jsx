@@ -23,6 +23,7 @@ import MainPage from './Components/MainPage';
 import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
 import ApplicationsPage from './Components/job/ApplicationsPage';
+import MessagePage from './Components/Messages/MessagePage';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
       <Route path="/job" element={<JobsPage />} />
       <Route path="/jobs" element={<CompanyJobsPage />} />
       <Route path="/applications" element={<ApplicationsPage />} />
+      <Route path="/messages" element={<MessagePage/>} />
 
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

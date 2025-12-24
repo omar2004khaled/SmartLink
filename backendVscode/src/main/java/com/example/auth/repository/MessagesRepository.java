@@ -16,7 +16,7 @@ public interface MessagesRepository extends JpaRepository<Message, Long> {
     @Query("SELECT m FROM Message m WHERE (m.sender.id = :userId1 AND m.receiver.id = :userId2) OR (m.sender.id = :userId2 AND m.receiver.id = :userId1) ORDER BY m.createdAt DESC")
     Page<Message> findConversationBetweenTwoUsers(@Param("userId1") Long userId1, @Param("userId2") Long userId2,Pageable pageable);
 
-    @Query("SELECT m FROM Message m WHERE m.createdAt IN (SELECT MAX(m2.createdAt) FROM Message m2 WHERE m2.sender.id = :userId OR m2.receiver.id = :userId GROUP BY CASE WHEN m2.sender.id = :userId THEN m2.receiver.id ELSE m2.sender.id END) ORDER BY m.createdAt DESC")
+    @Query("SELECT m FROM Message m LEFT JOIN FETCH m.sender LEFT JOIN FETCH m.receiver WHERE m.createdAt IN (SELECT MAX(m2.createdAt) FROM Message m2 WHERE m2.sender.id = :userId OR m2.receiver.id = :userId GROUP BY CASE WHEN m2.sender.id = :userId THEN m2.receiver.id ELSE m2.sender.id END) ORDER BY m.createdAt DESC")
     Page<Message> findConversations(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT COUNT(m) FROM Message m WHERE m.receiver.id = :userId AND m.isRead = false")

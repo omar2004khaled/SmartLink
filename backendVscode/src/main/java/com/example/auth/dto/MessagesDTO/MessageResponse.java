@@ -14,4 +14,8 @@ public class MessageResponse {
     private String content;
     private LocalDateTime createdAt;
     private Boolean isRead;
+    private Long otherUserId;
+    private String otherUserName;
+    private String otherUserProfilePicture;
+    private String otherUserType;
 }
