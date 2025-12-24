@@ -12,6 +12,9 @@ const AdminContentManagement = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [reportedPosts, setReportedPosts] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [reportStatus, setReportStatus] = useState('');
+  const [reportCategory, setReportCategory] = useState('');
   const [reportStats, setReportStats] = useState({
     totalReports: 0,
     pendingReports: 0,
@@ -21,23 +24,23 @@ const AdminContentManagement = () => {
 
   useEffect(() => {
     if (activeTab === 'all') {
-      fetchPosts();
+      fetchPosts(currentPage, 10, searchTerm);
     } else if (activeTab === 'reported') {
-      fetchReportedPosts();
+      fetchReportedPosts(currentPage, reportStatus, reportCategory, searchTerm);
       fetchReportStats();
     }
-  }, [currentPage, activeTab]);
+  }, [currentPage, activeTab, searchTerm, reportStatus, reportCategory]);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification({ message: '', type: '' }), 3000);
   };
 
-  const fetchPosts = async (page = 0, size = 10) => {
+  const fetchPosts = async (page = 0, size = 10, search = '') => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      
+
       if (!token) {
         showNotification('Authentication required. Please log in.', 'error');
         setLoading(false);
@@ -60,7 +63,7 @@ const AdminContentManagement = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/admin/posts?page=${page}&size=${size}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/posts?page=${page}&size=${size}&search=${encodeURIComponent(search)}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -98,11 +101,11 @@ const AdminContentManagement = () => {
     }
   };
 
-  const fetchReportedPosts = async (page = 0, status = '', category = '') => {
+  const fetchReportedPosts = async (page = 0, status = '', category = '', search = '') => {
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
-      
+
       if (!token) {
         showNotification('Authentication required. Please log in.', 'error');
         setLoading(false);
@@ -113,7 +116,8 @@ const AdminContentManagement = () => {
         page: page.toString(),
         size: '10',
         status,
-        ...(category && { category })
+        ...(category && { category }),
+        search
       });
 
       const response = await fetch(`${API_BASE_URL}/admin/reports?${params}`, {
@@ -158,7 +162,7 @@ const AdminContentManagement = () => {
   const fetchReportStats = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      
+
       if (!token) {
         return;
       }
@@ -183,7 +187,7 @@ const AdminContentManagement = () => {
   const resolveReport = async (reportId, action, adminNote = '') => {
     try {
       const token = localStorage.getItem("authToken");
-      
+
       if (!token) {
         showNotification('Authentication required. Please log in.', 'error');
         return;
@@ -225,12 +229,12 @@ const AdminContentManagement = () => {
 
     try {
       const token = localStorage.getItem("authToken");
-      
+
       if (!token) {
         showNotification('Authentication required. Please log in.', 'error');
         return;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
@@ -257,12 +261,12 @@ const AdminContentManagement = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      
+
       if (!token) {
         showNotification('Please log in to perform this action', 'error');
         return;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}`, {
         method: 'DELETE',
         headers: {
@@ -302,21 +306,19 @@ const AdminContentManagement = () => {
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('all')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'all'
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'all'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+              }`}
           >
             All Posts
           </button>
           <button
             onClick={() => setActiveTab('reported')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'reported'
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'reported'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+              }`}
           >
             Reported Posts
           </button>
@@ -379,13 +381,73 @@ const AdminContentManagement = () => {
         </div>
       )}
 
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Search */}
+          <div className="flex-1">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <FileText size={20} />
+              </span>
+              <input
+                type="text"
+                placeholder={activeTab === 'all' ? "Search posts by content..." : "Search reports by description or ID..."}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(0);
+                }}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Report Specific Filters */}
+          {activeTab === 'reported' && (
+            <>
+              <div className="md:w-48">
+                <select
+                  value={reportStatus}
+                  onChange={(e) => {
+                    setReportStatus(e.target.value);
+                    setCurrentPage(0);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="RESOLVED">Resolved</option>
+                </select>
+              </div>
+              <div className="md:w-48">
+                <select
+                  value={reportCategory}
+                  onChange={(e) => {
+                    setReportCategory(e.target.value);
+                    setCurrentPage(0);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Categories</option>
+                  <option value="SPAM">Spam</option>
+                  <option value="HATE_SPEECH">Hate Speech</option>
+                  <option value="SEXUAL_HARASSMENT">Harassment</option>
+                  <option value="VIOLENCE">Violence</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Notification */}
       {notification.message && (
-        <div className={`p-4 rounded-lg flex items-center gap-2 ${
-          notification.type === 'success' 
-            ? 'bg-green-50 border border-green-200 text-green-700' 
+        <div className={`p-4 rounded-lg flex items-center gap-2 ${notification.type === 'success'
+            ? 'bg-green-50 border border-green-200 text-green-700'
             : 'bg-red-50 border border-red-200 text-red-700'
-        }`}>
+          }`}>
           <AlertCircle size={16} />
           {notification.message}
         </div>
@@ -530,13 +592,12 @@ const AdminContentManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          report.category === 'HATE_SPEECH' ? 'bg-red-100 text-red-800' :
-                          report.category === 'SEXUAL_HARASSMENT' ? 'bg-pink-100 text-pink-800' :
-                          report.category === 'VIOLENCE' ? 'bg-orange-100 text-orange-800' :
-                          report.category === 'SPAM' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span className={`px-2 py-1 text-xs rounded-full ${report.category === 'HATE_SPEECH' ? 'bg-red-100 text-red-800' :
+                            report.category === 'SEXUAL_HARASSMENT' ? 'bg-pink-100 text-pink-800' :
+                              report.category === 'VIOLENCE' ? 'bg-orange-100 text-orange-800' :
+                                report.category === 'SPAM' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-gray-100 text-gray-800'
+                          }`}>
                           {report.category.replace('_', ' ')}
                         </span>
                       </td>
@@ -544,11 +605,10 @@ const AdminContentManagement = () => {
                         {report.reporter?.name || 'Anonymous'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          report.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                          report.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span className={`px-2 py-1 text-xs rounded-full ${report.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                            report.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
+                              'bg-gray-100 text-gray-800'
+                          }`}>
                           {report.status}
                         </span>
                       </td>
@@ -647,7 +707,7 @@ const AdminContentManagement = () => {
                 >
                   <ChevronLeft size={20} />
                 </button>
-                
+
                 {/* Page Numbers */}
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const pageNum = Math.max(0, Math.min(totalPages - 5, currentPage - 2)) + i;
@@ -655,11 +715,10 @@ const AdminContentManagement = () => {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                        currentPage === pageNum
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === pageNum
                           ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                           : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       {pageNum + 1}
                     </button>
@@ -720,13 +779,12 @@ const AdminContentManagement = () => {
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-500">Category:</span>
-                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                        selectedReport.category === 'HATE_SPEECH' ? 'bg-red-100 text-red-800' :
-                        selectedReport.category === 'SEXUAL_HARASSMENT' ? 'bg-pink-100 text-pink-800' :
-                        selectedReport.category === 'VIOLENCE' ? 'bg-orange-100 text-orange-800' :
-                        selectedReport.category === 'SPAM' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${selectedReport.category === 'HATE_SPEECH' ? 'bg-red-100 text-red-800' :
+                          selectedReport.category === 'SEXUAL_HARASSMENT' ? 'bg-pink-100 text-pink-800' :
+                            selectedReport.category === 'VIOLENCE' ? 'bg-orange-100 text-orange-800' :
+                              selectedReport.category === 'SPAM' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                        }`}>
                         {selectedReport.category.replace('_', ' ')}
                       </span>
                     </div>
@@ -742,11 +800,10 @@ const AdminContentManagement = () => {
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-500">Status:</span>
-                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                        selectedReport.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                        selectedReport.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${selectedReport.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                          selectedReport.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                        }`}>
                         {selectedReport.status}
                       </span>
                     </div>

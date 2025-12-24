@@ -301,6 +301,7 @@ public class AdminController {
     public ResponseEntity<?> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search,
             Authentication auth) {
 
         ResponseEntity<?> authCheck = checkAuthentication(auth);
@@ -308,10 +309,16 @@ public class AdminController {
             return authCheck;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("postId").descending());
-        Page<Post> posts = postRepository.findAll(pageable);
+        Page<Post> postPage;
+        
+        if (search.isEmpty()) {
+            postPage = postRepository.findAll(pageable);
+        } else {
+            postPage = postRepository.findByContentContaining(search, pageable);
+        }
 
         // Enrich posts with user email information
-        List<Map<String, Object>> enrichedPosts = posts.getContent().stream().map(post -> {
+        List<Map<String, Object>> enrichedPosts = postPage.getContent().stream().map(post -> {
             Map<String, Object> postData = new HashMap<>();
             postData.put("postId", post.getPostId());
             postData.put("content", post.getContent());
@@ -333,10 +340,10 @@ public class AdminController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("posts", enrichedPosts);
-        response.put("totalElements", posts.getTotalElements());
-        response.put("totalPages", posts.getTotalPages());
-        response.put("currentPage", posts.getNumber());
-        response.put("size", posts.getSize());
+        response.put("totalElements", postPage.getTotalElements());
+        response.put("totalPages", postPage.getTotalPages());
+        response.put("currentPage", postPage.getNumber());
+        response.put("size", postPage.getSize());
 
         return ResponseEntity.ok(response);
     }
@@ -395,49 +402,37 @@ public class AdminController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String status,
             @RequestParam(defaultValue = "") String category,
+            @RequestParam(defaultValue = "") String search,
             Authentication auth) {
 
         ResponseEntity<?> authCheck = checkAuthentication(auth);
         if (authCheck != null)
             return authCheck;
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        // Get all reports and filter manually for minimum structural change
+        List<Report> allReports = reportRepository.findAll();
+        
+        List<Report> filteredReports = allReports.stream()
+                .filter(r -> (status.isEmpty() || status.equals(r.getStatus())) &&
+                            (category.isEmpty() || category.equals(r.getReportCategory().toString())) &&
+                            (search.isEmpty() || 
+                             (r.getDescription() != null && r.getDescription().toLowerCase().contains(search.toLowerCase())) ||
+                             (String.valueOf(r.getPostId()).contains(search)) ||
+                             (String.valueOf(r.getReporterId()).contains(search))))
+                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
+                .toList();
 
-        List<Report> reports;
-        if (!status.isEmpty() && !category.isEmpty()) {
-            // Filter by both status and category
-            reports = reportRepository.findAll().stream()
-                    .filter(r -> status.equals(r.getStatus()) &&
-                            (category.isEmpty() || category.equals(r.getReportCategory().toString())))
-                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                    .skip((long) page * size)
-                    .limit(size)
-                    .toList();
-        } else if (!status.isEmpty()) {
-            reports = reportRepository.findAll().stream()
-                    .filter(r -> status.equals(r.getStatus()))
-                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                    .skip((long) page * size)
-                    .limit(size)
-                    .toList();
-        } else if (!category.isEmpty()) {
-            reports = reportRepository.findAll().stream()
-                    .filter(r -> category.equals(r.getReportCategory().toString()))
-                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                    .skip((long) page * size)
-                    .limit(size)
-                    .toList();
-        } else {
-            reports = reportRepository.findAll().stream()
-                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                    .skip((long) page * size)
-                    .limit(size)
-                    .toList();
-        }
+        // Fix paging: calculate total elements based on filtered list
+        long totalElements = filteredReports.size();
+        
+        List<Report> pagedReports = filteredReports.stream()
+                .skip((long) page * size)
+                .limit(size)
+                .toList();
 
         // Return individual reports with post and author information
         List<Map<String, Object>> result = new java.util.ArrayList<>();
-        for (Report report : reports) {
+        for (Report report : pagedReports) {
             Map<String, Object> reportData = new HashMap<>();
             reportData.put("id", report.getReportId());
             reportData.put("category", report.getReportCategory().toString());
@@ -503,8 +498,8 @@ public class AdminController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("content", result);
-        response.put("totalElements", result.size());
-        response.put("totalPages", (result.size() + size - 1) / size);
+        response.put("totalElements", totalElements);
+        response.put("totalPages", (totalElements + size - 1) / size);
         response.put("currentPage", page);
         response.put("size", size);
 
