@@ -1,12 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import SignUp from "./Components/SignUp";
-import Login from "./Components/Login";
-import VerifyEmail from "./Components/VerifyEmail";
-import EmailVerified from "./Components/EmailVerified";
-import ForgotPassword from './Components/ForgotPassword';
-import ResetPassword from './Components/ResetPassword';
-import OAuthCallback from "./Components/OAuthCallback";
-import Dashboard from "./Components/Dashboard";
+import SignUp from "./components/SignUp";
+import Login from "./components/Login";
+import VerifyEmail from "./components/VerifyEmail";
+import EmailVerified from "./components/EmailVerified";
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import OAuthCallback from "./components/OAuthCallback";
 import PostComposotion from './PostComposotion/PostComposotion';
 import PostCard from './PostCard/PostCard';
 import UserProfile from './Components/Profile/UserProfile/UserProfile';
@@ -24,6 +23,7 @@ import MainPage from './Components/MainPage';
 import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
 import CVAnalysis from './Components/CVAnalysis';
+import ApplicationsPage from './Components/job/ApplicationsPage';
 
 function App() {
   return (
@@ -60,6 +60,7 @@ function App() {
       <Route path="/job" element={<JobsPage />} />
       <Route path="/jobs" element={<CompanyJobsPage />} />
       <Route path="/cv-analysis" element={<CVAnalysis />} />
+      <Route path="/applications" element={<ApplicationsPage />} />
 
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

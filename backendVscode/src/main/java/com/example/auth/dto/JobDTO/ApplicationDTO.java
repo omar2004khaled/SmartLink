@@ -1,7 +1,10 @@
 package com.example.auth.dto.JobDTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -9,9 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Setter
 @Builder
 public class ApplicationDTO {
-    String status;
-    Long userId;
-    Long jobId;
-    String cvURL;
-    String coverLetter;
+    private Long id;  // lowercase
+    private String name;
+    private String email;
+    private String status;
+    private Long userId;
+    private Long jobId;
+    private String cvURL;
+    private String coverLetter;
+    private List<String> comments;
+    private String companyName;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;  // Changed from dateTimeFormat
 }

@@ -30,7 +30,7 @@ const OAuthCallback = () => {
         if (userData) {
           // Store basic info immediately
           if (userData.sub) localStorage.setItem('userEmail', userData.sub);
-          if (userData.userType) localStorage.setItem('userType', userData.userType);
+          if (userData.userType) localStorage.setItem('userType', userData.role);
 
           // 3. Fetch full user details to get userID (DATABASE ID)
           try {

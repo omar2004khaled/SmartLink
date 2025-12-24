@@ -50,7 +50,8 @@ public class SecurityConfig {
                                                                 "/Post/**", "/comment/**", "/jobs/**",
                                                                 "/graphql", "/apply/**", "/reactions/**",
                                                                 "/api/search/**", "/api/connections/**",
-                                                                "/error", "/login/**")
+                                                                "/api/notifications/**",
+                                                                "/ws/**", "/error", "/login/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
@@ -59,8 +60,10 @@ public class SecurityConfig {
                                 .exceptionHandling(exception -> exception
                                                 .authenticationEntryPoint((request, response, authException) -> {
                                                         if (request.getRequestURI().startsWith("/api/")) {
-                                                                response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
-                                                                response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                                                                response.setStatus(
+                                                                                jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                                                                response.getWriter()
+                                                                                .write("{\"error\": \"Unauthorized\"}");
                                                         } else {
                                                                 response.sendRedirect("/login/oauth2/code/google");
                                                         }

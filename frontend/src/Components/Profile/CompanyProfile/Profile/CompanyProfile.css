@@ -39,7 +39,7 @@
 }
 
 .company-info-wrapper {
-  padding: 20px 40px;
+  padding: 0px 15px;
 }
 
 .company-profile-content {
@@ -85,7 +85,7 @@
 
 @media (max-width: 768px) {
   .company-info-wrapper {
-    padding: 20px 24px;
+    padding: 0px 15px;
   }
   
   .company-profile-content {

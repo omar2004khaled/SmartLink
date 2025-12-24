@@ -8,7 +8,9 @@ import LocationsSection from '../LocationSection/LocationsSection';
 import PostsTab from '../Tabs/PostsTab';
 import EditModal from '../EditModal/EditModal';
 import './CompanyProfile.css';
-import { API_BASE_URL } from '../../../../config';
+import { API_BASE_URL,CLOUDINARY_UPLOAD_URL } from '../../../../config';
+
+
 
 export default function CompanyProfile({ companyId, userId, targetUserId, currentUserId }) {
   const [activeTab, setActiveTab] = useState('About');
@@ -22,7 +24,6 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
   const [editSection, setEditSection] = useState(null);
   const tabs = ['About', 'Posts'];
 
-  // Handle backward compatibility or simplified usage
   const viewerId = currentUserId || userId;
   const profileOwnerId = targetUserId;
 
@@ -30,7 +31,8 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
     if (companyId || profileOwnerId || viewerId) {
       fetchCompanyBasicData();
     }
-  }, [companyId, profileOwnerId, viewerId]);
+  }, [profileOwnerId, viewerId]);
+
 
   const fetchCompanyBasicData = async () => {
     try {
@@ -38,16 +40,15 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
       setError(null);
 
       let url;
-      if (companyId) {
-        url = viewerId
-          ? `${API_BASE_URL}/api/company/${companyId}?userId=${viewerId}`
-          : `${API_BASE_URL}/api/company/${companyId}`;
-      } else if (profileOwnerId) {
-        // Fetch by Target User ID
-        url = `${API_BASE_URL}/api/company/user/${profileOwnerId}`;
+      if (profileOwnerId) {
+        url = new URL(`${API_BASE_URL}/api/company/user/${Number(profileOwnerId)}`);
+        if (viewerId) {
+          url.searchParams.append('viewerId', Number(viewerId));
+        }else{
+          return;
+        }
       } else {
-        // Fallback: Fetch by Viewer ID (My Profile)
-        url = `${API_BASE_URL}/api/company/user/${viewerId}`;
+        url = new URL(`${API_BASE_URL}/api/company/user/${Number(viewerId)}`);
       }
 
       const token = localStorage.getItem('authToken');
@@ -63,7 +64,6 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
         headers,
       });
 
-
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Error response:', errorText);
@@ -75,16 +75,21 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
         throw new Error('Server returned non-JSON response. Check if API endpoint exists.');
       }
 
-      const data = await response.json();
-      console.log('Company data received:', data);
+      let data = await response.json();
+      // console.log('Company data received:', data);
       setCompanyData(data);
-      setIsFollowing(data.isFollowing || false);
-      setIsOwner(Number(data.userId) === Number(viewerId));
-
-      // Set companyId if not provided (for API calls)
-      if (!companyId && data.companyProfileId) {
-        companyId = data.companyProfileId;
+      
+      const followingStatus = data.isFollowing || false;
+      let ownerStatus;
+      if(profileOwnerId ==undefined){
+        ownerStatus = Number(data.userId) === Number(viewerId);
+      }else{
+         ownerStatus = Number(profileOwnerId) === Number(viewerId);
       }
+      
+      
+      setIsFollowing(()=>followingStatus);
+      setIsOwner(()=>ownerStatus);
 
       setTabData({
         description: data.description,
@@ -119,8 +124,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
 
   const fetchPostsData = async () => {
     try {
-      // If we don't have companyId from props, use the one from data
-      const idToUse = companyId || companyData?.companyProfileId;
+      const idToUse = companyData?.companyProfileId;
       if (!idToUse) throw new Error("No company ID available");
 
       const response = await fetch(`${API_BASE_URL}/api/company/${idToUse}/posts`, {
@@ -156,7 +160,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const idToUse = companyId || companyData?.companyProfileId;
+      const idToUse = companyData?.companyProfileId;
       const response = await fetch(`${API_BASE_URL}/api/company/${idToUse}/${op}`, {
         method: "POST",
         headers,
@@ -206,7 +210,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const currentCompanyId = companyId || companyData?.companyProfileId;
+      const currentCompanyId = companyData?.companyProfileId;
       const response = await fetch(`${API_BASE_URL}/api/company/${currentCompanyId}`, {
         method: 'PUT',
         headers,
@@ -230,7 +234,8 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
       const updated = await response.json();
       setCompanyData(updated);
 
-      if (updatedData.locations || activeTab === 'About') {
+      // Update tab data if on About tab
+      if (activeTab === 'About') {
         setTabData({
           description: updated.description,
           website: updated.website,
