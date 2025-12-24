@@ -33,4 +33,9 @@ public interface ReactionRepository extends JpaRepository<Reaction, Long> {
     @Transactional
     @Query("DELETE FROM Reaction r WHERE r.userId = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Reaction r WHERE r.postId = :postId")
+    void deleteByPostId(@Param("postId") Long postId);
 }

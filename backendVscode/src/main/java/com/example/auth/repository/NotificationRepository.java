@@ -39,5 +39,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.createdAt < :beforeDate")
     int deleteOldNotifications(@Param("beforeDate") LocalDateTime beforeDate);
+
+    @Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByUser_Id(Long userId);
 }
 

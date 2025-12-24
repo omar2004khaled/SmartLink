@@ -30,7 +30,18 @@ import com.example.auth.entity.Post;
 import com.example.auth.service.EmailService;
 import com.example.auth.entity.Report;
 import com.example.auth.repository.ReportRepository;
+import com.example.auth.repository.CompanyProfileRepo;
+import com.example.auth.repository.ReactionRepository;
+import com.example.auth.repository.ConnectionRepository;
+import com.example.auth.repository.NotificationRepository;
+import com.example.auth.repository.JobApplicationRepository;
+import com.example.auth.repository.VerificationTokenRepository;
+import com.example.auth.repository.PasswordResetTokenRepository;
+import com.example.auth.repository.LikeCommentRepo;
+import com.example.auth.repository.PostAttachmentRepository;
+import com.example.auth.repository.CompanyFollowerRepo;
 import com.example.auth.enums.ReportCategory;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/admin")
@@ -43,16 +54,41 @@ public class AdminController {
     private final PostRepository postRepository;
     private final CommentRepo commentRepository;
     private final ReportRepository reportRepository;
+    private final CompanyProfileRepo companyProfileRepo;
+    private final ReactionRepository reactionRepository;
+    private final ConnectionRepository connectionRepository;
+    private final NotificationRepository notificationRepository;
+    private final JobApplicationRepository jobApplicationRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final LikeCommentRepo likeCommentRepo;
+    private final PostAttachmentRepository postAttachmentRepository;
+    private final CompanyFollowerRepo companyFollowerRepo;
 
     public AdminController(UserRepository userRepository, EmailService emailService,
             JobSeekerProfileRepository jobSeekerProfileRepository, PostRepository postRepository,
-            CommentRepo commentRepository, ReportRepository reportRepository) {
+            CommentRepo commentRepository, ReportRepository reportRepository,
+            CompanyProfileRepo companyProfileRepo, ReactionRepository reactionRepository,
+            ConnectionRepository connectionRepository, NotificationRepository notificationRepository,
+            JobApplicationRepository jobApplicationRepository, VerificationTokenRepository verificationTokenRepository,
+            PasswordResetTokenRepository passwordResetTokenRepository, LikeCommentRepo likeCommentRepo,
+            PostAttachmentRepository postAttachmentRepository, CompanyFollowerRepo companyFollowerRepo) {
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.jobSeekerProfileRepository = jobSeekerProfileRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.reportRepository = reportRepository;
+        this.companyProfileRepo = companyProfileRepo;
+        this.reactionRepository = reactionRepository;
+        this.connectionRepository = connectionRepository;
+        this.notificationRepository = notificationRepository;
+        this.jobApplicationRepository = jobApplicationRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.likeCommentRepo = likeCommentRepo;
+        this.postAttachmentRepository = postAttachmentRepository;
+        this.companyFollowerRepo = companyFollowerRepo;
     }
 
     @GetMapping("/dashboard")
@@ -195,6 +231,7 @@ public class AdminController {
 
     @DeleteMapping("/users/{userId}")
     @PreAuthorize("hasRole('ADMIN') and @userRepository.findByEmail(authentication.name).orElse(new com.example.auth.entity.User()).email == 'BigBoss@example.com'")
+    @Transactional
     public ResponseEntity<?> deleteUser(@PathVariable Long userId, Authentication auth) {
         try {
             Optional<User> userOptional = userRepository.findById(userId);
@@ -209,13 +246,51 @@ public class AdminController {
                 return ResponseEntity.badRequest().body("Cannot delete super admin");
             }
 
-            jobSeekerProfileRepository.findByUser_Id(userId).ifPresent(jobSeekerProfileRepository::delete);
+            // 1. Delete Tokens
+            verificationTokenRepository.deleteByUser_Id(userId);
+            passwordResetTokenRepository.deleteByUser_Id(userId);
 
+            // 2. Delete Notifications
+            notificationRepository.deleteByUser_Id(userId);
+
+            // 3. Delete Job Related
+            jobApplicationRepository.deleteByUser_Id(userId);
+
+            // 4. Delete Social/Connections
+            companyFollowerRepo.deleteByFollower_Id(userId);
+            companyFollowerRepo.deleteByCompany_Id(userId);
+            connectionRepository.deleteBySender_Id(userId);
+            connectionRepository.deleteByReceiver_Id(userId);
+
+            // 5. Delete Interactions
+            reactionRepository.deleteByUserId(userId);
+            likeCommentRepo.deleteByUser_Id(userId);
+            reportRepository.deleteByReporterId(userId);
+            commentRepository.deleteByUser_Id(userId);
+
+            // 6. Delete Posts and their dependencies
+            List<Post> userPosts = postRepository.findByUserId(userId);
+            for (Post post : userPosts) {
+                Long postId = post.getPostId();
+                reportRepository.deleteByPostId(postId);
+                reactionRepository.deleteByPostId(postId);
+                commentRepository.deleteByPostId(postId);
+                postAttachmentRepository.deletePostById(postId);
+            }
+            postRepository.deleteByUserId(userId);
+
+            // 7. Delete Profiles
+            jobSeekerProfileRepository.findByUser_Id(userId).ifPresent(jobSeekerProfileRepository::delete);
+            companyProfileRepo.findByUser_Id(userId).ifPresent(companyProfileRepo::delete);
+
+            // 8. Delete User
             userRepository.delete(user);
-            return ResponseEntity.ok("User " + user.getEmail() + " deleted successfully!");
+
+            return ResponseEntity.ok("User " + user.getEmail() + " and all associated data deleted successfully!");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest()
-                    .body("Cannot delete user: User has associated profile data that must be removed first.");
+                    .body("Error deleting user: " + e.getMessage());
         }
     }
 
