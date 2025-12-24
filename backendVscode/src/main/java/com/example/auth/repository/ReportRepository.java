@@ -15,4 +15,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByReporterId(Long reporterId);
     Optional<Report> findByPostIdAndReporterId(Long postId, Long reporterId);
     long countByPostId(Long postId);
+    
+    @jakarta.transaction.Transactional
+    void deleteByPostId(Long postId);
+    @jakarta.transaction.Transactional
+    void deleteByReporterId(Long reporterId);
 }
