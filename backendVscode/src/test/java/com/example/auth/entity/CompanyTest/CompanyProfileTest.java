@@ -3,12 +3,15 @@ package com.example.auth.entity.CompanyTest;
 import com.example.auth.entity.CompanyProfile;
 import com.example.auth.entity.User;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@AutoConfigureMockMvc
+@SpringBootTest
 class CompanyProfileTest {
 
     @Test

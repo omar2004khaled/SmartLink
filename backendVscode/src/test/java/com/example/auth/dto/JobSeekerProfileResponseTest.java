@@ -3,11 +3,14 @@ package com.example.auth.dto;
 import com.example.auth.dto.ProfileDtos.JobSeekerProfileResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@AutoConfigureMockMvc
+@SpringBootTest
 class JobSeekerProfileResponseTest {
 
     private JobSeekerProfileResponse response;

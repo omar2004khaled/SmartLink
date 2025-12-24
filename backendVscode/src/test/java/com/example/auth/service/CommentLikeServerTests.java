@@ -14,12 +14,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 
-@ExtendWith(MockitoExtension.class)
+@AutoConfigureMockMvc
+@SpringBootTest
 public class CommentLikeServerTests {
 
     @Mock

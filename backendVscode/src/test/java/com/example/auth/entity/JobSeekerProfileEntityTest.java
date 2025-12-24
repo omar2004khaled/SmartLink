@@ -3,13 +3,16 @@ package com.example.auth.entity;
 import com.example.auth.entity.ProfileEntities.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@AutoConfigureMockMvc
+@SpringBootTest
 class JobSeekerProfileEntityTest {
 
     private JobSeekerProfile profile;

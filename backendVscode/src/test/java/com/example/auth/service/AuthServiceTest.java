@@ -18,6 +18,8 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.auth.dto.RegisterRequest;
@@ -27,7 +29,8 @@ import com.example.auth.enums.Gender;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.repository.VerificationTokenRepository;
 
-@ExtendWith(MockitoExtension.class)
+@AutoConfigureMockMvc
+@SpringBootTest
 class AuthServiceTest {
 
     @Mock
