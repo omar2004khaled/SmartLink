@@ -44,7 +44,9 @@ public class AdminController {
     private final CommentRepo commentRepository;
     private final ReportRepository reportRepository;
 
-    public AdminController(UserRepository userRepository, EmailService emailService, JobSeekerProfileRepository jobSeekerProfileRepository, PostRepository postRepository, CommentRepo commentRepository, ReportRepository reportRepository) {
+    public AdminController(UserRepository userRepository, EmailService emailService,
+            JobSeekerProfileRepository jobSeekerProfileRepository, PostRepository postRepository,
+            CommentRepo commentRepository, ReportRepository reportRepository) {
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.jobSeekerProfileRepository = jobSeekerProfileRepository;
@@ -64,64 +66,65 @@ public class AdminController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "") String userType) {
-        
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<User> users;
-        
+
         if (!search.isEmpty() || !userType.isEmpty()) {
             users = userRepository.findUsersWithFilters(search, userType, pageable);
         } else {
             users = userRepository.findAll(pageable);
         }
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("users", users.getContent());
         response.put("totalElements", users.getTotalElements());
         response.put("totalPages", users.getTotalPages());
         response.put("currentPage", users.getNumber());
         response.put("size", users.getSize());
-        
+
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/stats")
     public ResponseEntity<?> getStats() {
         List<User> allUsers = userRepository.findAll();
-        
+
         long totalUsers = allUsers.size();
         long activeUsers = allUsers.stream().filter(User::isEnabled).count();
         long adminUsers = allUsers.stream().filter(user -> "ADMIN".equals(user.getRole())).count();
         long companyUsers = allUsers.stream().filter(user -> "COMPANY".equals(user.getUserType())).count();
         long jobSeekerUsers = allUsers.stream().filter(user -> "JOB_SEEKER".equals(user.getUserType())).count();
-        
+
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalUsers", totalUsers);
         stats.put("activeUsers", activeUsers);
         stats.put("adminUsers", adminUsers);
         stats.put("companyUsers", companyUsers);
         stats.put("jobSeekerUsers", jobSeekerUsers);
-        
+
         return ResponseEntity.ok(stats);
     }
 
     @PostMapping("/send-email/{userId}")
-    public ResponseEntity<?> sendEmailToUser(@PathVariable Long userId, @RequestBody Map<String, String> request, Authentication auth) {
+    public ResponseEntity<?> sendEmailToUser(@PathVariable Long userId, @RequestBody Map<String, String> request,
+            Authentication auth) {
         Optional<User> userOptional = userRepository.findById(userId);
-        
+
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("User not found with ID: " + userId);
         }
-        
+
         User user = userOptional.get();
         String message = request.get("message");
-        
+
         if (message == null || message.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Message cannot be empty");
         }
-        
+
         // Send email using EmailService
         boolean emailSent = emailService.sendAdminNotification(user.getEmail(), auth.getName(), message);
-        
+
         if (emailSent) {
             return ResponseEntity.ok("Email sent to " + user.getEmail() + " successfully!");
         } else {
@@ -150,7 +153,6 @@ public class AdminController {
 
         user.setRole("ADMIN");
         userRepository.save(user);
-        
 
         return ResponseEntity.ok("User " + user.getEmail() + " promoted to ADMIN successfully!");
     }
@@ -176,7 +178,6 @@ public class AdminController {
 
         user.setRole("USER");
         userRepository.save(user);
-        
 
         return ResponseEntity.ok("User " + user.getEmail() + " demoted to USER successfully!");
     }
@@ -203,20 +204,18 @@ public class AdminController {
             }
 
             User user = userOptional.get();
-            
+
             if ("BigBoss@example.com".equals(user.getEmail())) {
                 return ResponseEntity.badRequest().body("Cannot delete super admin");
             }
 
             jobSeekerProfileRepository.findByUser_Id(userId).ifPresent(jobSeekerProfileRepository::delete);
-            
-            // Log the action
-            System.out.println("AUDIT LOG: Admin " + auth.getName() + " deleted user " + user.getEmail() + " (ID: " + userId + ") at " + java.time.LocalDateTime.now());
-            
+
             userRepository.delete(user);
             return ResponseEntity.ok("User " + user.getEmail() + " deleted successfully!");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Cannot delete user: User has associated profile data that must be removed first.");
+            return ResponseEntity.badRequest()
+                    .body("Cannot delete user: User has associated profile data that must be removed first.");
         }
     }
 
@@ -225,13 +224,14 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Authentication auth) {
-        
+
         ResponseEntity<?> authCheck = checkAuthentication(auth);
-        if (authCheck != null) return authCheck;
-        
+        if (authCheck != null)
+            return authCheck;
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("postId").descending());
         Page<Post> posts = postRepository.findAll(pageable);
-        
+
         // Enrich posts with user email information
         List<Map<String, Object>> enrichedPosts = posts.getContent().stream().map(post -> {
             Map<String, Object> postData = new HashMap<>();
@@ -239,7 +239,7 @@ public class AdminController {
             postData.put("content", post.getContent());
             postData.put("userId", post.getUserId());
             postData.put("createdAt", post.getCreatedAt());
-            
+
             // Get user email
             Optional<User> userOptional = userRepository.findById(post.getUserId());
             if (userOptional.isPresent()) {
@@ -249,17 +249,17 @@ public class AdminController {
                 postData.put("userEmail", "Unknown User");
                 postData.put("userName", "Unknown User");
             }
-            
+
             return postData;
         }).toList();
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("posts", enrichedPosts);
         response.put("totalElements", posts.getTotalElements());
         response.put("totalPages", posts.getTotalPages());
         response.put("currentPage", posts.getNumber());
         response.put("size", posts.getSize());
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -270,25 +270,26 @@ public class AdminController {
             error.put("message", "Please log in to access admin features");
             return ResponseEntity.status(401).body(error);
         }
-        
+
         boolean hasAdminRole = auth.getAuthorities().stream()
-            .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-        
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+
         if (!hasAdminRole) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Access denied");
             error.put("message", "Admin privileges required");
             return ResponseEntity.status(403).body(error);
         }
-        
+
         return null;
     }
 
     @DeleteMapping("/posts/{postId}")
     public ResponseEntity<?> deletePost(@PathVariable Long postId, Authentication auth) {
         ResponseEntity<?> authCheck = checkAuthentication(auth);
-        if (authCheck != null) return authCheck;
-        
+        if (authCheck != null)
+            return authCheck;
+
         try {
             Optional<Post> postOptional = postRepository.findById(postId);
 
@@ -297,13 +298,10 @@ public class AdminController {
             }
 
             Post post = postOptional.get();
-            
+
             // Delete related comments first
             commentRepository.deleteByPostId(postId);
-            
-            // Log the action
-            System.out.println("AUDIT LOG: Admin " + auth.getName() + " deleted post ID: " + postId + " at " + java.time.LocalDateTime.now());
-            
+
             postRepository.delete(post);
             return ResponseEntity.ok("Post deleted successfully!");
         } catch (Exception e) {
@@ -322,7 +320,8 @@ public class AdminController {
             Authentication auth) {
 
         ResponseEntity<?> authCheck = checkAuthentication(auth);
-        if (authCheck != null) return authCheck;
+        if (authCheck != null)
+            return authCheck;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
 
@@ -330,32 +329,32 @@ public class AdminController {
         if (!status.isEmpty() && !category.isEmpty()) {
             // Filter by both status and category
             reports = reportRepository.findAll().stream()
-                .filter(r -> status.equals(r.getStatus()) &&
-                           (category.isEmpty() || category.equals(r.getReportCategory().toString())))
-                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                .skip((long) page * size)
-                .limit(size)
-                .toList();
+                    .filter(r -> status.equals(r.getStatus()) &&
+                            (category.isEmpty() || category.equals(r.getReportCategory().toString())))
+                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
+                    .skip((long) page * size)
+                    .limit(size)
+                    .toList();
         } else if (!status.isEmpty()) {
             reports = reportRepository.findAll().stream()
-                .filter(r -> status.equals(r.getStatus()))
-                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                .skip((long) page * size)
-                .limit(size)
-                .toList();
+                    .filter(r -> status.equals(r.getStatus()))
+                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
+                    .skip((long) page * size)
+                    .limit(size)
+                    .toList();
         } else if (!category.isEmpty()) {
             reports = reportRepository.findAll().stream()
-                .filter(r -> category.equals(r.getReportCategory().toString()))
-                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                .skip((long) page * size)
-                .limit(size)
-                .toList();
+                    .filter(r -> category.equals(r.getReportCategory().toString()))
+                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
+                    .skip((long) page * size)
+                    .limit(size)
+                    .toList();
         } else {
             reports = reportRepository.findAll().stream()
-                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                .skip((long) page * size)
-                .limit(size)
-                .toList();
+                    .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
+                    .skip((long) page * size)
+                    .limit(size)
+                    .toList();
         }
 
         // Return individual reports with post and author information
@@ -441,7 +440,8 @@ public class AdminController {
             Authentication auth) {
 
         ResponseEntity<?> authCheck = checkAuthentication(auth);
-        if (authCheck != null) return authCheck;
+        if (authCheck != null)
+            return authCheck;
 
         String action = request.get("action"); // APPROVE_POST, REMOVE_POST, WARN_USER
         String adminNote = request.getOrDefault("adminNote", "");
@@ -454,10 +454,6 @@ public class AdminController {
         Report report = reportOptional.get();
         report.setStatus("RESOLVED");
         reportRepository.save(report);
-
-        // Log admin action
-        System.out.println("AUDIT LOG: Admin " + auth.getName() + " resolved report " + reportId +
-                          " with action: " + action + " at " + java.time.LocalDateTime.now());
 
         // Handle different actions
         String message = "Report resolved successfully";
@@ -477,10 +473,10 @@ public class AdminController {
                     Optional<User> author = userRepository.findById(post.get().getUserId());
                     if (author.isPresent()) {
                         emailService.sendAdminNotification(
-                            author.get().getEmail(),
-                            "Admin",
-                            "Your post has been reported and reviewed. Please review our community guidelines to avoid future violations. " + adminNote
-                        );
+                                author.get().getEmail(),
+                                "Admin",
+                                "Your post has been reported and reviewed. Please review our community guidelines to avoid future violations. "
+                                        + adminNote);
                         message = "Warning sent to user";
                     }
                 }
@@ -497,7 +493,8 @@ public class AdminController {
     @GetMapping("/reports/stats")
     public ResponseEntity<?> getReportStats(Authentication auth) {
         ResponseEntity<?> authCheck = checkAuthentication(auth);
-        if (authCheck != null) return authCheck;
+        if (authCheck != null)
+            return authCheck;
 
         List<Report> allReports = reportRepository.findAll();
         long totalReports = allReports.size();
@@ -506,10 +503,10 @@ public class AdminController {
 
         // High priority reports (SEXUAL_HARASSMENT, HATE_SPEECH)
         long highPriorityReports = allReports.stream()
-            .filter(r -> "PENDING".equals(r.getStatus()))
-            .filter(r -> r.getReportCategory() == ReportCategory.SEXUAL_HARASSMENT ||
+                .filter(r -> "PENDING".equals(r.getStatus()))
+                .filter(r -> r.getReportCategory() == ReportCategory.SEXUAL_HARASSMENT ||
                         r.getReportCategory() == ReportCategory.HATE_SPEECH)
-            .count();
+                .count();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalReports", totalReports);
