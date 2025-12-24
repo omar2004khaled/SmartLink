@@ -51,7 +51,7 @@ public class SecurityConfig {
                                                                 "/graphql", "/apply/**", "/reactions/**",
                                                                 "/api/search/**", "/api/connections/**",
                                                                 "/api/notifications/**",
-                                                                "/ws/**", "/error", "/login/**")
+                                                                "/ws/**", "/error", "/login/**","/api/messages/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())

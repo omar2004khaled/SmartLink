@@ -34,7 +34,8 @@ public class Message {
     private LocalDateTime createdAt;
 
     @Column(name = "is_read", nullable = false)
-    private Boolean isRead;
+    @Builder.Default
+    private Boolean isRead=false;
 
 
 }
