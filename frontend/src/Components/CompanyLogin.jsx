@@ -112,7 +112,7 @@ const CompanyLogin = () => {
         <div className="self-start">
           <div className="flex items-center gap-2">
             <img
-              src="src/assets/Logo.png"
+              src="/src/assets/Logo.png"
               alt="Logo"
               className="h-12 w-auto object-contain"
             />

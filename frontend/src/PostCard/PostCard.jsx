@@ -5,7 +5,7 @@ import Attachment from './Attachment';
 import Footer from './Footer';
 import CommentsPanel from './CommentsPanel';
 import ReportModal from './ReportModal';
-import { SaveComment, GetComments, GetUserInfo, userIdFromLocalStorage, UpdatePost, DeletePost } from '../FetchData/FetchData';
+import { SaveComment, GetComments, GetUserInfo, GetUserProfilePic, userIdFromLocalStorage, UpdatePost, DeletePost } from '../FetchData/FetchData';
 import './PostCard.css';
 import { API_BASE_URL, CLOUDINARY_UPLOAD_URL } from '../config';
 
@@ -17,6 +17,7 @@ function PostItem({ post }) {
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
   const [commentUsersInfo, setCommentUsersInfo] = useState({});
   const [errorMessage, setErrorMessage] = useState(null);
+  const [currentUserProfilePic, setCurrentUserProfilePic] = useState(null);
 
   const [comments, setComments] = useState([]);
 
@@ -54,9 +55,15 @@ function PostItem({ post }) {
 
       setLoadingUserInfo(true);
       try {
+        // Fetch user info
         const info = await GetUserInfo(userId);
         if (info) {
-          setUserInfo(info);
+          // Fetch profile picture separately
+          const profilePicUrl = await GetUserProfilePic(userId);
+          setUserInfo({
+            ...info,
+            profilePicUrl: profilePicUrl
+          });
         }
       } catch (err) {
         console.error('Error fetching user info:', err);
@@ -81,6 +88,18 @@ function PostItem({ post }) {
       fetchCommentsFromServer();
     }
   }, [post?.id, post?.postId]);
+
+  // Fetch current user's profile picture
+  useEffect(() => {
+    const fetchCurrentUserProfilePic = async () => {
+      const currentUserId = userIdFromLocalStorage();
+      if (currentUserId) {
+        const profilePicUrl = await GetUserProfilePic(currentUserId);
+        setCurrentUserProfilePic(profilePicUrl);
+      }
+    };
+    fetchCurrentUserProfilePic();
+  }, []);
 
   const uploadToCloudinary = async (file) => {
     try {
@@ -113,14 +132,23 @@ function PostItem({ post }) {
 
       const userIds = data.map(c => c.userId).filter(Boolean);
       const uniqueUserIds = [...new Set(userIds.filter(id => id && !commentUsersInfo[id]))];
+
       const userInfoPromises = uniqueUserIds.map(userId => GetUserInfo(userId));
       const userInfoResults = await Promise.all(userInfoPromises);
+
+      const profilePicPromises = uniqueUserIds.map(userId => GetUserProfilePic(userId));
+      const profilePicResults = await Promise.all(profilePicPromises);
+
       const fetchedUserInfo = {};
       uniqueUserIds.forEach((userId, index) => {
         if (userInfoResults[index]) {
-          fetchedUserInfo[userId] = userInfoResults[index];
+          fetchedUserInfo[userId] = {
+            ...userInfoResults[index],
+            profilePicUrl: profilePicResults[index]
+          };
         }
       });
+
       if (Object.keys(fetchedUserInfo).length > 0) {
         setCommentUsersInfo(prev => ({ ...prev, ...fetchedUserInfo }));
       }
@@ -133,7 +161,7 @@ function PostItem({ post }) {
           userId: c.userId,
           author: userInfo?.fullName || (c.userId ? `User${c.userId}` : 'Anonymous'),
           text: c.text,
-          avatar: '/src/PostCard/avatar.png',
+          avatar: userInfo?.profilePicUrl || '/src/PostCard/avatar.png',
           time: 'some time',
           attachment: c.url || undefined,
         };
@@ -444,12 +472,16 @@ function PostItem({ post }) {
         </div>
       )}
 
+      {/* Debug: Log profile picture URL */}
+      {console.log('UserInfo for post:', userInfo)}
+      {console.log('Profile Picture URL being passed:', userInfo?.profilePicUrl)}
+
       <UserHeader
         username={userInfo?.fullName || post.username || 'User'}
         userId={post.userId}
         time={post.time ? formatRelativeTime(post.time) : 'just now'}
         bio={userInfo ? (userInfo.role ? `${userInfo.role}${userInfo.email ? ` • ${userInfo.email}` : ''}` : userInfo.email || '') : ''}
-        avatarUrl={null}
+        avatarUrl={userInfo?.profilePicUrl || null}
         onDelete={handleDeletePost}
         onUpdate={handleEditPost}
         onReport={() => setShowReportModal(true)}
@@ -601,7 +633,7 @@ function PostItem({ post }) {
       )}
 
       <div className="comment-composer">
-        <img src="/src/PostCard/avatar.png" alt="me" className="composer-avatar" />
+        <img src={currentUserProfilePic || "/src/PostCard/avatar.png"} alt="me" className="composer-avatar" />
         <div className="composer-body">
           <textarea
             className="composer-input"
