@@ -34,11 +34,12 @@ public class GeminiService {
     List<SemiJobDto> semiJobs;
     List<Job> jobs;
     List<CompanyDTO> companyNames ;
+    RedisService redisService;
 
     @Value("${Gemini_key}")
     private String apiKey;
     @Autowired
-    public GeminiService(SkillRepository skillRepository, EducationRepository educationRepository, JobRepository jobRepository) {
+    public GeminiService(SkillRepository skillRepository, EducationRepository educationRepository, JobRepository jobRepository , RedisService redisService) {
         this.skillRepository = skillRepository;
         this.educationRepository = educationRepository;
         this.jobRepository = jobRepository;
@@ -47,6 +48,7 @@ public class GeminiService {
         this.jobs= new ArrayList<>();
         this.jsonUtils = new JsonUtils();
         this.semiJobs= new ArrayList<>();
+        this.redisService = redisService;
     }
     public void getPersonSkillsAndEducation(long id) {
         this.personSkills.clear();
@@ -132,6 +134,10 @@ public class GeminiService {
     }
     public List<JobResponse> callGoogleApi(Long profileId) {
         try {
+            List<JobResponse> recommendedJobs = redisService.getRecommendedJobs(profileId);
+            if (!recommendedJobs.isEmpty()) {
+                return recommendedJobs;
+            }
             this.getPersonSkillsAndEducation(profileId);
             this.getJobs();
             String Prompt = "You are given a user profile and a list of jobs.\n" +
@@ -202,7 +208,9 @@ public class GeminiService {
             );
             String responseText = response.text();
             List<Long> orderedJobIds = parseJobIdsFromResponse(responseText);
-            return reorderJobs(orderedJobIds);
+            List<JobResponse> reorderedJobs = reorderJobs(orderedJobIds);
+            redisService.saveRecommendedJobs(profileId, reorderedJobs);
+            return reorderedJobs;
             
         } catch (Exception e) {
             System.err.println("Error calling Gemini API: " + e.getMessage());

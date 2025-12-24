@@ -43,7 +43,7 @@ public class GeminiController {
                                     "error", "Request timeout",
                                     "message", "The request took too long to process"
                             )),
-                    60000, TimeUnit.MILLISECONDS
+                    120, TimeUnit.SECONDS
             );
     }
 }
