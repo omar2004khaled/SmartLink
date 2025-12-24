@@ -27,8 +27,13 @@ public class ApplicationController {
     }
 
     @GetMapping("/{jobId}")
-    public ResponseEntity<List<ApplicationDTO>> post(@PathVariable Long jobId){
+    public ResponseEntity<List<ApplicationDTO>> getByJobId(@PathVariable Long jobId){
         return ResponseEntity.status(HttpStatus.OK).body(jobApplicationService.getByJobId(jobId));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<ApplicationDTO>> getByUserId(@PathVariable Long userId){
+        return ResponseEntity.status(HttpStatus.OK).body(jobApplicationService.getByUserId(userId));
     }
 
     @PatchMapping("/add/comment")

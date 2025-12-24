@@ -23,10 +23,7 @@ export default function CommentsPanel({ comments = [], onClose }) {
       <div className="comments-modal" onClick={(e) => e.stopPropagation()}>
         <div className="comments-modal-header">
           <strong>Comments</strong>
-          <div className="comments-controls">
-            <button className="comments-hide-btn" onClick={handleHide}>Hide</button>
-            <button className="comments-modal-close" onClick={onClose} aria-label="Close">&times;</button>
-          </div>
+          <button className="comments-modal-close" onClick={onClose} aria-label="Close">&times;</button>
         </div>
 
         <div className="comments-modal-body">
@@ -61,9 +58,6 @@ export default function CommentsPanel({ comments = [], onClose }) {
         </div>
 
         <div className="comments-modal-footer">
-          <div className="comments-footer-left">
-            <span className="comments-count">Showing {Math.min(visibleCount, comments.length)} of {comments.length}</span>
-          </div>
           <div className="comments-footer-actions">
             {visibleCount < comments.length && visibleCount !== 0 && (
               <button className="load-more-btn" onClick={handleLoadMore}>Load more</button>

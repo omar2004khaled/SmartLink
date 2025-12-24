@@ -70,9 +70,9 @@ const AdminContentManagement = () => {
 
       if (response.ok) {
         const data = await response.json();
-        //console.log('Posts data received:', data);
+        ////console.log('Posts data received:', data);
         if (data.posts && data.posts.length > 0) {
-          //console.log('First post structure:', data.posts[0]);
+          ////console.log('First post structure:', data.posts[0]);
         }
         setPosts(data.posts || []);
         setTotalPages(data.totalPages || 0);
@@ -126,10 +126,10 @@ const AdminContentManagement = () => {
 
       if (response.ok) {
         const data = await response.json();
-        //console.log('Reported posts data received:', data);
+        ////console.log('Reported posts data received:', data);
         if (data.content && data.content.length > 0) {
-          //console.log('First report structure:', data.content[0]);
-          //console.log('First report post:', data.content[0].post);
+          ////console.log('First report structure:', data.content[0]);
+          ////console.log('First report post:', data.content[0].post);
         }
         setReportedPosts(data.content || []);
         setTotalPages(data.totalPages || 0);
@@ -555,8 +555,8 @@ const AdminContentManagement = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button
                           onClick={() => {
-                            //console.log('Opening modal for report:', report);
-                            //console.log('Report status:', report.status);
+                            ////console.log('Opening modal for report:', report);
+                            ////console.log('Report status:', report.status);
                             setSelectedReport(report);
                           }}
                           className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
@@ -759,7 +759,7 @@ const AdminContentManagement = () => {
                   <div className="flex space-x-3">
                     <button
                       onClick={() => {
-                        //console.log('Resolving report:', selectedReport.id, 'with action: APPROVE_POST');
+                        ////console.log('Resolving report:', selectedReport.id, 'with action: APPROVE_POST');
                         resolveReport(selectedReport.id, 'APPROVE_POST');
                         setSelectedReport(null);
                       }}
@@ -770,7 +770,7 @@ const AdminContentManagement = () => {
                     </button>
                     <button
                       onClick={() => {
-                        //console.log('Resolving report:', selectedReport.id, 'with action: WARN_USER');
+                        ////console.log('Resolving report:', selectedReport.id, 'with action: WARN_USER');
                         resolveReport(selectedReport.id, 'WARN_USER');
                         setSelectedReport(null);
                       }}
@@ -781,7 +781,7 @@ const AdminContentManagement = () => {
                     </button>
                     <button
                       onClick={() => {
-                        //console.log('Resolving report:', selectedReport.id, 'with action: REMOVE_POST');
+                        ////console.log('Resolving report:', selectedReport.id, 'with action: REMOVE_POST');
                         resolveReport(selectedReport.id, 'REMOVE_POST');
                         setSelectedReport(null);
                       }}
@@ -793,7 +793,7 @@ const AdminContentManagement = () => {
                     {selectedReport.post?.author && selectedReport.post?.author?.id && (
                       <button
                         onClick={() => {
-                          //console.log('Deleting user:', selectedReport.post.author.id);
+                          ////console.log('Deleting user:', selectedReport.post.author.id);
                           deleteUser(selectedReport.post.author.id, selectedReport.post.author.name);
                           setSelectedReport(null);
                         }}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Briefcase, User, LogOut, Menu, X, MessageSquare } from 'lucide-react';
 import './Navbar.css';
+import NotificationBell from './NotificationBell';
 
 const CompanyNavbar = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const CompanyNavbar = () => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login-select');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path;
@@ -27,6 +28,7 @@ const CompanyNavbar = () => {
             <img src="/src/assets/Logo.png" alt="SmartLink" className="brand-logo" />
             <h1 className="brand-title">SmartLink</h1>
           </div>
+          <NotificationBell />
         </div>
       </header>
 
@@ -57,7 +59,7 @@ const CompanyNavbar = () => {
               <span>Profile</span>
             </button>
           </div>
-          
+
           <div className="nav-section">
             <button className="sidebar-link logout" onClick={handleLogout}>
               <LogOut size={20} />

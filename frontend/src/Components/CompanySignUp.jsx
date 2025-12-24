@@ -97,7 +97,7 @@ const CompanySignUp = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/company/register`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
@@ -119,15 +119,15 @@ const CompanySignUp = () => {
       try {
         data = JSON.parse(responseText);
       } catch (e) {
-        data = { 
+        data = {
           message: responseText || 'No response from server',
-          success: response.ok 
+          success: response.ok
         };
       }
 
       if (!response.ok) {
         let errorMessage = 'Registration failed';
-        
+
         if (typeof data === 'string') {
           errorMessage = data;
         } else if (data.message) {
@@ -143,21 +143,21 @@ const CompanySignUp = () => {
         } else {
           setApiError(`${errorMessage} (Status: ${response.status})`);
         }
-        
+
         return;
       }
 
-      console.log("Company registration successful, redirecting to verification...");
-      navigate('/verify-email', { 
-        state: { 
+      //console.log("Company registration successful, redirecting to verification...");
+      navigate('/verify-email', {
+        state: {
           email: formData.email,
           justRegistered: true
-        } 
+        }
       });
-        
+
     } catch (error) {
       console.error("Registration Error:", error);
-      
+
       if (error.message === 'Failed to fetch') {
         setApiError('Cannot connect to server. Please check if the backend is running and try again.');
       } else {
@@ -195,8 +195,8 @@ const CompanySignUp = () => {
           <div className="hidden md:flex flex-col justify-between p-12 bg-[#FFEAEE] dark:bg-[#2C1A1D] text-center">
             <div className="self-start">
               <div className="flex items-center gap-2">
-                <img 
-                  src="src/assets/Logo.png" 
+                <img
+                  src="/src/assets/Logo.png"
                   alt="Logo"
                   className="h-12 w-auto object-contain"
                 />
@@ -232,7 +232,7 @@ const CompanySignUp = () => {
                   <div className="flex-1">
                     <p className="text-sm text-red-700 dark:text-red-300 mt-1">{apiError}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setApiError('')}
                     className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300"
                   >
@@ -252,9 +252,8 @@ const CompanySignUp = () => {
                     value={formData.companyName}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
-                      errors.companyName ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
-                    } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
+                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${errors.companyName ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
+                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
                     placeholder="e.g. Acme Corporation"
                   />
                   {errors.companyName && (
@@ -271,9 +270,8 @@ const CompanySignUp = () => {
                     value={formData.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
-                      errors.email ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
-                    } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
+                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${errors.email ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
+                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
                     placeholder="contact@company.com"
                   />
                   {errors.email && (
@@ -290,9 +288,8 @@ const CompanySignUp = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
-                      errors.phone ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
-                    } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
+                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${errors.phone ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
+                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
                     placeholder="(123) 456-7890"
                   />
                   {errors.phone && (
@@ -336,9 +333,8 @@ const CompanySignUp = () => {
                     onBlur={handleBlur}
                     min="1800"
                     max={new Date().getFullYear()}
-                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
-                      errors.founded ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
-                    } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
+                    className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${errors.founded ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
+                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 text-base font-normal leading-normal`}
                     placeholder="e.g. 2020"
                   />
                   {errors.founded && (
@@ -356,9 +352,8 @@ const CompanySignUp = () => {
                       value={formData.password}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
-                        errors.password ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
-                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
+                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${errors.password ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
+                        } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
                       placeholder="Enter your password"
                     />
                     <button
@@ -388,9 +383,8 @@ const CompanySignUp = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${
-                        errors.confirmPassword ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
-                      } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
+                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#333333] dark:text-[#F5F5F5] focus:outline-0 focus:ring-2 focus:ring-[#00A6F2]/50 border ${errors.confirmPassword ? 'border-red-500' : 'border-[#CCCCCC] dark:border-[#444444]'
+                        } bg-white dark:bg-[#1a1a1a] focus:border-[#00A6F2] h-12 placeholder:text-[#CCCCCC] dark:placeholder:text-[#444444] px-4 pr-12 text-base font-normal leading-normal`}
                       placeholder="Re-enter your password"
                     />
                     <button
@@ -409,8 +403,8 @@ const CompanySignUp = () => {
 
                 {/* Submit Button */}
                 <div className="mt-6 flex flex-col gap-4">
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={loading}
                     className="mt-4 w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                   >

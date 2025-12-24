@@ -25,7 +25,7 @@ const SignUp = () => {
 
    const handleGoogleSignup = (e) => {
     e.preventDefault();
-    console.log("Redirecting to Google OAuth2...");
+    //console.log("Redirecting to Google OAuth2...");
     window.location.href = GOOGLE_OAUTH2_AUTH_URL;
   };
   
@@ -164,7 +164,7 @@ const SignUp = () => {
     }
 
     // SUCCESS: Redirect to verification page immediately
-    console.log("Registration successful, redirecting to verification...");
+    //console.log("Registration successful, redirecting to verification...");
     navigate('/verify-email', { 
       state: { 
         email: formData.email,
