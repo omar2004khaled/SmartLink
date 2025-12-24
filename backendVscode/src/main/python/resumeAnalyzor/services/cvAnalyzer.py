@@ -8,9 +8,9 @@ class CVAnalyzer:
         self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     
-    def analyze_cv(self, cvText):
+    def analyze_cv(self, cvText, position):
         prompt = f"""
-        Analyze this CV/Resume and provide detailed feedback. Respond ONLY with valid JSON in this exact format:
+        Analyze this CV/Resume for the position of "{position}" and provide detailed feedback. Respond ONLY with valid JSON in this exact format:
         {{
             "strong_points": ["point1", "point2", "point3"],
             "weak_points": ["point1", "point2", "point3"],
@@ -21,8 +21,8 @@ class CVAnalyzer:
         CV Text:
         {cvText}
 
-        Focus on: skills relevance, experience quality, formatting, completeness, and professional presentation.
-        Rate the overall_score from 1-10 based on the actual quality of the CV. Be honest and vary the score based on the CV's strengths and weaknesses.
+        Focus on: skills relevance to {position} role, experience quality for {position}, formatting, completeness, and professional presentation.
+        Rate the overall_score from 1-10 based on how well this CV matches the {position} position requirements.
         """
         
         try:
