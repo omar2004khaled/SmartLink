@@ -5,6 +5,7 @@ import com.example.auth.dto.JobDTO.ApplicationDTO;
 import com.example.auth.entity.Job;
 import com.example.auth.entity.JobApplication;
 import com.example.auth.entity.User;
+import com.example.auth.enums.ApplicationStatus;
 import com.example.auth.repository.JobApplicationRepository;
 import com.example.auth.repository.JobRepository;
 import com.example.auth.repository.UserRepository;
@@ -17,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,7 +71,9 @@ class JobApplicationServiceTest {
                 .job(mockJob)
                 .user(mockUser)
                 .cvURL("https://example.com/cv.pdf")
+                .applicationStatus(ApplicationStatus.PENDING)
                 .createdAt(Instant.now())
+                .comments(new ArrayList<>(Arrays.asList("a","v")))
                 .build();
     }
 
@@ -187,4 +192,48 @@ class JobApplicationServiceTest {
         assertTrue(result.getCreatedAt().isAfter(beforeCall.minusSeconds(1)));
         assertTrue(result.getCreatedAt().isBefore(afterCall.plusSeconds(1)));
     }
+
+    @Test
+    void addCommentWithFalseJobId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.empty());
+        RuntimeException exception=assertThrows(RuntimeException.class ,()->{
+            jobApplicationService.addComment("a",1L);
+        });
+        verify(jobApplicationRepository,times(1)).findById(1L);
+        assertEquals("there is no such application",exception.getMessage());
+    }
+
+    @Test
+    void addCommentWithTrueJobId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.of(mockJobApplication));
+
+        when(jobApplicationRepository.save(mockJobApplication)).thenReturn(null);
+        ApplicationDTO result=jobApplicationService.addComment("a",1L);
+        assertEquals(100L, result.getJobId());
+        assertEquals(1L, result.getUserId());
+        assertEquals("https://example.com/cv.pdf", result.getCvURL());
+        assertNotNull(result.getCreatedAt());
+    }
+
+    @Test
+    void changeStatusWithFalseId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.empty());
+        RuntimeException exception=assertThrows(RuntimeException.class ,()->{
+            jobApplicationService.addComment("a",1L);
+        });
+        verify(jobApplicationRepository,times(1)).findById(1L);
+        assertEquals("there is no such application",exception.getMessage());
+    }
+
+    @Test
+    void changeStatusWithTrueJobId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.of(mockJobApplication));
+        when(jobApplicationRepository.save(mockJobApplication)).thenReturn(null);
+        ApplicationDTO result=jobApplicationService.changeStatus("PENDING",1L);
+        assertEquals(100L, result.getJobId());
+        assertEquals(1L, result.getUserId());
+        assertEquals("https://example.com/cv.pdf", result.getCvURL());
+        assertNotNull(result.getCreatedAt());
+    }
+
 }

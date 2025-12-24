@@ -23,6 +23,7 @@ import CompanyJobs from './Components/CompanyJobs';
 import MainPage from './Components/MainPage';
 import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
+import ApplicationsPage from './Components/job/ApplicationsPage';
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
       <Route path="/post" element={<PostCard />} />
       <Route path="/job" element={<JobsPage />} />
       <Route path="/jobs" element={<CompanyJobsPage />} />
+      <Route path="/applications" element={<ApplicationsPage />} />
 
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

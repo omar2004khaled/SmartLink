@@ -33,6 +33,13 @@ const JobsPage = () => {
         setUserId(parseInt(storedUserId));
       }
     }, []);
+  const handleJobClick = (job) => {
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'COMPANY') {
+      window.location.href = `/applications?jobId=${job.jobId}`;
+    }
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
     console.log('Filters from form:', filters);
@@ -187,7 +194,8 @@ const JobsPage = () => {
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200"
+                onDoubleClick={() => handleJobClick(job)}
+                className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 cursor-pointer"
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{job.title}</h3>
                 <p className="text-gray-600 mb-4 text-sm leading-relaxed">{job.description}</p>
