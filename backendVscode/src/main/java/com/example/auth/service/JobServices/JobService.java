@@ -3,10 +3,17 @@ package com.example.auth.service.JobServices;
 import com.example.auth.dto.JobDTO.JobRequest;
 import com.example.auth.dto.JobDTO.JobResponse;
 import com.example.auth.dto.JobDTO.JobUpdateRequest;
+import com.example.auth.entity.CompanyFollower;
 import com.example.auth.entity.Job;
+import com.example.auth.entity.JobApplication;
 import com.example.auth.entity.User;
+import com.example.auth.repository.CompanyFollowerRepo;
+import com.example.auth.repository.JobApplicationRepository;
 import com.example.auth.repository.JobRepository;
 import com.example.auth.repository.UserRepository;
+import com.example.auth.service.NotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,18 +21,29 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class JobService {
+    private static final Logger logger = LoggerFactory.getLogger(JobService.class);
+
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final CompanyFollowerRepo companyFollowerRepo;
+    private final JobApplicationRepository jobApplicationRepository;
 
-    public JobService(JobRepository jobRepository, UserRepository userRepository) {
+    public JobService(JobRepository jobRepository, UserRepository userRepository,
+            NotificationService notificationService, CompanyFollowerRepo companyFollowerRepo,
+            JobApplicationRepository jobApplicationRepository) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.companyFollowerRepo = companyFollowerRepo;
+        this.jobApplicationRepository = jobApplicationRepository;
     }
 
-    private Job getJob(User company,JobRequest request){
+    private Job getJob(User company, JobRequest request) {
         return Job.builder()
                 .company(company)
                 .title(request.getTitle())
@@ -40,7 +58,8 @@ public class JobService {
                 .build();
 
     }
-    private JobResponse getResponse(User company,Job saved){
+
+    private JobResponse getResponse(User company, Job saved) {
         return JobResponse.builder()
                 .jobId(saved.getJobId())
                 .title(saved.getTitle())
@@ -81,13 +100,31 @@ public class JobService {
         if (!company.getUserType().equals("COMPANY")) {
             throw new RuntimeException("User is not a company");
         }
-        Job job=getJob(company,request);
+        Job job = getJob(company, request);
         Job saved = jobRepository.save(job);
-        return getResponse(company,saved);
 
+        // Notify all followers about the new job post
+        try {
+            List<CompanyFollower> followers = companyFollowerRepo.findByCompany(company);
+            for (CompanyFollower follower : followers) {
+                try {
+                    notificationService.createNewJobPostNotification(
+                            follower.getFollower().getId(),
+                            company.getFullName(),
+                            saved.getTitle(),
+                            saved.getJobId());
+                } catch (Exception e) {
+                    logger.error("Failed to create job post notification for follower {}: {}",
+                            follower.getFollower().getId(), e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed to notify followers about new job post: {}", e.getMessage());
+        }
+
+        return getResponse(company, saved);
 
     }
-
 
     public Page<JobResponse> getCurrentJobs(Long companyId, int page, int size) {
         User company = userRepository.findById(companyId)
@@ -104,17 +141,28 @@ public class JobService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("deadline").ascending());
         Page<Job> jobPage = jobRepository.findByCompanyAndDeadlineBefore(company, Instant.now(), pageable);
-        
+
         return jobPage.map(this::mapToJobResponse);
     }
 
     public void deleteJob(Long jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // Delete all applications for this job first to avoid foreign key constraint
+        // violation
+        List<JobApplication> applications = jobApplicationRepository.getApplicationByJobId(jobId)
+                .orElse(List.of());
+
+        if (!applications.isEmpty()) {
+            jobApplicationRepository.deleteAll(applications);
+        }
+
+        // Now delete the job
         jobRepository.delete(job);
     }
 
-    private void getJob(Job job,JobUpdateRequest request){
+    private void getJob(Job job, JobUpdateRequest request) {
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
         job.setExperienceLevel(request.getExperienceLevel());
@@ -130,8 +178,8 @@ public class JobService {
     public JobResponse updateJob(Long jobId, JobUpdateRequest request) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
-        getJob(job,request);
+        getJob(job, request);
         Job updated = jobRepository.save(job);
-        return getResponse(updated.getCompany(),updated);
+        return getResponse(updated.getCompany(), updated);
     }
 }

@@ -5,13 +5,13 @@ const uploadToCloudinary = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', 'ml_default'); // Changed to signed preset
-    
+
     // Determine resource type and endpoint
     const isPdf = file.type === 'application/pdf';
     const resourceType = isPdf ? 'raw' : 'image';
-    
+
     const endpoint = `https://api.cloudinary.com/v1_1/dqhdiihx4/${resourceType}/upload`;
-    
+
     const res = await fetch(endpoint, {
       method: 'POST',
       body: formData,
@@ -32,17 +32,19 @@ const uploadToCloudinary = async (file) => {
     return null;
   }
 };
-export const submitApplication = async (jobId, applicationData) => {
+export const submitApplication = async (jobId, applicationData, onProgress) => {
   try {
     let cvUrl = null;
-    
+
     if (applicationData.cv) {
+      if (onProgress) onProgress('Uploading CV to cloud storage...');
       cvUrl = await uploadToCloudinary(applicationData.cv);
       if (!cvUrl) {
         throw new Error('Failed to upload CV');
       }
+      if (onProgress) onProgress('CV uploaded, submitting application...');
     }
-    
+
     const token = localStorage.getItem('authToken');
     const payload = {
       // id: null, // Optional - let backend generate

@@ -15,6 +15,8 @@ import com.example.auth.repository.LocationRepo;
 import com.example.auth.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,27 +25,29 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CompanyProfileService {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyProfileService.class);
 
     private final CompanyProfileRepo companyProfileRepo;
     private final CompanyFollowerRepo companyFollowerRepo;
     private final CompanyLocationRepo companyLocationRepo;
     private final LocationRepo locationRepo;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-
-    private List<LocationDTO> getLocations(Long companyId){
+    private List<LocationDTO> getLocations(Long companyId) {
         List<CompanyLocation> locations = companyLocationRepo.findByCompanyId(companyId);
         List<LocationDTO> locationDTOS = new ArrayList<>();
-        for(CompanyLocation location : locations){
+        for (CompanyLocation location : locations) {
             final Long locationId = location.getLocationId();
             Location loc = locationRepo.findById(locationId).orElse(null);
-            if(loc == null) continue;
+            if (loc == null)
+                continue;
             locationDTOS.add(new LocationDTO(locationId, loc.getCity(), loc.getCountry()));
         }
         return locationDTOS;
     }
 
-    private CompanyDTO getCompanyDTO(CompanyProfile companyProfile){
+    private CompanyDTO getCompanyDTO(CompanyProfile companyProfile) {
         return CompanyDTO.builder()
                 .companyName(companyProfile.getCompanyName())
                 .founded(companyProfile.getFounded())
@@ -61,7 +65,7 @@ public class CompanyProfileService {
     public CompanyDTO getCompanyByUserId(Long userId, Long viewerId) {
         CompanyProfile companyProfile = companyProfileRepo.findByUser_Id(userId)
                 .orElseThrow(() -> new RuntimeException("Company profile not found for user"));
-        
+
         CompanyDTO companyDTO = getCompanyDTO(companyProfile);
         companyDTO.setLocations(getLocations(companyProfile.getCompanyProfileId()));
 
@@ -78,7 +82,7 @@ public class CompanyProfileService {
         return companyDTO;
     }
 
-    public CompanyDTO getCompanyProfile(Long companyId, Long userId){
+    public CompanyDTO getCompanyProfile(Long companyId, Long userId) {
         CompanyProfile companyProfile = companyProfileRepo.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company profile not found"));
 
@@ -169,7 +173,6 @@ public class CompanyProfileService {
         }
     }
 
-
     @Transactional
     public void followCompany(Long companyId, Long userId) {
         CompanyProfile company = companyProfileRepo.findById(companyId)
@@ -191,6 +194,16 @@ public class CompanyProfileService {
 
         company.setNumberOfFollowers(company.getNumberOfFollowers() + 1);
         companyProfileRepo.save(company);
+
+        createFollowNotificationAsync(companyUser.getId(), followerUser.getId(), followerUser.getFullName());
+    }
+
+    private void createFollowNotificationAsync(Long companyUserId, Long followerUserId, String followerName) {
+        try {
+            notificationService.createCompanyFollowedNotification(companyUserId, followerUserId, followerName);
+        } catch (Exception e) {
+            logger.error("Failed to create company follow notification: {}", e.getMessage());
+        }
     }
 
     @Transactional

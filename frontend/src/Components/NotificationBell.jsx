@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Bell, X, Check, CheckCheck, UserPlus, UserCheck, Heart, MessageCircle, ThumbsUp, Briefcase, FileText, Edit3 } from 'lucide-react';
+import { Bell, X, Check, CheckCheck, UserPlus, UserCheck, Heart, MessageCircle, ThumbsUp, Briefcase, FileText, Edit3, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import useWebSocket from '../hooks/useWebSocket';
@@ -18,10 +18,11 @@ const NotificationBell = () => {
 
         setNotifications(prev => [notification, ...prev]);
 
-        if (!notification.isRead) {
+
+        if (notification.isRead !== true) {
             setUnreadCount(prev => {
                 const newCount = prev + 1;
-                console.log('Unread count updated:', newCount);
+                //console.log('Unread count updated from', prev, 'to', newCount);
                 return newCount;
             });
         }
@@ -165,8 +166,32 @@ const NotificationBell = () => {
                 }
                 break;
             case 'JOB_APPLICATION':
+                // Navigate to applications page filtered by job (relatedEntityId is the jobId)
+                if (notification.relatedEntityId) {
+                    navigate(`/applications?jobId=${notification.relatedEntityId}`);
+                } else {
+                    navigate('/applications');
+                }
+                break;
             case 'JOB_APPLICATION_STATUS_CHANGE':
-                navigate('/job');
+            case 'APPLICATION_COMMENT':
+                // Navigate to applications page for status updates and comments
+                navigate('/applications');
+                break;
+            case 'NEW_JOB_FROM_FOLLOWED_COMPANY':
+                if (notification.relatedEntityId) {
+                    navigate(`/job?jobId=${notification.relatedEntityId}`);
+                } else {
+                    navigate('/job');
+                }
+                break;
+            case 'COMPANY_FOLLOWED':
+                // Navigate to the follower's profile (relatedEntityId is the follower's user ID)
+                if (notification.relatedEntityId) {
+                    navigate(`/profile/${notification.relatedEntityId}`);
+                } else {
+                    navigate('/profile');
+                }
                 break;
             default:
                 break;
@@ -183,7 +208,10 @@ const NotificationBell = () => {
             COMMENT_LIKE: <ThumbsUp size={20} />,
             JOB_APPLICATION: <Briefcase size={20} />,
             JOB_APPLICATION_STATUS_CHANGE: <FileText size={20} />,
-            NEW_POST: <Edit3 size={20} />
+            NEW_POST: <Edit3 size={20} />,
+            COMPANY_FOLLOWED: <Building2 size={20} />,
+            APPLICATION_COMMENT: <MessageCircle size={20} />,
+            NEW_JOB_FROM_FOLLOWED_COMPANY: <Briefcase size={20} />
         };
         return iconMap[type] || <Bell size={20} />;
     };
