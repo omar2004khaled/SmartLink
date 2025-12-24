@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send } from 'lucide-react';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import ConversationItem from './Components/Messages/ConversationItem';
-import MessageBubble from './Components/Messages/MessageBubble';
-import ChatHeader from './Components/Messages/ChatHeader';
-import MessageInput from './Components/Messages/MessageInput';
+import ConversationItem from './ConversationItem';
+import MessageBubble from './MessageBubble';
+import ChatHeader from './ChatHeader';
+import MessageInput from './MessageInput';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 const WS_URL = 'http://localhost:8080/ws';
@@ -67,8 +66,6 @@ const MessagingApp = ({ userId }) => {
     const client = Stomp.over(socket);
 
     client.connect({}, () => {
-      console.log('WebSocket Connected');
-
       client.subscribe(`/topic/messages/${currentUserId}`, (message) => {
         const receivedMessage = JSON.parse(message.body);
 

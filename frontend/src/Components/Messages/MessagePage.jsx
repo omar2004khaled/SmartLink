@@ -1,5 +1,5 @@
 import React, {useState } from "react";
-import MessagingApp from "../../MessagingApp";
+import MessagingApp from "./MessagingApp";
 import CompanyNavbar from "../CompanyNavbar";
 import Navbar from "../Navbar";
 
