@@ -2,13 +2,10 @@ package com.example.auth.dto.CompanyTests;
 
 import com.example.auth.dto.FollowRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-@AutoConfigureMockMvc
-@SpringBootTest
+
 class FollowRequestTest {
 
     @Test

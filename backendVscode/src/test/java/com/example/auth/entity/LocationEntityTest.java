@@ -3,12 +3,9 @@ package com.example.auth.entity;
 import com.example.auth.entity.ProfileEntities.Location;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
-@AutoConfigureMockMvc
-@SpringBootTest
+
 class LocationEntityTest {
 
     private Location location;
