@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, FileText, Download, Loader } from 'lucide-react';
 import Navbar from './Navbar';
 import jsPDF from 'jspdf';
+import { CV_ANALYSIS_API_URL } from '../config.js';
 
 const CVAnalysis = () => {
   const [file, setFile] = useState(null);
@@ -13,6 +14,10 @@ const CVAnalysis = () => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile && selectedFile.type === 'application/pdf') {
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        setError('File size must be less than 10MB');
+        return;
+      }
       setFile(selectedFile);
       setError('');
     } else {
@@ -34,7 +39,7 @@ const CVAnalysis = () => {
     formData.append('position', position);
 
     try {
-      const response = await fetch('http://localhost:8000/analyze-cv', {
+      const response = await fetch(`${CV_ANALYSIS_API_URL}/analyze-cv`, {
         method: 'POST',
         body: formData,
       });
@@ -57,63 +62,63 @@ const CVAnalysis = () => {
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const maxWidth = pageWidth - 2 * margin;
     let yPosition = 20;
 
+    const addText = (text, fontSize = 12, isBold = false) => {
+      doc.setFontSize(fontSize);
+      if (isBold) doc.setFont(undefined, 'bold');
+      else doc.setFont(undefined, 'normal');
+      
+      const lines = doc.splitTextToSize(text, maxWidth);
+      
+      if (yPosition + (lines.length * fontSize * 0.5) > pageHeight - margin) {
+        doc.addPage();
+        yPosition = margin;
+      }
+      
+      doc.text(lines, margin, yPosition);
+      yPosition += lines.length * fontSize * 0.5 + 5;
+    };
+
     // Title
-    doc.setFontSize(20);
-    doc.text('CV Analysis Report', pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 20;
+    addText('CV Analysis Report', 20, true);
+    yPosition += 10;
 
     // Position
-    doc.setFontSize(14);
-    doc.text(`Position: ${position}`, 20, yPosition);
-    yPosition += 15;
+    addText(`Position: ${position}`, 14, true);
+    yPosition += 5;
 
     // Overall Score
-    doc.setFontSize(16);
-    doc.text(`Overall Score: ${analysis.overall_score}/10`, 20, yPosition);
-    yPosition += 20;
+    addText(`Overall Score: ${analysis.overall_score}/10`, 16, true);
+    yPosition += 10;
 
     // Strong Points
-    doc.setFontSize(14);
-    doc.text('Strong Points:', 20, yPosition);
-    yPosition += 10;
-    analysis.strong_points.forEach((point, index) => {
-      doc.setFontSize(12);
-      doc.text(`• ${point}`, 25, yPosition);
-      yPosition += 8;
+    addText('Strong Points:', 14, true);
+    analysis.strong_points.forEach(point => {
+      addText(`• ${point}`, 12);
     });
-    yPosition += 10;
+    yPosition += 5;
 
     // Weak Points
-    doc.setFontSize(14);
-    doc.text('Weak Points:', 20, yPosition);
-    yPosition += 10;
-    analysis.weak_points.forEach((point, index) => {
-      doc.setFontSize(12);
-      doc.text(`• ${point}`, 25, yPosition);
-      yPosition += 8;
+    addText('Weak Points:', 14, true);
+    analysis.weak_points.forEach(point => {
+      addText(`• ${point}`, 12);
     });
-    yPosition += 10;
+    yPosition += 5;
 
     // Improvements
-    doc.setFontSize(14);
-    doc.text('Improvements Needed:', 20, yPosition);
-    yPosition += 10;
-    analysis.improvements_needed.forEach((improvement, index) => {
-      doc.setFontSize(12);
-      doc.text(`• ${improvement}`, 25, yPosition);
-      yPosition += 8;
+    addText('Improvements Needed:', 14, true);
+    analysis.improvements_needed.forEach(improvement => {
+      addText(`• ${improvement}`, 12);
     });
-    yPosition += 10;
+    yPosition += 5;
 
     // Summary
-    doc.setFontSize(14);
-    doc.text('Summary:', 20, yPosition);
-    yPosition += 10;
-    doc.setFontSize(12);
-    const splitSummary = doc.splitTextToSize(analysis.summary, pageWidth - 40);
-    doc.text(splitSummary, 20, yPosition);
+    addText('Summary:', 14, true);
+    addText(analysis.summary, 12);
 
     doc.save('cv-analysis-report.pdf');
   };
