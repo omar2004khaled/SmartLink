@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../../config";
 import Navbar from "../../Navbar";
+import { useAlert } from "../../../hooks/useAlert";
 
 const API_BASE = `${API_BASE_URL}/api`;
 
 export default function ConnectionsTab() {
   const navigate = useNavigate();
+  const { showError, showSuccess } = useAlert();
   const userId = localStorage.getItem('userId');
   const [sentRequests, setSentRequests] = useState([]);
   const [receivedRequests, setReceivedRequests] = useState([]);
@@ -81,8 +83,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Request cancelled');
     } catch (err) {
-      alert('Failed to cancel request');
+      showError('Failed to cancel request');
     }
   };
 
@@ -94,8 +97,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Connection accepted!');
     } catch (err) {
-      alert('Failed to accept request');
+      showError('Failed to accept request');
     }
   };
 
@@ -107,8 +111,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Request rejected');
     } catch (err) {
-      alert('Failed to reject request');
+      showError('Failed to reject request');
     }
   };
 
@@ -120,8 +125,9 @@ export default function ConnectionsTab() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchConnections();
+      showSuccess('Connection removed');
     } catch (err) {
-      alert('Failed to remove connection');
+      showError('Failed to remove connection');
     }
   };
 

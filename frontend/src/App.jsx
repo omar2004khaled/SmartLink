@@ -25,29 +25,33 @@ import AdminDashboard from './Components/AdminDashboard';
 import CVAnalysis from './Components/CVAnalysis';
 import ApplicationsPage from './Components/job/ApplicationsPage';
 import ConnectionsTab from './Components/Profile/UserProfile/ConnectionsTab';
+import { AlertProvider } from './contexts/AlertContext';
+import AlertNotification from './components/AlertNotification/AlertNotification';
 
 function App() {
   return (
-    <Routes>
-      {/* User Type Selection */}
-      <Route path="/" element={<UserTypeSelection />} />
-      <Route path="/home" element={<MainPage />} />
-      <Route path="/signup-select" element={<UserTypeSelection />} />
-      <Route path="/login-select" element={<LoginTypeSelection />} />
+    <AlertProvider>
+      <AlertNotification />
+      <Routes>
+        {/* User Type Selection */}
+        <Route path="/" element={<UserTypeSelection />} />
+        <Route path="/home" element={<MainPage />} />
+        <Route path="/signup-select" element={<UserTypeSelection />} />
+        <Route path="/login-select" element={<LoginTypeSelection />} />
 
-      {/* Job Seeker Routes */}
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/profile" element={<UserProfile />} />
-      <Route path="/profile/:userId" element={<UserProfile />} />
+        {/* Job Seeker Routes */}
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/profile/:userId" element={<UserProfile />} />
 
-      {/* Company Routes */}
-      <Route path="/company/signup" element={<CompanySignUp />} />
-      <Route path="/company/login" element={<CompanyLogin />} />
-      <Route path="/company-home" element={<CompanyHome />} />
-      <Route path="/company-jobs" element={<CompanyJobs />} />
-      <Route path="/company-profile" element={<CompanyProfilePage />} />
-      <Route path="/company-profile/:companyId" element={<CompanyProfilePage />} />
+        {/* Company Routes */}
+        <Route path="/company/signup" element={<CompanySignUp />} />
+        <Route path="/company/login" element={<CompanyLogin />} />
+        <Route path="/company-home" element={<CompanyHome />} />
+        <Route path="/company-jobs" element={<CompanyJobs />} />
+        <Route path="/company-profile" element={<CompanyProfilePage />} />
+        <Route path="/company-profile/:companyId" element={<CompanyProfilePage />} />
 
       {/* Common Routes */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -64,10 +68,11 @@ function App() {
       <Route path="/applications" element={<ApplicationsPage />} />
       <Route path="/connections" element={<ConnectionsTab />} />
 
-      {/* Admin Routes */}
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
-    </Routes>
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      </Routes>
+    </AlertProvider>
   );
 }
 

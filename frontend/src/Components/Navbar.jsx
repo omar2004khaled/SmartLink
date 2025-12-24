@@ -48,7 +48,7 @@ const Navbar = ({ showSearch = false }) => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login-select');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path;
@@ -135,7 +135,7 @@ const Navbar = ({ showSearch = false }) => {
             <button className={`sidebar-link ${isActive('/cv-analysis') ? 'active' : ''}`} onClick={() => { navigate('/cv-analysis'); setSidebarOpen(false); }}>
               <FileText size={20} />
               <span>CV Analysis</span>
-             </button> 
+            </button>
 
             <button className={`sidebar-link ${isActive('/applications') ? 'active' : ''}`} onClick={() => { navigate('/applications'); setSidebarOpen(false); }}>
               <Briefcase size={20} />

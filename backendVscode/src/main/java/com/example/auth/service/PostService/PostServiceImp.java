@@ -6,6 +6,8 @@ import com.example.auth.repository.*;
 import com.example.auth.service.AttachmentService.*;
 import com.example.auth.service.NotificationService;
 import com.example.auth.service.PostAttachmentService.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.Optional;
 
 @Service
 public class PostServiceImp implements PostService {
+    private static final Logger logger = LoggerFactory.getLogger(PostServiceImp.class);
+
     private PostRepository postRepository;
     private AttachmentService attachmentService;
     private PostAttachmentService postAttachmentService;
@@ -158,8 +162,7 @@ public class PostServiceImp implements PostService {
             }
 
         } catch (Exception e) {
-            // Log error but don't fail the post creation
-            e.printStackTrace();
+            logger.error("Error notifying friends about new post: {}", e.getMessage());
         }
     }
 

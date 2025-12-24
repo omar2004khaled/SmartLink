@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "../CompanyProfile/EditModal/EditModal.css";
 import { CLOUDINARY_UPLOAD_URL } from "../../../config";
+import { useAlert } from "../../../hooks/useAlert";
 
 export default function ProfileInfoForm({ open, profile, locations = [], onSave, onCancel }) {
+  const { showError, showSuccess } = useAlert();
   const [form, setForm] = useState({
     userName: "",
     headline: "",
@@ -56,11 +58,11 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
       }
 
       const data = await res.json();
-      console.log('Cloudinary response:', data);
+      //console.log('Cloudinary response:', data);
       return data.secure_url;
     } catch (err) {
       console.error('Upload failed', err);
-      alert(`Upload failed: ${err.message}`);
+      showError(`Upload failed: ${err.message}`);
       return null;
     }
   };
@@ -73,15 +75,16 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
     const uploadedUrl = await uploadToCloudinary(file);
     if (uploadedUrl) {
       setForm({ ...form, profilePicUrl: uploadedUrl });
+      showSuccess('Image uploaded successfully!');
     } else {
-      alert('Failed to upload image');
+      showError('Failed to upload image');
     }
     setUploading(false);
   };
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log('Submitting form:', form);
+    //console.log('Submitting form:', form);
     onSave(form);
   }
 
@@ -94,31 +97,31 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
             ✕
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="edit-form">
             <div className="form-group">
               <label>Headline</label>
               <input name="headline" value={form.headline} onChange={handleChange} className="form-input" />
             </div>
-            
+
             <div className="form-group">
               <label>Bio</label>
               <textarea name="bio" value={form.bio} onChange={handleChange} className="form-textarea" rows="4" />
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label>Gender</label>
                 <input name="gender" value={form.gender} onChange={handleChange} className="form-input" />
               </div>
-              
+
               <div className="form-group">
                 <label>Birth Date</label>
                 <input name="birthDate" type="date" value={form.birthDate} onChange={handleChange} className="form-input" max={new Date(new Date().setFullYear(new Date().getFullYear() - 13)).toISOString().split('T')[0]} />
               </div>
             </div>
-            
+
             <div className="form-group">
               <label>Location</label>
               {!useCustomLocation ? (
@@ -150,7 +153,7 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
                 </div>
               )}
             </div>
-            
+
             <div className="form-group">
               <label>Profile Picture</label>
               <div className="image-upload">
@@ -164,7 +167,7 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
               </div>
             </div>
           </div>
-          
+
           <div className="modal-footer">
             <button type="button" onClick={onCancel} className="btn-cancel">Cancel</button>
             <button type="submit" className="btn-save" disabled={uploading}>Save</button>

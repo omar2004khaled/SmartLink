@@ -43,6 +43,13 @@ const CompanyJobsPage = ({ companyId }) => {
           </button>
         </div>
 
+        {/* Info banner */}
+        <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+          <p className="text-blue-800 font-medium">
+            <strong>Tip:</strong> Double-click on any job card below to view all applications for that job
+          </p>
+        </div>
+
         {successMessage && (
           <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
             {successMessage}
@@ -58,8 +65,8 @@ const CompanyJobsPage = ({ companyId }) => {
           />
         )}
 
-        <JobList 
-          companyId={companyId} 
+        <JobList
+          companyId={companyId}
           refreshTrigger={refreshTrigger}
           onEdit={handleEdit}
         />

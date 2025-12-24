@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CompanyFollowerRepo extends JpaRepository<CompanyFollower, CompanyFollower.CompanyFollowerId> {
 
@@ -20,6 +22,9 @@ public interface CompanyFollowerRepo extends JpaRepository<CompanyFollower, Comp
 
     @Query("SELECT COUNT(cf) FROM CompanyFollower cf WHERE cf.company = :company")
     Long countFollowersByCompany(@Param("company") User company);
+
+    @Query("SELECT cf FROM CompanyFollower cf WHERE cf.company = :company")
+    List<CompanyFollower> findByCompany(@Param("company") User company);
 
     @Modifying
     @org.springframework.transaction.annotation.Transactional

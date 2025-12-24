@@ -89,7 +89,7 @@ const CompanyLogin = () => {
         localStorage.setItem('userEmail', data.email);
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('userType', 'COMPANY');
-        console.log("Company login successful, token stored");
+        //console.log("Company login successful, token stored");
       }
 
       navigate('/company-home');
@@ -112,7 +112,7 @@ const CompanyLogin = () => {
         <div className="self-start">
           <div className="flex items-center gap-2">
             <img
-              src="src/assets/Logo.png"
+              src="/src/assets/Logo.png"
               alt="Logo"
               className="h-12 w-auto object-contain"
             />
