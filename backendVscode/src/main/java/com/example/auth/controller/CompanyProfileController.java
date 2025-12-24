@@ -17,7 +17,8 @@ public class CompanyProfileController {
     private final CompanyProfileService companyProfileService;
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId,@RequestParam(required = false) Long viewerId ) {
+    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId,
+            @RequestParam(required = false) Long viewerId) {
         try {
             CompanyDTO company = companyProfileService.getCompanyByUserId(userId, viewerId);
             return ResponseEntity.ok(company);
@@ -25,7 +26,6 @@ public class CompanyProfileController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found for user");
         }
     }
-    
 
     @GetMapping("/{companyId}/about")
     public ResponseEntity<?> getCompanyAbout(@PathVariable Long companyId) {
@@ -48,7 +48,7 @@ public class CompanyProfileController {
     @GetMapping("/{companyId}/posts")
     public ResponseEntity<?> getCompanyPosts(@PathVariable Long companyId) {
         try {
-            //Implement posts retrieval
+            // Implement posts retrieval
             return ResponseEntity.ok("");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ERROR in get posts");
@@ -71,7 +71,8 @@ public class CompanyProfileController {
             companyProfileService.followCompany(companyId, request.getUserId());
             return ResponseEntity.ok("Successfully followed company");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error in follow");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
 

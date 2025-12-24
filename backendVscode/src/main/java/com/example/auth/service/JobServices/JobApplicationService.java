@@ -28,10 +28,11 @@ public class JobApplicationService {
     UserRepository userRepository;
     JobApplicationRepository jobApplicationRepository;
     NotificationService notificationService;
+
     @Autowired
     public JobApplicationService(JobRepository jobRepository, UserRepository userRepository,
             JobApplicationRepository jobApplicationRepository,
-            NotificationService notificationService,CompanyProfileRepo companyProfileRepo) {
+            NotificationService notificationService, CompanyProfileRepo companyProfileRepo) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.jobApplicationRepository = jobApplicationRepository;
@@ -82,21 +83,21 @@ public class JobApplicationService {
                 .build();
     }
 
-    public List<ApplicationDTO> getByJobId(Long jobId){
+    public List<ApplicationDTO> getByJobId(Long jobId) {
         List<JobApplication> list = jobApplicationRepository.getApplicationByJobId(jobId).get();
         return list.stream()
                 .map(this::toApplicationDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<ApplicationDTO> getByUserId(Long userId){
+    public List<ApplicationDTO> getByUserId(Long userId) {
         List<JobApplication> list = jobApplicationRepository.getApplicationByUserId(userId).get();
         return list.stream()
                 .map(this::toApplicationDTO)
                 .collect(Collectors.toList());
     }
 
-    public ApplicationDTO addComment(String comment, Long applicationId){
+    public ApplicationDTO addComment(String comment, Long applicationId) {
 
         JobApplication jobApp = helper(applicationId);
         List<String> tmpComments = jobApp.getComments();
@@ -104,20 +105,49 @@ public class JobApplicationService {
         jobApp.setComments(tmpComments);
         jobApplicationRepository.save(jobApp);
 
+        // Create notification for applicant about new comment
+        try {
+            notificationService.createApplicationCommentNotification(
+                    jobApp.getUser().getId(),
+                    jobApp.getJob().getCompany().getFullName(),
+                    jobApp.getJob().getTitle(),
+                    applicationId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return toApplicationDTO(jobApp);
     }
 
-    private JobApplication helper(Long applicationId){
+    private JobApplication helper(Long applicationId) {
         Optional<JobApplication> optionalJobApplication = jobApplicationRepository.findById(applicationId);
-        if(optionalJobApplication.isEmpty()) throw new RuntimeException("there is no such application");
+        if (optionalJobApplication.isEmpty())
+            throw new RuntimeException("there is no such application");
         JobApplication jobApp = optionalJobApplication.get();
         return jobApp;
     }
 
-    public ApplicationDTO changeStatus(String status, Long applicationId){
+    public ApplicationDTO changeStatus(String status, Long applicationId) {
         JobApplication jobApp = helper(applicationId);
-        jobApp.setApplicationStatus(ApplicationStatus.valueOf(status));
+        ApplicationStatus oldStatus = jobApp.getApplicationStatus();
+        ApplicationStatus newStatus = ApplicationStatus.valueOf(status);
+
+        jobApp.setApplicationStatus(newStatus);
         jobApplicationRepository.save(jobApp);
+
+        // Create notification for applicant if status changed
+        if (!oldStatus.equals(newStatus)) {
+            try {
+                notificationService.createApplicationStatusChangeNotification(
+                        jobApp.getUser().getId(),
+                        jobApp.getJob().getTitle(),
+                        newStatus.toString(),
+                        applicationId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         return toApplicationDTO(jobApp);
     }
 
