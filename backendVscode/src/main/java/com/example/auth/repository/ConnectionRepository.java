@@ -3,6 +3,8 @@ package com.example.auth.repository;
 import com.example.auth.entity.Connection;
 import com.example.auth.entity.Connection.ConnectionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
@@ -37,4 +39,12 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
             AND c.status = 'ACCEPTED'            
             """)
     Optional<Connection> findConnectionBetweenUsers(Long userId1, Long userId2);
+
+    @Modifying
+    @Transactional
+    void deleteBySender_Id(Long senderId);
+
+    @Modifying
+    @Transactional
+    void deleteByReceiver_Id(Long receiverId);
 }

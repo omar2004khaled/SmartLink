@@ -14,9 +14,18 @@ public interface CompanyFollowerRepo extends JpaRepository<CompanyFollower, Comp
     boolean existsByFollowerAndCompany(User follower, User company);
 
     @Modifying
+    @org.springframework.transaction.annotation.Transactional
     @Query("DELETE FROM CompanyFollower cf WHERE cf.follower = :follower AND cf.company = :company")
     void deleteByFollowerAndCompany(@Param("follower") User follower, @Param("company") User company);
 
     @Query("SELECT COUNT(cf) FROM CompanyFollower cf WHERE cf.company = :company")
     Long countFollowersByCompany(@Param("company") User company);
+
+    @Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByFollower_Id(Long followerId);
+
+    @Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByCompany_Id(Long companyId);
 }
