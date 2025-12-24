@@ -10,12 +10,8 @@ import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepositor
 import com.example.auth.repository.PostRepository;
 import com.example.auth.repository.CommentRepo;
 import com.example.auth.service.EmailService;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@AutoConfigureMockMvc
-@SpringBootTest
-public class AdminDashboardUnitTest {
+class AdminDashboardUnitTest {
 
     @Test
     void adminDashboard_DirectCall_ShouldReturnCorrectMessage() {
