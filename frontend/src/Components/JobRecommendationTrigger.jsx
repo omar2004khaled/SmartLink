@@ -1,70 +1,32 @@
 import { useEffect } from 'react';
-import { RecommendationService } from '../services/RecommendationService';
+import { RecommendationService } from './RecommendationService';
 
 const JobRecommendationTrigger = ({ userId }) => {
   useEffect(() => {
-    const triggerRecommendations = async () => {
-      if (!userId) return;
-      
+    if (!userId) return;
+
+    // Just check if we already have recommendations stored
+    const checkExistingRecommendations = async () => {
       const status = RecommendationService.checkRecommendationStatus(userId);
       
-      // Only trigger if not already generating or generated recently (last hour)
-      const shouldTrigger = status.status === 'not_started' || 
-        (status.timestamp && Date.now() - new Date(status.timestamp).getTime() > 3600000);
-      
-      if (shouldTrigger) {
-        console.log('Triggering recommendation generation for user:', userId);
-        RecommendationService.setRecommendationStatus(userId, 'generating');
-        
-        // Trigger in background without blocking UI
-        setTimeout(async () => {
-          try {
-            const success = await RecommendationService.triggerRecommendationGeneration(userId);
-            if (success) {
-              RecommendationService.setRecommendationStatus(userId, 'pending');
-              
-              // Poll for results (optional - can be done when user clicks button)
-              pollForRecommendations(userId);
-            }
-          } catch (error) {
-            RecommendationService.setRecommendationStatus(userId, 'failed');
-          }
-        }, 1000);
+      // If not checked before or checked more than 1 hour ago, check again
+      if (!status.timestamp || Date.now() - new Date(status.timestamp).getTime() > 3600000) {
+        try {
+          const result = await RecommendationService.checkIfRecommendationsReady(userId);
+          console.log('Recommendation check result:', result.status);
+        } catch (error) {
+          console.error('Error checking recommendations:', error);
+        }
       }
     };
 
-    const pollForRecommendations = async (userId) => {
-      let attempts = 0;
-      const maxAttempts = 60; // Poll for up to 5 minutes (60 * 5 seconds)
-      
-      const pollInterval = setInterval(async () => {
-        attempts++;
-        
-        try {
-          const recommendations = await RecommendationService.getJobSeekerRecommendations(userId);
-          
-          if (recommendations && recommendations.length > 0) {
-            RecommendationService.setRecommendationStatus(userId, 'ready', recommendations);
-            clearInterval(pollInterval);
-            console.log('Recommendations ready!');
-          } else if (attempts >= maxAttempts) {
-            RecommendationService.setRecommendationStatus(userId, 'timeout');
-            clearInterval(pollInterval);
-          }
-        } catch (error) {
-          console.error('Polling error:', error);
-          if (attempts >= maxAttempts) {
-            RecommendationService.setRecommendationStatus(userId, 'error');
-            clearInterval(pollInterval);
-          }
-        }
-      }, 5000); // Poll every 5 seconds
-    };
-
-    triggerRecommendations();
+    // Wait a bit after component mounts to avoid blocking initial render
+    const timer = setTimeout(checkExistingRecommendations, 2000);
+    
+    return () => clearTimeout(timer);
   }, [userId]);
 
-  return null; // This component doesn't render anything
+  return null;
 };
 
 export default JobRecommendationTrigger;

@@ -8,18 +8,30 @@ const RecommendJobButton = ({ userId }) => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('not_started');
-  const [polling, setPolling] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
-    // Check initial status
-    const storedStatus = RecommendationService.checkRecommendationStatus(userId);
-    setStatus(storedStatus.status);
-    if (storedStatus.data) {
-      setRecommendations(storedStatus.data);
-    }
+    // Check initial status on component mount
+    checkRecommendations();
   }, [userId]);
 
+  const checkRecommendations = async () => {
+    if (!userId) return;
+    
+    const storedStatus = RecommendationService.checkRecommendationStatus(userId);
+    setStatus(storedStatus.status);
+    setRecommendations(storedStatus.data || []);
+    
+    // If status is not_started, we should check the backend
+    if (storedStatus.status === 'not_started') {
+      const result = await RecommendationService.checkIfRecommendationsReady(userId);
+      setStatus(result.status);
+      setRecommendations(result.data);
+    }
+  };
+
   const handleButtonClick = async () => {
+    // If we have recommendations ready, show them
     if (status === 'ready' && recommendations.length > 0) {
       setShowRecommendations(true);
       return;
@@ -27,71 +39,66 @@ const RecommendJobButton = ({ userId }) => {
 
     setLoading(true);
     
-    if (status === 'not_started' || status === 'failed' || status === 'timeout') {
-      // Start generation
-      RecommendationService.setRecommendationStatus(userId, 'generating');
-      setStatus('generating');
+    try {
+      // Check current status from backend
+      const result = await RecommendationService.checkIfRecommendationsReady(userId);
+      setStatus(result.status);
+      setRecommendations(result.data);
       
-      const success = await RecommendationService.triggerRecommendationGeneration(userId);
-      if (success) {
-        RecommendationService.setRecommendationStatus(userId, 'pending');
-        setStatus('pending');
-        startPolling();
+      if (result.status === 'ready' && result.data.length > 0) {
+        // Recommendations are ready, show them
+        setShowRecommendations(true);
       } else {
-        RecommendationService.setRecommendationStatus(userId, 'failed');
-        setStatus('failed');
-        setLoading(false);
+        // Recommendations are not ready yet, start polling
+        startPolling();
       }
-    } else if (status === 'pending') {
-      // Already generating, just poll
-      startPolling();
+    } catch (error) {
+      console.error('Error checking recommendations:', error);
+      setStatus('error');
+    } finally {
+      setLoading(false);
     }
   };
 
   const startPolling = () => {
-    setPolling(true);
+    setIsChecking(true);
     pollForRecommendations();
   };
 
   const pollForRecommendations = async () => {
     let attempts = 0;
-    const maxAttempts = 60; // 5 minutes max
+    const maxAttempts = 36; // Poll for up to 3 minutes (36 * 5 seconds)
     
     const poll = async () => {
       attempts++;
       
       try {
-        const data = await RecommendationService.getJobSeekerRecommendations(userId);
+        console.log(`Polling attempt ${attempts}/${maxAttempts}`);
+        const result = await RecommendationService.checkIfRecommendationsReady(userId);
         
-        if (data && data.length > 0) {
-          // Recommendations ready
-          RecommendationService.setRecommendationStatus(userId, 'ready', data);
+        if (result.status === 'ready' && result.data.length > 0) {
+          // Recommendations are ready
           setStatus('ready');
-          setRecommendations(data);
-          setPolling(false);
-          setLoading(false);
+          setRecommendations(result.data);
+          setIsChecking(false);
           setShowRecommendations(true);
           return true;
         }
         
         if (attempts >= maxAttempts) {
-          // Timeout
-          RecommendationService.setRecommendationStatus(userId, 'timeout');
+          // Timeout after 3 minutes
           setStatus('timeout');
-          setPolling(false);
-          setLoading(false);
+          setIsChecking(false);
           return false;
         }
         
-        // Continue polling
+        // Continue polling every 5 seconds
         setTimeout(poll, 5000);
       } catch (error) {
         console.error('Polling error:', error);
         if (attempts >= maxAttempts) {
-          RecommendationService.setRecommendationStatus(userId, 'error');
           setStatus('error');
-          setPolling(false);
-          setLoading(false);
+          setIsChecking(false);
         } else {
           setTimeout(poll, 5000);
         }
@@ -105,30 +112,39 @@ const RecommendJobButton = ({ userId }) => {
     switch (status) {
       case 'ready':
         return `Recommended Jobs (${recommendations.length})`;
-      case 'generating':
-        return 'Starting Recommendations...';
       case 'pending':
         return 'Generating Recommendations...';
-      case 'failed':
-        return 'Try Generating Recommendations';
+      case 'error':
+        return 'Recommendation Error';
       case 'timeout':
-        return 'Generate Recommendations (Timeout)';
+        return 'Generating (Taking time...)';
       default:
         return 'Recommend a Job';
     }
+  };
+
+  const handleRefreshRecommendations = () => {
+    // Clear existing recommendations and start fresh
+    RecommendationService.clearRecommendationStatus(userId);
+    setStatus('not_started');
+    setRecommendations([]);
+    setShowRecommendations(false);
+    
+    // The backend endpoint will generate new recommendations when called
+    handleButtonClick();
   };
 
   return (
     <>
       <button
         onClick={handleButtonClick}
-        disabled={loading || polling}
+        disabled={loading || isChecking}
         className="recommend-job-button"
       >
-        {loading || polling ? (
+        {loading || isChecking ? (
           <>
             <Loader2 className="animate-spin" size={16} />
-            <span>{polling ? 'Generating...' : 'Loading...'}</span>
+            <span>{isChecking ? 'Checking...' : 'Loading...'}</span>
           </>
         ) : (
           <>
@@ -157,7 +173,7 @@ const RecommendJobButton = ({ userId }) => {
                   {recommendations.map((job, index) => (
                     <div key={index} className="job-recommendation-card">
                       <div className="job-header">
-                        <h4>{job.title}</h4>
+                        <h4>{job.title || job.jobTitle || `Job ${index + 1}`}</h4>
                         {job.company && <span className="company-name">{job.company}</span>}
                       </div>
                       
@@ -183,10 +199,10 @@ const RecommendJobButton = ({ userId }) => {
                         )}
                       </div>
                       
-                      <div className="job-actions">
+                      {/* <div className="job-actions">
                         <button className="apply-button">View Details</button>
                         <button className="save-button">Save</button>
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                 </div>
@@ -194,7 +210,14 @@ const RecommendJobButton = ({ userId }) => {
                 <div className="no-recommendations">
                   <AlertCircle size={48} />
                   <p>No recommendations available yet.</p>
-                  <p className="small-text">Try again later or check back soon.</p>
+                  {status === 'pending' || status === 'timeout' ? (
+                    <p className="small-text">
+                      Generating recommendations... This may take up to 30 seconds.
+                      {status === 'timeout' && ' Still processing...'}
+                    </p>
+                  ) : (
+                    <p className="small-text">Try again later or check back soon.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -202,12 +225,7 @@ const RecommendJobButton = ({ userId }) => {
             <div className="recommendations-footer">
               <button 
                 className="refresh-button"
-                onClick={() => {
-                  RecommendationService.setRecommendationStatus(userId, 'not_started');
-                  setStatus('not_started');
-                  setShowRecommendations(false);
-                  handleButtonClick();
-                }}
+                onClick={handleRefreshRecommendations}
               >
                 <Clock size={16} />
                 Generate New Recommendations

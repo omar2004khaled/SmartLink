@@ -138,7 +138,7 @@ useEffect(() => {
           const userData = await userResponse.json();
           localStorage.setItem('userId', userData.id);
           setTimeout(() => {
-          fetch(`${API_BASE_URL}/gimini/recommendations/generate/${userData.id}`, {
+          fetch(`${API_BASE_URL}/gemini/getRelevantJobs/${userData.id}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${data.token}`
@@ -150,7 +150,7 @@ useEffect(() => {
         }).catch(error => {
           console.error('Failed to trigger recommendations:', error);
         });
-      }, 1000); // Delay 1 second to not block login flow
+      }, 1500); // Delay 1 second to not block login flow
         }
       } catch (err) {
         console.error('Failed to fetch user data:', err);

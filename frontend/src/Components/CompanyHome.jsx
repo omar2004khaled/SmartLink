@@ -7,9 +7,16 @@ import './MainPage.css';
 
 const CompanyHome = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
-
+  const [userId, setUserId] = useState(null);
+  useEffect(() => {
+    const id = localStorage.getItem('userId');
+    if (id) {
+      setUserId(parseInt(id));
+    }
+  }, []);
   return (
     <div className="home-page">
+      {userId && <JobRecommendationTrigger userId={userId} />}
       <CompanyNavbar />
       
       <div className="home-content">
