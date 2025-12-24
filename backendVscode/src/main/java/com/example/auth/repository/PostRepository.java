@@ -16,11 +16,16 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAll();
+
     Optional<Post> findById(Long theId);
+
     void deleteById(Long theId);
+
     Post save(Post post);
+
     @Query("SELECT p FROM Post p WHERE p.UserId = :userId")
     List<Post> findByUserId(@Param("userId") Long userId);
+
     @Query("SELECT p FROM Post p WHERE p.content LIKE %:content%")
     List<Post> findByContent(@Param("content") String content);
 
