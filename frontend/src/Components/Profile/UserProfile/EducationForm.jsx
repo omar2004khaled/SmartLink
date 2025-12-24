@@ -30,6 +30,10 @@ export default function EducationForm({ open, education, onSave, onCancel }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (form.startDate && form.endDate && form.startDate >= form.endDate) {
+      alert('Start date must be before end date');
+      return;
+    }
     onSave(form);
   }
 
@@ -52,18 +56,18 @@ export default function EducationForm({ open, education, onSave, onCancel }) {
             
             <div className="form-group">
               <label>Field of Study</label>
-              <input name="fieldOfStudy" value={form.fieldOfStudy} onChange={handleChange} className="form-input" />
+              <input name="fieldOfStudy" value={form.fieldOfStudy} onChange={handleChange} required className="form-input" />
             </div>
             
             <div className="form-row">
               <div className="form-group">
                 <label>Start Date</label>
-                <input name="startDate" type="date" value={form.startDate} onChange={handleChange} className="form-input" />
+                <input name="startDate" type="date" value={form.startDate} onChange={handleChange} required className="form-input" max={new Date().toISOString().split('T')[0]} />
               </div>
               
               <div className="form-group">
                 <label>End Date</label>
-                <input name="endDate" type="date" value={form.endDate} onChange={handleChange} className="form-input" />
+                <input name="endDate" type="date" value={form.endDate} onChange={handleChange} required className="form-input" />
               </div>
             </div>
             

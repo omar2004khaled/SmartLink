@@ -124,7 +124,7 @@ const Navbar = ({ showSearch = false }) => {
 
           <div className="nav-section">
             <h3 className="nav-section-title">Network</h3>
-            <button className={`sidebar-link ${location.search.includes('tab=connections') ? 'active' : ''}`} onClick={() => { navigate('/profile?tab=connections'); setSidebarOpen(false); }}>
+            <button className={`sidebar-link ${isActive('/connections') ? 'active' : ''}`} onClick={() => { navigate('/connections'); setSidebarOpen(false); }}>
               <Users size={20} />
               <span>Connections</span>
             </button>

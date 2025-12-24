@@ -118,7 +118,7 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
 
               <div className="form-group">
                 <label>Birth Date</label>
-                <input name="birthDate" type="date" value={form.birthDate} onChange={handleChange} className="form-input" />
+                <input name="birthDate" type="date" value={form.birthDate} onChange={handleChange} className="form-input" max={new Date(new Date().setFullYear(new Date().getFullYear() - 13)).toISOString().split('T')[0]} />
               </div>
             </div>
 

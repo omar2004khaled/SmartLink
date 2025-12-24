@@ -24,6 +24,7 @@ import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
 import CVAnalysis from './Components/CVAnalysis';
 import ApplicationsPage from './Components/job/ApplicationsPage';
+import ConnectionsTab from './Components/Profile/UserProfile/ConnectionsTab';
 import { AlertProvider } from './contexts/AlertContext';
 import AlertNotification from './components/AlertNotification/AlertNotification';
 
@@ -52,19 +53,20 @@ function App() {
         <Route path="/company-profile" element={<CompanyProfilePage />} />
         <Route path="/company-profile/:companyId" element={<CompanyProfilePage />} />
 
-        {/* Common Routes */}
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/email-verified" element={<EmailVerified />} />
-        <Route path="/auth/callback" element={<OAuthCallback />} />
-        <Route path="/PostComposotion" element={<PostComposotion />} />
-        <Route path="/posts" element={<Posts />} />
-        <Route path="/post" element={<PostCard />} />
-        <Route path="/job" element={<JobsPage />} />
-        <Route path="/jobs" element={<CompanyJobsPage />} />
-        <Route path="/cv-analysis" element={<CVAnalysis />} />
-        <Route path="/applications" element={<ApplicationsPage />} />
+      {/* Common Routes */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/email-verified" element={<EmailVerified />} />
+      <Route path="/auth/callback" element={<OAuthCallback />} />
+      <Route path="/PostComposotion" element={<PostComposotion />} />
+      <Route path="/posts" element={<Posts />} />
+      <Route path="/post" element={<PostCard />} />
+      <Route path="/job" element={<JobsPage />} />
+      <Route path="/jobs" element={<CompanyJobsPage />} />
+      <Route path="/cv-analysis" element={<CVAnalysis />} />
+      <Route path="/applications" element={<ApplicationsPage />} />
+      <Route path="/connections" element={<ConnectionsTab />} />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />

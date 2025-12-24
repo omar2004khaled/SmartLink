@@ -30,6 +30,10 @@ export default function ProjectForm({ open, project, onSave, onCancel }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (form.startDate && form.endDate && form.startDate >= form.endDate) {
+      alert('Start date must be before end date');
+      return;
+    }
     onSave(form);
   }
 
@@ -52,7 +56,7 @@ export default function ProjectForm({ open, project, onSave, onCancel }) {
             
             <div className="form-group">
               <label>Description</label>
-              <textarea name="description" value={form.description} onChange={handleChange} className="form-textarea" rows="4" />
+              <textarea name="description" value={form.description} onChange={handleChange} required className="form-textarea" rows="4" />
             </div>
             
             <div className="form-group">
@@ -63,12 +67,12 @@ export default function ProjectForm({ open, project, onSave, onCancel }) {
             <div className="form-row">
               <div className="form-group">
                 <label>Start Date</label>
-                <input name="startDate" type="date" value={form.startDate} onChange={handleChange} className="form-input" />
+                <input name="startDate" type="date" value={form.startDate} onChange={handleChange} required className="form-input" max={new Date().toISOString().split('T')[0]} />
               </div>
               
               <div className="form-group">
                 <label>End Date</label>
-                <input name="endDate" type="date" value={form.endDate} onChange={handleChange} className="form-input" />
+                <input name="endDate" type="date" value={form.endDate} onChange={handleChange} required className="form-input" />
               </div>
             </div>
           </div>

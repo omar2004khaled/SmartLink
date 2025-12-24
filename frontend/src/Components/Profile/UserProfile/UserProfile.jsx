@@ -46,16 +46,21 @@ export default function UserProfile() {
   const [editEducationId, setEditEducationId] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState(null);
   const [connectionId, setConnectionId] = useState(null);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('About');
+  const tabs = ['About', 'Experience', 'Education', 'Skills', 'Projects'];
   const location = useLocation();
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
     if (tab === 'connections' && isOwnProfile) {
-      setActiveTab('connections');
+      navigate('/connections');
     }
-  }, [location.search, isOwnProfile]);
+  }, [location.search, isOwnProfile, navigate]);
 
   useEffect(() => {
     async function fetchProfileId() {
@@ -557,104 +562,182 @@ export default function UserProfile() {
   return (
     <div>
       {userType === 'COMPANY' ? <CompanyNavbar /> : <Navbar />}
-      <div className="up-page">
-        <div className="user-profile-container">
-          <div className="profile-container">
-
-
-            {activeTab === 'profile' && (
-              <>
-                <ProfileInfo
-                  profile={profile}
-                  onEdit={isOwnProfile ? handleEditProfile : null}
-                  onConnect={(!isOwnProfile && userType !== 'COMPANY') ? getConnectionHandler() : null}
-                  connectionStatus={connectionStatus}
-                  isOwnProfile={isOwnProfile}
-                />
-
-                <div className="up-sections">
-                  {/* Experience Card */}
-                  <section className="up-card">
-                    <div className="up-card-header">
-                      <div className="up-card-title">
-                        <h3>Experience</h3>
-                        <div className="up-card-sub">Professional roles & responsibilities</div>
-                      </div>
-                      <div className="up-card-actions">
-                        {/* keep header Add (styled) and remove Manage */}
-                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddExperience}>+ Add</button>}
-                      </div>
-                    </div>
-                    <div className="up-card-body">
-                      <ExperienceSection experience={experience} onAdd={isOwnProfile ? handleAddExperience : null} onEdit={isOwnProfile ? handleEditExperience : null} onDelete={isOwnProfile ? handleDeleteExperience : null} />
-                    </div>
-                  </section>
-
-                  {/* Education Card */}
-                  <section className="up-card">
-                    <div className="up-card-header">
-                      <div className="up-card-title">
-                        <h3>Education</h3>
-                        <div className="up-card-sub">Degrees, certifications and institutions</div>
-                      </div>
-                      <div className="up-card-actions">
-                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddEducation}>+ Add</button>}
-                      </div>
-                    </div>
-                    <div className="up-card-body">
-                      <EducationSection education={education} onAdd={isOwnProfile ? handleAddEducation : null} onEdit={isOwnProfile ? handleEditEducation : null} onDelete={isOwnProfile ? handleDeleteEducation : null} />
-                    </div>
-                  </section>
-
-                  {/* Skills Card */}
-                  <section className="up-card">
-                    <div className="up-card-header">
-                      <div className="up-card-title">
-                        <h3>Skills</h3>
-                        <div className="up-card-sub">Core skills, tools & proficiencies</div>
-                      </div>
-                      <div className="up-card-actions">
-                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddSkill}>+ Add</button>}
-                      </div>
-                    </div>
-                    <div className="up-card-body">
-                      <SkillsSection skills={skills} onAdd={isOwnProfile ? handleAddSkill : null} onEdit={isOwnProfile ? handleEditSkill : null} onDelete={isOwnProfile ? handleDeleteSkill : null} />
-                    </div>
-                  </section>
-
-                  {/* Projects Card */}
-                  <section className="up-card">
-                    <div className="up-card-header">
-                      <div className="up-card-title">
-                        <h3>Projects</h3>
-                        <div className="up-card-sub">Selected projects and highlights</div>
-                      </div>
-                      <div className="up-card-actions">
-                        {isOwnProfile && <button className="btn btn-outline btn-sm" onClick={handleAddProject}>+ Add</button>}
-                      </div>
-                    </div>
-                    <div className="up-card-body">
-                      <ProjectsSection projects={projects} onAdd={isOwnProfile ? handleAddProject : null} onEdit={isOwnProfile ? handleEditProject : null} onDelete={isOwnProfile ? handleDeleteProject : null} />
-                    </div>
-                  </section>
-                </div>
-              </>
+      <div className="user-profile-container">
+        <div className="user-profile-header">
+          <div className="cover-image-container">
+            <div className="cover-color" style={{backgroundColor: profile?.coverColor || '#667eea'}}></div>
+            {isOwnProfile && (
+              <button className="color-palette-btn" onClick={() => document.getElementById('colorPicker').click()}>
+                🎨
+              </button>
             )}
+            <input 
+              type="color" 
+              id="colorPicker" 
+              style={{display: 'none'}} 
+              value={profile?.coverColor || '#667eea'}
+              onChange={(e) => setProfile({...profile, coverColor: e.target.value})}
+            />
+          </div>
+          
+          <div className="user-profile-wrapper">
+            <div className="profile-image-container">
+              <img 
+                src={profile?.profilePicUrl} 
+                alt="Profile" 
+                className="profile-image"
+              />
+            </div>
+          </div>
 
-            {activeTab === 'connections' && isOwnProfile && (
-              <div className="up-sections">
-                <ConnectionsTab />
+          <div className="profile-info">
+            <h1 className="profile-name">{profile?.userName}</h1>
+            <div className="profile-headline">{profile?.headline}</div>
+            <div className="profile-meta">
+              <div>{profile?.country}, {profile?.city}</div>
+              <div>{profile?.userEmail}</div>
+            </div>
+
+            {isOwnProfile && (
+              <div className="description-wrapper">
+                <button className="edit-btn-small" onClick={handleEditProfile} title="Edit profile">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  </svg>
+                </button>
               </div>
             )}
-
-            {/* Modals for editing/adding fields */}
-            <ProfileInfoForm open={editProfile} profile={profile} locations={locations} onSave={handleSaveProfile} onCancel={handleCancelProfile} />
-            <ExperienceForm open={!!editExperienceId} experience={experience.find(e => e.id === editExperienceId)} onSave={handleSaveExperience} onCancel={handleCancelExperience} />
-            <SkillForm open={!!editSkillId} skill={skills.find(s => s.id === editSkillId)} onSave={handleSaveSkill} onCancel={handleCancelSkill} />
-            <ProjectForm open={!!editProjectId} project={projects.find(p => p.id === editProjectId)} onSave={handleSaveProject} onCancel={handleCancelProject} />
-            <EducationForm open={!!editEducationId} education={education.find(e => e.id === editEducationId)} onSave={handleSaveEducation} onCancel={handleCancelEducation} />
+            {!isOwnProfile && getConnectionHandler() && (
+              <div className="connection-actions">
+                {connectionStatus === 'NONE' && (
+                  <button onClick={getConnectionHandler()} className="btn btn-primary btn-sm">Connect</button>
+                )}
+                {connectionStatus === 'PENDING_SENT' && (
+                  <button onClick={getConnectionHandler()} className="btn btn-outline btn-sm">Cancel Request</button>
+                )}
+                {connectionStatus === 'PENDING_RECEIVED' && (
+                  <div className="connection-buttons">
+                    <button onClick={getConnectionHandler().accept} className="btn btn-primary btn-sm">Accept</button>
+                    <button onClick={getConnectionHandler().reject} className="btn btn-outline btn-sm">Reject</button>
+                  </div>
+                )}
+                {connectionStatus === 'ACCEPTED' && (
+                  <button onClick={getConnectionHandler()} className="btn btn-outline btn-sm">Remove Connection</button>
+                )}
+              </div>
+            )}
           </div>
         </div>
+
+        <div className="navigation-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => handleTabChange(tab)}
+              className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="user-profile-content">
+          {activeTab === 'About' && (
+            <div className="about-section">
+              <div className="profile-summary">
+                <h3>About</h3>
+                <p>{profile?.bio || 'No bio available'}</p>
+                <div className="profile-details">
+                  <div>Gender: {profile?.gender}</div>
+                  <div>Birth Date: {profile?.birthDate}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'Experience' && (
+            <div className="section-content">
+              <div className="section-header">
+                <h3>Experience</h3>
+                {isOwnProfile && (
+                  <button className="btn btn-primary btn-sm" onClick={handleAddExperience}>
+                    + Add Experience
+                  </button>
+                )}
+              </div>
+              <ExperienceSection 
+                experience={experience} 
+                onAdd={isOwnProfile ? handleAddExperience : null} 
+                onEdit={isOwnProfile ? handleEditExperience : null} 
+                onDelete={isOwnProfile ? handleDeleteExperience : null} 
+              />
+            </div>
+          )}
+
+          {activeTab === 'Education' && (
+            <div className="section-content">
+              <div className="section-header">
+                <h3>Education</h3>
+                {isOwnProfile && (
+                  <button className="btn btn-primary btn-sm" onClick={handleAddEducation}>
+                    + Add Education
+                  </button>
+                )}
+              </div>
+              <EducationSection 
+                education={education} 
+                onAdd={isOwnProfile ? handleAddEducation : null} 
+                onEdit={isOwnProfile ? handleEditEducation : null} 
+                onDelete={isOwnProfile ? handleDeleteEducation : null} 
+              />
+            </div>
+          )}
+
+          {activeTab === 'Skills' && (
+            <div className="section-content">
+              <div className="section-header">
+                <h3>Skills</h3>
+                {isOwnProfile && (
+                  <button className="btn btn-primary btn-sm" onClick={handleAddSkill}>
+                    + Add Skill
+                  </button>
+                )}
+              </div>
+              <SkillsSection 
+                skills={skills} 
+                onAdd={isOwnProfile ? handleAddSkill : null} 
+                onEdit={isOwnProfile ? handleEditSkill : null} 
+                onDelete={isOwnProfile ? handleDeleteSkill : null} 
+              />
+            </div>
+          )}
+
+          {activeTab === 'Projects' && (
+            <div className="section-content">
+              <div className="section-header">
+                <h3>Projects</h3>
+                {isOwnProfile && (
+                  <button className="btn btn-primary btn-sm" onClick={handleAddProject}>
+                    + Add Project
+                  </button>
+                )}
+              </div>
+              <ProjectsSection 
+                projects={projects} 
+                onAdd={isOwnProfile ? handleAddProject : null} 
+                onEdit={isOwnProfile ? handleEditProject : null} 
+                onDelete={isOwnProfile ? handleDeleteProject : null} 
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Modals for editing/adding fields */}
+        <ProfileInfoForm open={editProfile} profile={profile} locations={locations} onSave={handleSaveProfile} onCancel={handleCancelProfile} />
+        <ExperienceForm open={!!editExperienceId} experience={experience.find(e => e.id === editExperienceId)} onSave={handleSaveExperience} onCancel={handleCancelExperience} />
+        <SkillForm open={!!editSkillId} skill={skills.find(s => s.id === editSkillId)} onSave={handleSaveSkill} onCancel={handleCancelSkill} />
+        <ProjectForm open={!!editProjectId} project={projects.find(p => p.id === editProjectId)} onSave={handleSaveProject} onCancel={handleCancelProject} />
+        <EducationForm open={!!editEducationId} education={education.find(e => e.id === editEducationId)} onSave={handleSaveEducation} onCancel={handleCancelEducation} />
       </div>
     </div>
   );
