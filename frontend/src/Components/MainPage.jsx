@@ -11,7 +11,7 @@ const MainPage = () => {
   const postsRef = useRef(null);
 
   const handlePostCreated = () => {
-    console.log('Post created! Refreshing posts...');
+    ////console.log('Post created! Refreshing posts...');
     // Refresh posts to show the new post
     if (postsRef.current) {
       postsRef.current.refreshPosts();

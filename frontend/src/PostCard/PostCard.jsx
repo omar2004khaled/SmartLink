@@ -196,7 +196,7 @@ function PostItem({ post }) {
     }));
 
     if (uploadedUrl) {
-      console.log('Uploaded attachment URL:', uploadedUrl);
+      //console.log('Uploaded attachment URL:', uploadedUrl);
     } else {
       showError('Attachment upload failed');
     }
@@ -253,7 +253,7 @@ function PostItem({ post }) {
     };
 
     try {
-      console.log('Submitting comment for post:', postId, 'Comment DTO:', commentDTO);
+      //console.log('Submitting comment for post:', postId, 'Comment DTO:', commentDTO);
       const id = await SaveComment(commentDTO);
       setCommentText('');
       handleRemoveAttachment();
@@ -334,7 +334,7 @@ function PostItem({ post }) {
 
     if (uploadedUrl) {
       setEditAttachmentUrl(uploadedUrl);
-      console.log('Uploaded attachment URL:', uploadedUrl);
+      //console.log('Uploaded attachment URL:', uploadedUrl);
     } else {
       showError('Attachment upload failed');
     }
@@ -388,7 +388,7 @@ function PostItem({ post }) {
           attachments: attachments.length > 0 ? attachments : null,
           createdAt: post.createdAt || null
         };
-        console.log('Updating post attachments:', attachmentDTO);
+        //console.log('Updating post attachments:', attachmentDTO);
         await UpdatePost(postId, attachmentDTO);
       }
 
@@ -400,7 +400,7 @@ function PostItem({ post }) {
           attachments: null,
           createdAt: post.createdAt || null
         };
-        console.log('Updating post content:', contentDTO);
+        //console.log('Updating post content:', contentDTO);
         await UpdatePost(postId, contentDTO);
       }
 

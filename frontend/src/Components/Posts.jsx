@@ -27,7 +27,7 @@ const Posts = forwardRef((props, ref) => {
     try {
       isFetchingRef.current = true;
       setLoading(true);
-      console.log('Refreshing posts...');
+      ////console.log('Refreshing posts...');
 
       // Reset state for clean refresh
       setPosts([]);
@@ -41,7 +41,7 @@ const Posts = forwardRef((props, ref) => {
         setPosts(transformedPosts);
         setCurrentPage(1);
         setHasMore(postsData.length === pageSize);
-        console.log('Posts refreshed successfully:', transformedPosts.length, 'posts loaded');
+        ////console.log('Posts refreshed successfully:', transformedPosts.length, 'posts loaded');
       }
       else {
         setPosts([]);
@@ -57,7 +57,7 @@ const Posts = forwardRef((props, ref) => {
   };
 
   const loadMorePosts = async () => {
-    console.log('Loading more posts...');
+    ////console.log('Loading more posts...');
     if (loading || !hasMore || isFetchingRef.current) return;
 
     try {
@@ -75,13 +75,13 @@ const Posts = forwardRef((props, ref) => {
       const newUniquePosts = transformedPosts.filter(p => !existingPostIds.has(p.id));
       if (newUniquePosts.length === 0) {
         setHasMore(false);
-        console.log('No new unique posts found.');
+        ////console.log('No new unique posts found.');
         return;
       }
       setPosts(prevPosts => [...prevPosts, ...newUniquePosts]);
       setHasMore(postsData.length === pageSize);
       setCurrentPage(prevPage => prevPage + 1);
-      console.log(`Loaded ${newUniquePosts.length} new posts.`);
+      ////console.log(`Loaded ${newUniquePosts.length} new posts.`);
     } catch (error) {
       setHasMore(false);
       console.error('Error fetching more posts:', error);
@@ -116,7 +116,7 @@ const Posts = forwardRef((props, ref) => {
       }
     }
 
-    console.log(`Transformed ${postsData.length} posts to ${uniquePosts.length} unique posts`);
+    ////console.log(`Transformed ${postsData.length} posts to ${uniquePosts.length} unique posts`);
     return uniquePosts;
   };
   return (

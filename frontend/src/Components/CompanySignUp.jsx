@@ -147,7 +147,7 @@ const CompanySignUp = () => {
         return;
       }
 
-      console.log("Company registration successful, redirecting to verification...");
+      //console.log("Company registration successful, redirecting to verification...");
       navigate('/verify-email', {
         state: {
           email: formData.email,

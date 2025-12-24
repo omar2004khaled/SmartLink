@@ -21,7 +21,7 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
   const fetchJobs = async () => {
     setLoading(true);
     setError(null);
-    console.log(companyId)
+    //console.log(companyId)
     if (companyId === null) return;
     try {
       const endpoint = activeTab === 'current'
@@ -32,7 +32,7 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
       if (!response.ok) throw new Error('Failed to fetch jobs');
 
       const data = await response.json();
-      console.log(data);
+      //console.log(data);
       setJobs(data.content);
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);

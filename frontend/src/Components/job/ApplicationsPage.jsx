@@ -100,7 +100,7 @@ const ApplicationsPage = () => {
       // Get user type from localStorage
       const type = localStorage.getItem('userType');
       setUserType(type);
-      console.log(type);
+      //console.log(type);
       const userId = localStorage.getItem('userId');
       
       if (type === 'USER' && userId) {

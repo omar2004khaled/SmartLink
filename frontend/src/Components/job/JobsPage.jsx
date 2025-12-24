@@ -40,7 +40,7 @@ const JobsPage = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    console.log('Filters from form:', filters);
+    //console.log('Filters from form:', filters);
     setLoading(true);
     const data = await fetchJobs(filters);
     setJobs(data);
@@ -64,14 +64,14 @@ const JobsPage = () => {
 
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
-    console.log('Application submitted:', applicationData, 'for job:', selectedJob);
+    //console.log('Application submitted:', applicationData, 'for job:', selectedJob);
 
     try {
       setLoading(true);
       setUploadProgress('Preparing application...');
 
       const result = await submitApplication(selectedJob.jobId, applicationData, setUploadProgress);
-      //console.log('Application result:', result);
+      ////console.log('Application result:', result);
 
       setUploadProgress('Success!');
 

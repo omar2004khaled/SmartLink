@@ -17,7 +17,7 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, config.data || config.params);
+    //console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, config.data || config.params);
     return config;
   },
   (error) => {
@@ -27,7 +27,7 @@ apiClient.interceptors.request.use(
 );
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+    //console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
     return response;
   },
   (error) => {
@@ -61,7 +61,7 @@ export const userIdFromLocalStorage = () => {
 export const SavePost = async (postData) => {
   try {
     const response = await apiClient.post('/Post/add', postData);
-    console.log("Post saved successfully:", response.data);
+    //console.log("Post saved successfully:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error saving post:", error);
@@ -78,7 +78,7 @@ export const GetPosts = async (page = 0, size = 10, sortBy = 'postId', ascending
         ascending: ascending
       }
     });
-    console.log(`Posts fetched successfully (page ${page}, size ${size}):`, response.data);
+    //console.log(`Posts fetched successfully (page ${page}, size ${size}):`, response.data);
 
     const normalizedData = response.data.map(post => ({
       ...post,
@@ -100,7 +100,7 @@ export const GetAllPosts = async () => {
 export const GetSpecificPost = async (PostId) => {
   try {
     const response = await apiClient.get(`/Post/${PostId}`);
-    console.log("Post with id " + PostId + " fetched successfully:", response.data);
+    //console.log("Post with id " + PostId + " fetched successfully:", response.data);
 
     const post = response.data;
     return {
@@ -115,7 +115,7 @@ export const GetSpecificPost = async (PostId) => {
 export const DeletePost = async (PostId) => {
   try {
     const response = await apiClient.delete(`/Post/delete/${PostId}`);
-    console.log("Post with id " + PostId + " deleted successfully:", response.data);
+    //console.log("Post with id " + PostId + " deleted successfully:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error deleting Post:", error);
@@ -125,7 +125,7 @@ export const DeletePost = async (PostId) => {
 export const UpdatePost = async (PostId, updatedData) => {
   try {
     const response = await apiClient.put(`/Post/update/${PostId}`, updatedData);
-    console.log("Post with id " + PostId + " updated successfully:", response.data);
+    //console.log("Post with id " + PostId + " updated successfully:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error updating Post:", error);
@@ -134,9 +134,9 @@ export const UpdatePost = async (PostId, updatedData) => {
 }
 export const GetComments = async (postId, page = 0, size = 10) => {
   try {
-    console.log(`Fetching comments for post ${postId}, page ${page}`);
+    //console.log(`Fetching comments for post ${postId}, page ${page}`);
     const response = await apiClient.get(`/comment/getAll/${postId}/${page}`);
-    console.log(`Comments for post ${postId} fetched:`, response.data);
+    //console.log(`Comments for post ${postId} fetched:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -146,19 +146,19 @@ export const GetComments = async (postId, page = 0, size = 10) => {
 
 export const SaveComment = async (commentDTO) => {
   try {
-    console.log("=== Attempting to save comment ===");
-    console.log("Comment data:", commentDTO);
+    //console.log("=== Attempting to save comment ===");
+    //console.log("Comment data:", commentDTO);
 
     if (!commentDTO.postId) {
       throw new Error('Post ID is required to save a comment');
     }
 
-    console.log("API endpoint:", `${API_BASE_URL}/comment/add`);
+    //console.log("API endpoint:", `${API_BASE_URL}/comment/add`);
 
     const response = await apiClient.post('/comment/add', commentDTO);
 
-    console.log("=== Comment saved successfully ===");
-    console.log("Response:", response.data);
+    //console.log("=== Comment saved successfully ===");
+    //console.log("Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("=== Error saving comment ===");
@@ -190,9 +190,9 @@ export const SaveComment = async (commentDTO) => {
 
 export const GetUserInfo = async (userId) => {
   try {
-    console.log(`Fetching user info for userId: ${userId}`);
+    //console.log(`Fetching user info for userId: ${userId}`);
     const response = await apiClient.get(`/auth/user/${userId}`);
-    console.log(`User info for userId ${userId} fetched:`, response.data);
+    //console.log(`User info for userId ${userId} fetched:`, response.data);
     return response.data;
   } catch (error) {
     console.error(`Error fetching user info for userId ${userId}:`, error);
@@ -212,11 +212,11 @@ export const GetUserProfilePic = async (userId) => {
 
     const profileId = typeof profileIdData === 'object' ? profileIdData.profileId : profileIdData;
 
-    console.log(`Profile ID for user ${userId}:`, profileId);
+    //console.log(`Profile ID for user ${userId}:`, profileId);
 
     if (profileId) {
       const profileResponse = await apiClient.get(`/api/profiles/${profileId}`);
-      console.log(`Profile picture URL for user ${userId}:`, profileResponse.data.profilePicUrl);
+      //console.log(`Profile picture URL for user ${userId}:`, profileResponse.data.profilePicUrl);
       return profileResponse.data.profilePicUrl || null;
     }
     return null;
@@ -236,7 +236,7 @@ export const toggleReaction = async (postId, userId, reactionType) => {
         reactionType
       }
     });
-    console.log("Reaction toggled:", response.data);
+    //console.log("Reaction toggled:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error toggling reaction:", error);
@@ -247,7 +247,7 @@ export const toggleReaction = async (postId, userId, reactionType) => {
 export const getReactionCounts = async (postId) => {
   try {
     const response = await apiClient.get(`/reactions/count/${postId}`);
-    console.log(`Reaction counts for post ${postId}:`, response.data);
+    //console.log(`Reaction counts for post ${postId}:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching reaction counts:", error);
@@ -260,7 +260,7 @@ export const getTopReactions = async (postId, limit = 3) => {
     const response = await apiClient.get(`/reactions/top/${postId}`, {
       params: { limit }
     });
-    console.log(`Top ${limit} reactions for post ${postId}:`, response.data);
+    //console.log(`Top ${limit} reactions for post ${postId}:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching top reactions:", error);
@@ -271,7 +271,7 @@ export const getTopReactions = async (postId, limit = 3) => {
 export const getTotalReactions = async (postId) => {
   try {
     const response = await apiClient.get(`/reactions/total/${postId}`);
-    console.log(`Total reactions for post ${postId}:`, response.data);
+    //console.log(`Total reactions for post ${postId}:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching total reactions:", error);
@@ -284,7 +284,7 @@ export const getUserReaction = async (postId, userId) => {
     const response = await apiClient.get('/reactions/user', {
       params: { postId, userId }
     });
-    console.log(`User reaction for post ${postId}:`, response.data);
+    //console.log(`User reaction for post ${postId}:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching user reaction:", error);
@@ -301,7 +301,7 @@ export const reportPost = async (postId, reporterId, category, description = '')
         description
       }
     });
-    console.log("Post reported successfully:", response.data);
+    //console.log("Post reported successfully:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error reporting post:", error);
@@ -312,7 +312,7 @@ export const reportPost = async (postId, reporterId, category, description = '')
 export const getReportsForPost = async (postId) => {
   try {
     const response = await apiClient.get(`/Post/${postId}/reports`);
-    console.log(`Reports for post ${postId}:`, response.data);
+    //console.log(`Reports for post ${postId}:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching reports:", error);
@@ -323,7 +323,7 @@ export const getReportsForPost = async (postId) => {
 export const getReportCount = async (postId) => {
   try {
     const response = await apiClient.get(`/Post/${postId}/report-count`);
-    console.log(`Report count for post ${postId}:`, response.data);
+    //console.log(`Report count for post ${postId}:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching report count:", error);
@@ -336,7 +336,7 @@ export const hasUserReported = async (postId, reporterId) => {
     const response = await apiClient.get(`/Post/${postId}/has-reported`, {
       params: { reporterId }
     });
-    console.log(`User ${reporterId} has reported post ${postId}:`, response.data);
+    //console.log(`User ${reporterId} has reported post ${postId}:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Error checking if user reported:", error);

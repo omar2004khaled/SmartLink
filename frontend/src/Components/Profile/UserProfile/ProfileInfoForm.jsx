@@ -58,7 +58,7 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
       }
 
       const data = await res.json();
-      console.log('Cloudinary response:', data);
+      //console.log('Cloudinary response:', data);
       return data.secure_url;
     } catch (err) {
       console.error('Upload failed', err);
@@ -84,7 +84,7 @@ export default function ProfileInfoForm({ open, profile, locations = [], onSave,
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log('Submitting form:', form);
+    //console.log('Submitting form:', form);
     onSave(form);
   }
 

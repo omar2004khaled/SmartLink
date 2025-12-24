@@ -92,7 +92,7 @@ export default function EditModal({
       const cloudinaryData = await cloudinaryResponse.json();
       const imageUrl = cloudinaryData.secure_url;
 
-      console.log('Image uploaded:', imageType, imageUrl);
+      //console.log('Image uploaded:', imageType, imageUrl);
 
       // FIX 1: Update BOTH logoUrl/coverUrl AND coverImageUrl for backend compatibility
       if (imageType === 'logo') {
@@ -153,7 +153,7 @@ export default function EditModal({
       };
     }
 
-    console.log('Saving data for section:', section, dataToSave);
+    //console.log('Saving data for section:', section, dataToSave);
     onSave(dataToSave);
   };
 

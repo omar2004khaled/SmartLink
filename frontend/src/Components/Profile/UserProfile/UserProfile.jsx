@@ -237,7 +237,33 @@ export default function UserProfile() {
     return null;
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: '#f5f5f5'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          border: '4px solid #f3f3f3',
+          borderTop: '4px solid #3498db',
+          borderRadius: '50%',
+          width: '40px',
+          height: '40px',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto'
+        }}></div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!profile) return <div>No profile found.</div>;
 
@@ -245,17 +271,17 @@ export default function UserProfile() {
   const handleEditProfile = () => isOwnProfile && setEditProfile(true);
   const handleSaveProfile = async (form) => {
     try {
-      console.log('Starting profile save with form:', form);
+      //console.log('Starting profile save with form:', form);
       const token = localStorage.getItem('authToken');
       let locationId = profile.locationId;
 
       // If location changed, find or create location
       if (form.country && form.city && (form.country !== profile.country || form.city !== profile.city)) {
-        console.log('Location changed, processing...');
+        //console.log('Location changed, processing...');
         // Try to find existing location
         let loc = locations.find(l => l.country === form.country && l.city === form.city);
         if (!loc) {
-          console.log('Creating new location...');
+          //console.log('Creating new location...');
           // Create new location
           const locRes = await fetch(`${API_BASE_URL}/api/locations`, {
             method: 'POST',
@@ -271,7 +297,7 @@ export default function UserProfile() {
             throw new Error('Failed to create location: ' + errorText);
           }
           loc = await locRes.json();
-          console.log('New location created:', loc);
+          //console.log('New location created:', loc);
           // Refresh locations
           const allLocRes = await fetch(`${API_BASE_URL}/api/locations`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -292,8 +318,8 @@ export default function UserProfile() {
         locationId: locationId
       };
 
-      console.log('Sending profile update:', profilePayload);
-      console.log('URL:', `${API_BASE}/${profileId}`);
+      //console.log('Sending profile update:', profilePayload);
+      //console.log('URL:', `${API_BASE}/${profileId}`);
 
       const res = await fetch(`${API_BASE}/${profileId}`, {
         method: 'PUT',
@@ -304,8 +330,8 @@ export default function UserProfile() {
         body: JSON.stringify(profilePayload)
       });
 
-      console.log('Response status:', res.status);
-      console.log('Response headers:', res.headers);
+      //console.log('Response status:', res.status);
+      //console.log('Response headers:', res.headers);
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -314,7 +340,7 @@ export default function UserProfile() {
       }
 
       const updated = await res.json();
-      console.log('Profile updated successfully:', updated);
+      //console.log('Profile updated successfully:', updated);
       setProfile(updated);
       setEditProfile(false);
       showSuccess('Profile updated successfully!');

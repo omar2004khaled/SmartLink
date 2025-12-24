@@ -89,7 +89,7 @@ const CompanyLogin = () => {
         localStorage.setItem('userEmail', data.email);
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('userType', 'COMPANY');
-        console.log("Company login successful, token stored");
+        //console.log("Company login successful, token stored");
       }
 
       navigate('/company-home');
