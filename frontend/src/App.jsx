@@ -24,6 +24,7 @@ import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
 import CVAnalysis from './Components/CVAnalysis';
 import ApplicationsPage from './Components/job/ApplicationsPage';
+import ConnectionsTab from './Components/Profile/UserProfile/ConnectionsTab';
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
       <Route path="/jobs" element={<CompanyJobsPage />} />
       <Route path="/cv-analysis" element={<CVAnalysis />} />
       <Route path="/applications" element={<ApplicationsPage />} />
+      <Route path="/connections" element={<ConnectionsTab />} />
 
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

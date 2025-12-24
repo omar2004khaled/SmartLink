@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../../config";
+import Navbar from "../../Navbar";
 
 const API_BASE = `${API_BASE_URL}/api`;
 
@@ -127,63 +128,129 @@ export default function ConnectionsTab() {
   if (loading) return <div>Loading connections...</div>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <section className="up-card">
-        <div className="up-card-header">
-          <div className="up-card-title">
-            <h3>Sent Requests</h3>
-            <div className="up-card-sub">Pending connection requests you sent</div>
+    <>
+      <Navbar />
+      <div style={{ maxWidth: '900px', margin: '80px auto 0', backgroundColor: 'white', minHeight: '100vh' }}>
+        <div style={{ padding: '32px 40px' }}>
+          <div style={{ marginBottom: '32px' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#000000', margin: '0 0 8px 0', letterSpacing: '-0.5px' }}>My Network</h1>
+            <p style={{ fontSize: '15px', color: '#666666', margin: '0' }}>Manage your professional connections</p>
           </div>
+      <section style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '12px', marginBottom: '24px', overflow: 'hidden' }}>
+        <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #f3f6f9' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a', margin: '0 0 8px 0' }}>Sent Requests</h3>
+          <p style={{ fontSize: '14px', color: '#666666', margin: '0' }}>Pending connection requests you sent</p>
         </div>
-        <div className="up-card-body">
+        <div style={{ padding: '0 24px 24px' }}>
           {sentRequests.length === 0 ? (
-            <p style={{ color: '#6b7280' }}>No pending sent requests</p>
+            <div style={{ padding: '32px 0', textAlign: 'center', color: '#666666', fontSize: '15px' }}>No pending sent requests</div>
           ) : (
             sentRequests.map(req => (
-              <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f3f6f9' }}>
-                <div>
+              <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid #f3f6f9' }}>
+                <div style={{ flex: 1 }}>
                   <div 
-                    style={{ fontWeight: 600, color: '#0066cc', cursor: 'pointer' }}
+                    style={{ fontWeight: '600', color: '#1976d2', cursor: 'pointer', fontSize: '16px', marginBottom: '4px' }}
                     onClick={() => {
                       navigate(`/profile/${req.receiverId}`);
                       window.location.reload();
                     }}
                   >{req.name}</div>
-                  <div style={{ fontSize: '13px', color: '#6b7280' }}>{req.headline}</div>
+                  <div style={{ fontSize: '14px', color: '#666666' }}>{req.headline}</div>
                 </div>
-                <button className="btn btn-outline btn-sm" onClick={() => handleCancel(req.id)}>Cancel</button>
+                <button 
+                  style={{ 
+                    padding: '8px 16px', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#666666', 
+                    backgroundColor: 'white', 
+                    border: '1px solid #d0d0d0', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor = '#f8f9fa';
+                    e.target.style.borderColor = '#1976d2';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor = 'white';
+                    e.target.style.borderColor = '#d0d0d0';
+                  }}
+                  onClick={() => handleCancel(req.id)}
+                >Cancel</button>
               </div>
             ))
           )}
         </div>
       </section>
 
-      <section className="up-card">
-        <div className="up-card-header">
-          <div className="up-card-title">
-            <h3>Received Requests</h3>
-            <div className="up-card-sub">Connection requests waiting for your response</div>
-          </div>
+      <section style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '12px', marginBottom: '24px', overflow: 'hidden' }}>
+        <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #f3f6f9' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a', margin: '0 0 8px 0' }}>Received Requests</h3>
+          <p style={{ fontSize: '14px', color: '#666666', margin: '0' }}>Connection requests waiting for your response</p>
         </div>
-        <div className="up-card-body">
+        <div style={{ padding: '0 24px 24px' }}>
           {receivedRequests.length === 0 ? (
-            <p style={{ color: '#6b7280' }}>No pending received requests</p>
+            <div style={{ padding: '32px 0', textAlign: 'center', color: '#666666', fontSize: '15px' }}>No pending received requests</div>
           ) : (
             receivedRequests.map(req => (
-              <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f3f6f9' }}>
-                <div>
+              <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid #f3f6f9' }}>
+                <div style={{ flex: 1 }}>
                   <div 
-                    style={{ fontWeight: 600, color: '#0066cc', cursor: 'pointer' }}
+                    style={{ fontWeight: '600', color: '#1976d2', cursor: 'pointer', fontSize: '16px', marginBottom: '4px' }}
                     onClick={() => {
                       navigate(`/profile/${req.senderId}`);
                       window.location.reload();
                     }}
                   >{req.name}</div>
-                  <div style={{ fontSize: '13px', color: '#6b7280' }}>{req.headline}</div>
+                  <div style={{ fontSize: '14px', color: '#666666' }}>{req.headline}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-primary btn-sm" onClick={() => handleAccept(req.id)}>Accept</button>
-                  <button className="btn btn-outline btn-sm" onClick={() => handleReject(req.id)}>Reject</button>
+                  <button 
+                    style={{ 
+                      padding: '8px 16px', 
+                      fontSize: '14px', 
+                      fontWeight: '500', 
+                      color: 'white', 
+                      backgroundColor: '#1976d2', 
+                      border: 'none', 
+                      borderRadius: '8px', 
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#1565c0';
+                      e.target.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = '#1976d2';
+                      e.target.style.transform = 'translateY(0)';
+                    }}
+                    onClick={() => handleAccept(req.id)}
+                  >Accept</button>
+                  <button 
+                    style={{ 
+                      padding: '8px 16px', 
+                      fontSize: '14px', 
+                      fontWeight: '500', 
+                      color: '#666666', 
+                      backgroundColor: 'white', 
+                      border: '1px solid #d0d0d0', 
+                      borderRadius: '8px', 
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#f8f9fa';
+                      e.target.style.borderColor = '#1976d2';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = 'white';
+                      e.target.style.borderColor = '#d0d0d0';
+                    }}
+                    onClick={() => handleReject(req.id)}
+                  >Reject</button>
                 </div>
               </div>
             ))
@@ -191,35 +258,56 @@ export default function ConnectionsTab() {
         </div>
       </section>
 
-      <section className="up-card">
-        <div className="up-card-header">
-          <div className="up-card-title">
-            <h3>All Connections</h3>
-            <div className="up-card-sub">{connections.length} connection{connections.length !== 1 ? 's' : ''}</div>
-          </div>
+      <section style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '12px', marginBottom: '24px', overflow: 'hidden' }}>
+        <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #f3f6f9' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a', margin: '0 0 8px 0' }}>All Connections</h3>
+          <p style={{ fontSize: '14px', color: '#666666', margin: '0' }}>{connections.length} connection{connections.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="up-card-body">
+        <div style={{ padding: '0 24px 24px' }}>
           {connections.length === 0 ? (
-            <p style={{ color: '#6b7280' }}>No connections yet</p>
+            <div style={{ padding: '32px 0', textAlign: 'center', color: '#666666', fontSize: '15px' }}>No connections yet</div>
           ) : (
             connections.map(conn => (
-              <div key={conn.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f3f6f9' }}>
-                <div>
+              <div key={conn.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid #f3f6f9' }}>
+                <div style={{ flex: 1 }}>
                   <div 
-                    style={{ fontWeight: 600, color: '#0066cc', cursor: 'pointer' }}
+                    style={{ fontWeight: '600', color: '#1976d2', cursor: 'pointer', fontSize: '16px', marginBottom: '4px' }}
                     onClick={() => {
                       navigate(`/profile/${conn.otherId}`);
                       window.location.reload();
                     }}
                   >{conn.name}</div>
-                  <div style={{ fontSize: '13px', color: '#6b7280' }}>{conn.headline}</div>
+                  <div style={{ fontSize: '14px', color: '#666666' }}>{conn.headline}</div>
                 </div>
-                <button className="btn btn-danger btn-sm" onClick={() => handleRemove(conn.id)}>Remove</button>
+                <button 
+                  style={{ 
+                    padding: '8px 16px', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#dc3545', 
+                    backgroundColor: 'white', 
+                    border: '1px solid #dc3545', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor = '#dc3545';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor = 'white';
+                    e.target.style.color = '#dc3545';
+                  }}
+                  onClick={() => handleRemove(conn.id)}
+                >Remove</button>
               </div>
             ))
           )}
         </div>
       </section>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }
