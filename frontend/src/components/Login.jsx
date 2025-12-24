@@ -122,9 +122,10 @@ useEffect(() => {
 
     // Success case - response should be JSON
     if (data.token) {
+  
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userEmail', data.email);
-      localStorage.setItem('userType', data.userType);
+      localStorage.setItem('userType', data.role);
       console.log("Login successful, token stored");
       
       // Fetch userId from backend

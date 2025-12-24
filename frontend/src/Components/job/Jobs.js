@@ -15,6 +15,8 @@ const GET_JOBS_QUERY = `
       salaryMin
       salaryMax
       deadline
+      companyName
+      isApplied
     }
   }
 `;
@@ -30,8 +32,8 @@ export const fetchJobs = async (filters = {}) => {
     if (filters.jobType) filter.jobType = filters.jobType.replace('-', '_').toUpperCase();
     if (filters.minSalary) filter.minSalary = parseInt(filters.minSalary);
     if (filters.maxSalary) filter.maxSalary = parseInt(filters.maxSalary);
+    filter.userId=Number(localStorage.getItem('userId'));
 
-    console.log('Sending filter:', filter);
 
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',

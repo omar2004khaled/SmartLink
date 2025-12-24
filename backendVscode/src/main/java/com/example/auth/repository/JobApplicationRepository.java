@@ -17,6 +17,8 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication,L
     Optional<JobApplication> getApplicationByUserAndJob(@Param("userId") Long userId, @Param("jobId") Long jobId);
     @Query("SELECT ja FROM JobApplication ja WHERE ja.job.id = :jobId")
     Optional<List<JobApplication>> getApplicationByJobId(@Param("jobId") Long jobId);
+    @Query("SELECT ja FROM JobApplication ja WHERE ja.user.id = :userId")
+    Optional<List<JobApplication>> getApplicationByUserId(@Param("userId") Long userId);
 
     @Modifying
     @org.springframework.transaction.annotation.Transactional
