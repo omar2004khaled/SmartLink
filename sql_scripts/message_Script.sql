@@ -15,4 +15,6 @@ CREATE TABLE messages (
         FOREIGN KEY (receiver_id) 
         REFERENCES users(id) 
         ON DELETE CASCADE
+
+        INDEX idx_sender_receiver_created (sender_id, receiver_id, created_at DESC)
 )

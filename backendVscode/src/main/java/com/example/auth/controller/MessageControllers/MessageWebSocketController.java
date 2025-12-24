@@ -15,6 +15,7 @@ import org.springframework.web.socket.WebSocketMessage;
 @RequiredArgsConstructor
 public class MessageWebSocketController {
 
+    public static final String TOPIC_MESSAGES = "/topic/messages/";
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -30,12 +31,12 @@ public class MessageWebSocketController {
 
  
         messagingTemplate.convertAndSend(
-                "/topic/messages/" + message.getReceiverId(),
+                TOPIC_MESSAGES + message.getReceiverId(),
                 savedMessage
         );
 
         messagingTemplate.convertAndSend(
-                "/topic/messages/" + message.getSenderId(),
+                TOPIC_MESSAGES + message.getSenderId(),
                 savedMessage
         );
     }
