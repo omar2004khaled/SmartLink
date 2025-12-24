@@ -3,12 +3,15 @@ package com.example.auth.dto.CompanyTests;
 import com.example.auth.dto.CompanyUpdateDTO;
 import com.example.auth.dto.LocationDTO;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@AutoConfigureMockMvc
+@SpringBootTest
 class CompanyUpdateDTOTest {
 
     @Test

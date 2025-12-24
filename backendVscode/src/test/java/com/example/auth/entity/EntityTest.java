@@ -2,12 +2,15 @@ package com.example.auth.entity;
 
 import com.example.auth.enums.Gender;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@AutoConfigureMockMvc
+@SpringBootTest
 class EntityTest {
 
     @Test
