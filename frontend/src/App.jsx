@@ -23,6 +23,7 @@ import CompanyJobs from './Components/CompanyJobs';
 import MainPage from './Components/MainPage';
 import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
+import CVAnalysis from './Components/CVAnalysis';
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
       <Route path="/post" element={<PostCard />} />
       <Route path="/job" element={<JobsPage />} />
       <Route path="/jobs" element={<CompanyJobsPage />} />
+      <Route path="/cv-analysis" element={<CVAnalysis />} />
 
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
