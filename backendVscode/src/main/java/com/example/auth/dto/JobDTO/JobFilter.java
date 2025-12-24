@@ -18,6 +18,7 @@ public class JobFilter {
     private String jobLocation;
     private Integer minSalary;
     private Integer maxSalary;
+    private Long userId;
 
     @Override
     public String toString() {

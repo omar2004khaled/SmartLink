@@ -1,10 +1,12 @@
 package com.example.auth.service.JobServices;
 
 import com.example.auth.dto.JobDTO.ApplicationDTO;
+import com.example.auth.entity.CompanyProfile;
 import com.example.auth.entity.Job;
 import com.example.auth.entity.JobApplication;
 import com.example.auth.entity.User;
 import com.example.auth.enums.ApplicationStatus;
+import com.example.auth.repository.CompanyProfileRepo;
 import com.example.auth.repository.JobApplicationRepository;
 import com.example.auth.repository.JobRepository;
 import com.example.auth.repository.UserRepository;
@@ -26,11 +28,10 @@ public class JobApplicationService {
     UserRepository userRepository;
     JobApplicationRepository jobApplicationRepository;
     NotificationService notificationService;
-
     @Autowired
     public JobApplicationService(JobRepository jobRepository, UserRepository userRepository,
             JobApplicationRepository jobApplicationRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService,CompanyProfileRepo companyProfileRepo) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.jobApplicationRepository = jobApplicationRepository;
@@ -88,6 +89,13 @@ public class JobApplicationService {
                 .collect(Collectors.toList());
     }
 
+    public List<ApplicationDTO> getByUserId(Long userId){
+        List<JobApplication> list = jobApplicationRepository.getApplicationByUserId(userId).get();
+        return list.stream()
+                .map(this::toApplicationDTO)
+                .collect(Collectors.toList());
+    }
+
     public ApplicationDTO addComment(String comment, Long applicationId){
 
         JobApplication jobApp = helper(applicationId);
@@ -125,6 +133,7 @@ public class JobApplicationService {
                 .coverLetter(jobApp.getCoverLetter())
                 .createdAt(LocalDateTime.ofInstant(jobApp.getCreatedAt(), ZoneId.systemDefault()))
                 .comments(jobApp.getComments())
+                .companyName(jobApp.getJob().getCompany().getFullName())
                 .build();
     }
 }

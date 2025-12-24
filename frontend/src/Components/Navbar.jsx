@@ -132,6 +132,11 @@ const Navbar = ({ showSearch = false }) => {
               <Briefcase size={20} />
               <span>Opportunities</span>
             </button>
+
+            <button className={`sidebar-link ${isActive('/applications') ? 'active' : ''}`} onClick={() => { navigate('/applications'); setSidebarOpen(false); }}>
+              <Briefcase size={20} />
+              <span>Applications</span>
+            </button>
           </div>
 
           <div className="nav-section">

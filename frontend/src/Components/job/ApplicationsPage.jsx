@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchApplications } from './applicationService';
+import { fetchApplications, fetchApplicationsByUserId } from './applicationService';
 import Navbar from '../Navbar';
 import { useSearchParams } from 'react-router-dom';
 import CompanyNavbar from '../CompanyNavbar';
@@ -10,6 +10,7 @@ const ApplicationsPage = () => {
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState({});
   const [searchParams] = useSearchParams();
+  const [userType, setUserType] = useState(null);
   const jobId = searchParams.get('jobId');
 
   const handleCommentChange = (appId, value) => {
@@ -94,16 +95,31 @@ const ApplicationsPage = () => {
   useEffect(() => {
     const loadApplications = async () => {
       setLoading(true);
-      const data = jobId ? await fetchApplications(jobId) : await fetchApplications();
+      let data = [];
+      
+      // Get user type from localStorage
+      const type = localStorage.getItem('userType');
+      setUserType(type);
+      console.log(type);
+      const userId = localStorage.getItem('userId');
+      
+      if (type === 'USER' && userId) {
+        // User is fetching their own applications
+        data = await fetchApplicationsByUserId(userId);
+      } else if (jobId) {
+        // Company is fetching applications for a specific job
+        data = await fetchApplications(jobId);
+      }
+      
       setApplications(data);
       setLoading(false);
     };
     loadApplications();
-  }, [jobId]);
+  }, []);
 
   return (
     <>
-      <CompanyNavbar />
+      {userType === 'USER' ? <Navbar /> : <CompanyNavbar />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-20">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Job Applications</h1>
 
@@ -119,21 +135,27 @@ const ApplicationsPage = () => {
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">{app.name}</h3>
                     <p className="text-gray-600 text-sm">{app.email}</p>
+                    {app.companyName && (
+                      <p className="text-gray-500 text-sm mt-1">Company: {app.companyName}</p>
+                    )}
                     <p className="text-gray-500 text-xs mt-1">Applied: {new Date(app.createdAt).toLocaleString()}</p>
                     <span className={`inline-block mt-2 px-3 py-1 rounded-md text-xs font-medium border ${getStatusColor(app.status)}`}>
                       {app.status}
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <select
-                      value={app.status}
-                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                    >
-                      <option value="PENDING">Pending</option>
-                      <option value="ACCEPTED">Accepted</option>
-                      <option value="REJECTED">Rejected</option>
-                    </select>
+                    {userType === 'COMPANY' && (
+                      <select
+                        value={app.status}
+                        onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                      >
+                        <option value="PENDING">Pending</option>
+                        <option value="REVIEWED">Reviewed</option>
+                        <option value="ACCEPTED">Accepted</option>
+                        <option value="REJECTED">Rejected</option>
+                      </select>
+                    )}
                     <a
                       href={app.cvURL}
                       download="CV.pdf"
@@ -167,22 +189,24 @@ const ApplicationsPage = () => {
                   </div>
                 )}
 
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Add Comment:</h4>
-                  <textarea
-                    value={comments[app.id] || ''}
-                    onChange={(e) => handleCommentChange(app.id, e.target.value)}
-                    placeholder="Add your comment here..."
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
-                  />
-                  <button
-                    onClick={() => handleSaveComment(app.id)}
-                    className="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-                  >
-                    Save Comment
-                  </button>
-                </div>
+                {userType === 'COMPANY' && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Add Comment:</h4>
+                    <textarea
+                      value={comments[app.id] || ''}
+                      onChange={(e) => handleCommentChange(app.id, e.target.value)}
+                      placeholder="Add your comment here..."
+                      rows="3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
+                    />
+                    <button
+                      onClick={() => handleSaveComment(app.id)}
+                      className="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Save Comment
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -1,7 +1,9 @@
 package com.example.auth.controller;
 
 import com.example.auth.dto.JobDTO.JobFilter;
+import com.example.auth.dto.JobDTO.JobResponse;
 import com.example.auth.entity.Job;
+import com.example.auth.entity.JobApplication;
 import com.example.auth.enums.ExperienceLevel;
 import com.example.auth.enums.JobType;
 import com.example.auth.enums.LocationType;
@@ -51,7 +53,7 @@ class JobsControllerQlTest {
         when(jobRepository.findAll()).thenReturn(mockJobs);
 
         // Act
-        List<Job> result = jobsControllerQl.allJobs(null);
+        List<JobResponse> result = jobsControllerQl.allJobs(null);
 
         // Assert
         assertNotNull(result);
@@ -65,7 +67,7 @@ class JobsControllerQlTest {
         JobFilter emptyFilter = new JobFilter();
         when(jobRepository.findAll()).thenReturn(mockJobs);
 
-        List<Job> result = jobsControllerQl.allJobs(emptyFilter);
+        List<JobResponse> result = jobsControllerQl.allJobs(emptyFilter);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -89,7 +91,7 @@ class JobsControllerQlTest {
         )).thenReturn(filteredJobs);
 
         // Act
-        List<Job> result = jobsControllerQl.allJobs(filter);
+        List<JobResponse> result = jobsControllerQl.allJobs(filter);
 
         // Assert
         assertNotNull(result);
@@ -112,7 +114,7 @@ class JobsControllerQlTest {
         )).thenReturn(Arrays.asList());
 
         // Act
-        List<Job> result = jobsControllerQl.allJobs(filter);
+        List<JobResponse> result = jobsControllerQl.allJobs(filter);
 
         // Assert
         assertNotNull(result);
