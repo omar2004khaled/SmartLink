@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchJobs } from './Jobs';
 import { submitApplication } from './jobService';
+import RecommendJobButton from '../RecommendJobButton';
 import Navbar from '../Navbar';
 
 const JobsPage = () => {
@@ -24,7 +25,14 @@ const JobsPage = () => {
     cv: null,
     coverLetter: ''
   });
-
+  const [userId, setUserId] = useState(null);
+  
+  useEffect(() => {
+      const storedUserId = localStorage.getItem('userId');
+      if (storedUserId) {
+        setUserId(parseInt(storedUserId));
+      }
+    }, []);
   const handleJobClick = (job) => {
     const userRole = localStorage.getItem('userRole');
     if (userRole === 'COMPANY') {
@@ -172,6 +180,10 @@ const JobsPage = () => {
             </form>
           </div>
         )}
+        {/* Add the Recommend Job Button */}
+          <div className="header-actions">
+            <RecommendJobButton userId={userId} />
+          </div>
 
         {loading ? (
           <div className="text-center py-12">

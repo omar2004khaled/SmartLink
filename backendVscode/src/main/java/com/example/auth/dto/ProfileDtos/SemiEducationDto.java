@@ -1,5 +1,11 @@
 package com.example.auth.dto.ProfileDtos;
 
+import lombok.*;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
 public class SemiEducationDto {
     private Long id;
     private String fieldOfStudy;
