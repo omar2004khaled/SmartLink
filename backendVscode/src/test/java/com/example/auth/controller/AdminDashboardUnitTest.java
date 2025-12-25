@@ -21,7 +21,10 @@ import com.example.auth.repository.LikeCommentRepo;
 import com.example.auth.repository.PostAttachmentRepository;
 import com.example.auth.repository.CompanyFollowerRepo;
 import com.example.auth.service.EmailService;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class AdminDashboardUnitTest {
 
     @Test

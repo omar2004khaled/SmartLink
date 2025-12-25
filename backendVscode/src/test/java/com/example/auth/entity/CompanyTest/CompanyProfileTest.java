@@ -3,12 +3,14 @@ package com.example.auth.entity.CompanyTest;
 import com.example.auth.entity.CompanyProfile;
 import com.example.auth.entity.User;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@ExtendWith(MockitoExtension.class)
 class CompanyProfileTest {
 
     @Test

@@ -2,10 +2,12 @@ package com.example.auth.entity.CompanyTest;
 
 import com.example.auth.entity.CompanyLocation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
+@ExtendWith(MockitoExtension.class)
 class CompanyLocationTest {
 
     @Test
