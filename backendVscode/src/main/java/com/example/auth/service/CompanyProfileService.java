@@ -136,7 +136,10 @@ public class CompanyProfileService {
 
         return getCompanyProfile(companyId, null);
     }
-
+    @Transactional
+    boolean userFollowsAccount(Long userId,Long companyId){
+        return companyFollowerRepo.existsByFollowerAndCompany(userRepository.findById(userId).get(),userRepository.findById(companyId).get());
+    }
     @Transactional
     public void updateCompanyLocations(Long companyId, List<LocationDTO> locationUpdates) {
 

@@ -3,12 +3,14 @@ package com.example.auth.dto.CompanyTests;
 import com.example.auth.dto.CompanyUpdateDTO;
 import com.example.auth.dto.LocationDTO;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@ExtendWith(MockitoExtension.class)
 class CompanyUpdateDTOTest {
 
     @Test

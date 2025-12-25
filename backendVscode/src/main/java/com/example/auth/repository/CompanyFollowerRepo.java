@@ -33,4 +33,8 @@ public interface CompanyFollowerRepo extends JpaRepository<CompanyFollower, Comp
     @Modifying
     @org.springframework.transaction.annotation.Transactional
     void deleteByCompany_Id(Long companyId);
+
+
+    @Query("SELECT cf.follower FROM CompanyFollower cf WHERE cf.company.id = :companyId")
+    List<User> findAllFollowersByCompanyId(@Param("companyId") Long companyId);
 }
