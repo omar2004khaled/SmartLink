@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Home, Briefcase, Users, User, LogOut, Menu, X } from 'lucide-react';
+import { Search, Home, Briefcase, Users, User, LogOut, Menu, X, MessageSquare, FileText } from 'lucide-react';
 import './Navbar.css';
 import { API_BASE_URL } from '../config';
 import Logo from '../assets/Logo.png';
+import NotificationBell from './NotificationBell';
+
 
 const Navbar = ({ showSearch = false }) => {
   const navigate = useNavigate();
@@ -46,7 +48,7 @@ const Navbar = ({ showSearch = false }) => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login-select');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path;
@@ -56,44 +58,47 @@ const Navbar = ({ showSearch = false }) => {
       {/* Top Header */}
       <header className="top-header">
         <div className="header-content">
-          <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <Menu size={24} />
-          </button>
-          <div className="brand-section">
-            <img src={Logo} alt="SmartLink" className="brand-logo" />
-            <h1 className="brand-title">SmartLink</h1>
-          </div>
-          {showSearch && (
-            <div className="header-search">
-              <Search className="search-icon" size={18} />
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="search-input"
-              />
-              {showResults && (
-                <div className="search-results">
-                  {isSearching ? (
-                    <div className="search-loading">Searching...</div>
-                  ) : searchResults.length > 0 ? (
-                    searchResults.map(user => (
-                      <div key={user.id} className="search-result-item" onClick={() => navigate(user.userType === 'COMPANY' ? `/company-profile/${user.id}` : `/profile/${user.id}`)}>
-                        <div className="result-avatar">{user.fullName.charAt(0)}</div>
-                        <div className="result-info">
-                          <div className="result-name">{user.fullName}</div>
-                          <div className="result-email">{user.email}</div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="search-no-results">No users found</div>
-                  )}
-                </div>
-              )}
+          <div className="header-left">
+            <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+              <Menu size={24} />
+            </button>
+            <div className="brand-section">
+              <img src={Logo} alt="SmartLink" className="brand-logo" />
+              <h1 className="brand-title">SmartLink</h1>
             </div>
-          )}
+            {showSearch && (
+              <div className="header-search">
+                <Search className="search-icon" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="search-input"
+                />
+                {showResults && (
+                  <div className="search-results">
+                    {isSearching ? (
+                      <div className="search-loading">Searching...</div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map(user => (
+                        <div key={user.id} className="search-result-item" onClick={() => navigate(user.userType === 'COMPANY' ? `/company-profile/${user.id}` : `/profile/${user.id}`)}>
+                          <div className="result-avatar">{user.fullName.charAt(0)}</div>
+                          <div className="result-info">
+                            <div className="result-name">{user.fullName}</div>
+                            <div className="result-email">{user.email}</div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="search-no-results">No users found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <NotificationBell />
         </div>
       </header>
 
@@ -119,13 +124,26 @@ const Navbar = ({ showSearch = false }) => {
 
           <div className="nav-section">
             <h3 className="nav-section-title">Network</h3>
-            <button className={`sidebar-link ${location.search.includes('tab=connections') ? 'active' : ''}`} onClick={() => { navigate('/profile?tab=connections'); setSidebarOpen(false); }}>
+            <button className={`sidebar-link ${isActive('/connections') ? 'active' : ''}`} onClick={() => { navigate('/connections'); setSidebarOpen(false); }}>
               <Users size={20} />
               <span>Connections</span>
             </button>
-            <button className={`sidebar-link ${isActive('/profile') ? 'active' : ''}`} onClick={() => { navigate('/job'); setSidebarOpen(false); }}>
+            <button className={`sidebar-link ${isActive('/messages') ? 'active' : ''}`} onClick={() => { navigate('/messages'); setSidebarOpen(false); }}>
+              <MessageSquare size={20} />
+              <span>Messages</span>
+            </button>
+            <button className={`sidebar-link ${isActive('/job') ? 'active' : ''}`} onClick={() => { navigate('/job'); setSidebarOpen(false); }}>
               <Briefcase size={20} />
               <span>Opportunities</span>
+            </button>
+            <button className={`sidebar-link ${isActive('/cv-analysis') ? 'active' : ''}`} onClick={() => { navigate('/cv-analysis'); setSidebarOpen(false); }}>
+              <FileText size={20} />
+              <span>CV Analysis</span>
+            </button>
+
+            <button className={`sidebar-link ${isActive('/applications') ? 'active' : ''}`} onClick={() => { navigate('/applications'); setSidebarOpen(false); }}>
+              <Briefcase size={20} />
+              <span>Applications</span>
             </button>
           </div>
 

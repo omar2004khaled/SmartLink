@@ -21,6 +21,7 @@ public class ApplicationDTO {
     private String cvURL;
     private String coverLetter;
     private List<String> comments;
+    private String companyName;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;  // Changed from dateTimeFormat
 }

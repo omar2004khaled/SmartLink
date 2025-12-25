@@ -32,5 +32,6 @@ public class JobResponse {
     private Integer salaryMax;
 
     private Instant deadline;
+    private boolean isApplied;
 }
 

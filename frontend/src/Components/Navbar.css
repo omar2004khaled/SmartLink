@@ -12,8 +12,17 @@
 .header-content {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 16px 24px;
   gap: 20px;
+  padding-bottom: 10px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
 }
 
 .menu-toggle {

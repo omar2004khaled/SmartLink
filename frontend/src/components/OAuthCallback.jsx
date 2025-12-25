@@ -12,7 +12,7 @@ const OAuthCallback = () => {
     const handleOAuthCallback = async () => {
       try {
         const token = searchParams.get('token');
-        console.log('OAuth callback received with token:', token);
+        ////console.log('OAuth callback received with token:', token);
 
         if (!token) {
           setStatus('error');
@@ -25,12 +25,12 @@ const OAuthCallback = () => {
 
         // 2. Decode token to get email and userType
         const userData = parseJwt(token);
-        console.log('User data from token:', userData);
+        ////console.log('User data from token:', userData);
 
         if (userData) {
           // Store basic info immediately
           if (userData.sub) localStorage.setItem('userEmail', userData.sub);
-          if (userData.userType) localStorage.setItem('userType', userData.userType);
+          if (userData.userType) localStorage.setItem('userType', userData.role);
 
           // 3. Fetch full user details to get userID (DATABASE ID)
           try {
@@ -42,7 +42,7 @@ const OAuthCallback = () => {
 
             if (userResponse.ok) {
               const fullUserData = await userResponse.json();
-              console.log("Fetched full user data:", fullUserData);
+              ////console.log("Fetched full user data:", fullUserData);
               localStorage.setItem('userId', fullUserData.id);
               localStorage.setItem('user', JSON.stringify(fullUserData));
             } else {

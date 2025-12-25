@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Briefcase, User, LogOut, Menu, X } from 'lucide-react';
+import { Home, Briefcase, User, LogOut, Menu, X, MessageSquare } from 'lucide-react';
 import './Navbar.css';
+import NotificationBell from './NotificationBell';
 
 const CompanyNavbar = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const CompanyNavbar = () => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login-select');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path;
@@ -27,6 +28,7 @@ const CompanyNavbar = () => {
             <img src="/src/assets/Logo.png" alt="SmartLink" className="brand-logo" />
             <h1 className="brand-title">SmartLink</h1>
           </div>
+          <NotificationBell />
         </div>
       </header>
 
@@ -48,12 +50,16 @@ const CompanyNavbar = () => {
               <Briefcase size={20} />
               <span>Jobs</span>
             </button>
+            <button className={`sidebar-link ${isActive('/messages') ? 'active' : ''}`} onClick={() => { navigate('/messages'); setSidebarOpen(false); }}>
+              <MessageSquare size={20} />
+              <span>Messages</span>
+            </button>
             <button className={`sidebar-link ${isActive('/company-profile') ? 'active' : ''}`} onClick={() => { navigate('/company-profile'); setSidebarOpen(false); }}>
               <User size={20} />
               <span>Profile</span>
             </button>
           </div>
-          
+
           <div className="nav-section">
             <button className="sidebar-link logout" onClick={handleLogout}>
               <LogOut size={20} />

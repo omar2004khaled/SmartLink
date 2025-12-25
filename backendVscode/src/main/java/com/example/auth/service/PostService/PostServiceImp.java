@@ -4,7 +4,10 @@ import com.example.auth.dto.PostDTO;
 import com.example.auth.entity.*;
 import com.example.auth.repository.*;
 import com.example.auth.service.AttachmentService.*;
+import com.example.auth.service.NotificationService;
 import com.example.auth.service.PostAttachmentService.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,20 +19,28 @@ import java.util.Optional;
 
 @Service
 public class PostServiceImp implements PostService {
+    private static final Logger logger = LoggerFactory.getLogger(PostServiceImp.class);
+
     private PostRepository postRepository;
     private AttachmentService attachmentService;
     private PostAttachmentService postAttachmentService;
     private CommentRepo commentRepository;
     private UserRepository userRepository;
+    private NotificationService notificationService;
+    private ConnectionRepository connectionRepository;
 
     @Autowired
     public PostServiceImp(PostRepository postRepository, AttachmentService attachmentService,
-            PostAttachmentService postAttachmentService, CommentRepo commentRepo, UserRepository userRepository) {
+            PostAttachmentService postAttachmentService, CommentRepo commentRepo,
+            UserRepository userRepository, NotificationService notificationService,
+            ConnectionRepository connectionRepository) {
         this.postRepository = postRepository;
         this.attachmentService = attachmentService;
         this.postAttachmentService = postAttachmentService;
         this.commentRepository = commentRepo;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.connectionRepository = connectionRepository;
     }
 
     @Override
@@ -115,7 +126,44 @@ public class PostServiceImp implements PostService {
                 .orElse("JOB_SEEKER");
         PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(), userType, savedAttachments,
                 post.getCreatedAt());
+
+        // Notify all connected friends about the new post
+        notifyConnectedFriendsAboutNewPost(post.getUserId(), post.getPostId());
+
         return answer;
+    }
+
+    private void notifyConnectedFriendsAboutNewPost(Long userId, Long postId) {
+
+        try {
+            User postAuthor = userRepository.findById(userId).orElse(null);
+            if (postAuthor == null) {
+                return;
+            }
+
+            // Get all accepted connections for this user
+            List<Connection> connections = connectionRepository.findByUserIdAndStatus(
+                    userId,
+                    Connection.ConnectionStatus.ACCEPTED);
+
+            // Create notification for each connected friend
+            for (Connection connection : connections) {
+                Long friendId = connection.getSender().getId().equals(userId)
+                        ? connection.getReceiver().getId()
+                        : connection.getSender().getId();
+
+                notificationService.createNotification(
+                        friendId,
+                        com.example.auth.enums.NotificationType.NEW_POST,
+                        "New Post from Connection",
+                        postAuthor.getFullName() + " posted something new",
+                        postId,
+                        "POST");
+            }
+
+        } catch (Exception e) {
+            logger.error("Error notifying friends about new post: {}", e.getMessage());
+        }
     }
 
     @Override
