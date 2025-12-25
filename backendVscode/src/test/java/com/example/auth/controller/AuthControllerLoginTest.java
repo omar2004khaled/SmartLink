@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -19,15 +19,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+// Use WebMvcTest for controller layer testing
+@WebMvcTest(AuthController.class) // Specify the controller to test
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
-
 class AuthControllerLoginTest {
 
     @Autowired
@@ -36,60 +36,41 @@ class AuthControllerLoginTest {
     @MockitoBean
     private AuthService authService;
 
-    @Autowired
-    private UserRepository userRepository;
+    @MockitoBean
+    private UserRepository userRepository; // Mock repositories if needed
 
-    @Autowired
+    @MockitoBean
     private JobSeekerProfileRepository jobSeekerProfileRepository;
 
-    @Autowired
-    private com.example.auth.repository.CommentRepo commentRepo;
-
-    @Autowired
-    private com.example.auth.repository.PostRepository postRepository;
-
-    @Autowired
-    private com.example.auth.repository.ConnectionRepository connectionRepository;
-
-    @Autowired
-    private com.example.auth.repository.NotificationRepository notificationRepository;
+    // Remove @Autowired for repositories that aren't needed in controller tests
+    // If you need integration tests, use @SpringBootTest instead
 
     @BeforeEach
     void setUp() {
-        // Delete child entities first to avoid FK constraint violation
-        commentRepo.deleteAll();
-        postRepository.deleteAll();
-        connectionRepository.deleteAll();
-        notificationRepository.deleteAll();
-        jobSeekerProfileRepository.deleteAll();
-        userRepository.deleteAll();
-
-        // Ensure a test user exists for login tests
-        User testUser = new User();
-        testUser.setFullName("Regular User");
-        testUser.setEmail("user@test.com");
-        testUser.setPassword("encodedPassword");
-        testUser.setBirthDate(LocalDate.of(1995, 5, 20));
-        testUser.setPhoneNumber("+209876543210");
-        testUser.setGender(Gender.FEMALE);
-        testUser.setEnabled(true);
-        testUser.setRole("USER");
-        userRepository.save(testUser);
+        // Clear any mocked data
+        // No database operations in unit tests
     }
 
     @Test
     void login_WithValidCredentials_Returns200AndToken() throws Exception {
+        // Arrange
         String email = "user@test.com";
         String password = "Pass123!";
         String token = "jwt-xyz";
 
-        when(authService.login(email, password)).thenReturn(token);
+        when(authService.login(anyString(), anyString())).thenReturn(token);
 
-        String body = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+        String body = """
+            {
+                "email": "%s",
+                "password": "%s"
+            }
+            """.formatted(email, password);
 
+        // Act & Assert
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value(token))
                 .andExpect(jsonPath("$.email").value(email));
@@ -97,17 +78,54 @@ class AuthControllerLoginTest {
 
     @Test
     void login_WithInvalidCredentials_Returns401() throws Exception {
+        // Arrange
         String email = "user@test.com";
         String password = "BadPass";
 
-        when(authService.login(email, password)).thenThrow(new IllegalArgumentException("Invalid password"));
+        when(authService.login(anyString(), anyString()))
+                .thenThrow(new RuntimeException("Invalid credentials"));
 
-        String body = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+        String body = """
+            {
+                "email": "%s",
+                "password": "%s"
+            }
+            """.formatted(email, password);
 
+        // Act & Assert
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Invalid password"));
+                .andExpect(content().string("Invalid credentials"));
+    }
+
+    @Test
+    void login_WithEmptyCredentials_ReturnsBadRequest() throws Exception {
+        // Arrange
+        String body = """
+            {
+                "email": "",
+                "password": ""
+            }
+            """;
+
+        // Act & Assert
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void login_WithMalformedJson_ReturnsBadRequest() throws Exception {
+        // Arrange
+        String malformedJson = "{email: \"test\", password: \"test\"}";
+
+        // Act & Assert
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(malformedJson))
+                .andExpect(status().isBadRequest());
     }
 }

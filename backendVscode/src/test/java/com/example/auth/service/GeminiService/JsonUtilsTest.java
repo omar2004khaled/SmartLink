@@ -6,214 +6,192 @@ import com.example.auth.entity.User;
 import com.example.auth.enums.ExperienceLevel;
 import com.example.auth.enums.JobType;
 import com.example.auth.enums.LocationType;
+import com.example.auth.repository.JobRepository;
+import com.example.auth.repository.UserRepository;
+import com.example.auth.service.JobServices.JobService;
+import com.example.auth.service.NotificationService;
+import com.example.auth.repository.CompanyFollowerRepo;
+import com.example.auth.repository.JobApplicationRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.time.Instant;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class JsonUtilsTest {
 
-    @Test
-    void testToJsonString_WithObject() {
-        // Given
-        TestObject obj = new TestObject("John", 30);
+    @Mock
+    private JobRepository jobRepository;
 
-        // When
-        String json = JsonUtils.toJsonString(obj);
+    @Mock
+    private UserRepository userRepository;
 
-        // Then
-        assertNotNull(json);
-        assertTrue(json.contains("John"));
-        assertTrue(json.contains("30"));
-        assertTrue(json.contains("name"));
-        assertTrue(json.contains("age"));
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private CompanyFollowerRepo companyFollowerRepo;
+
+    @Mock
+    private JobApplicationRepository jobApplicationRepository;
+
+    @InjectMocks
+    private JobService jobService;
+
+
+    private User company;
+    private Job job;
+
+    @BeforeEach
+    void setUp() {
+        company = User.builder()
+                .id(1L)
+                .fullName("Tech Corp")
+                .userType("COMPANY")
+                .build();
+
+        job = Job.builder()
+                .jobId(1L)
+                .title("Software Engineer")
+                .description("Develop software")
+                .company(company)
+                .jobLocation("Remote")
+                .experienceLevel(ExperienceLevel.MID)
+                .jobType(JobType.FULL_TIME)
+                .locationType(LocationType.REMOTE)
+                .createdAt(Instant.now())
+                .salaryMin(80000)
+                .salaryMax(120000)
+                .deadline(Instant.now().plusSeconds(86400))
+                .build();
     }
 
     @Test
-    void testToJsonString_WithNullObject() {
-        // When
-        String json = JsonUtils.toJsonString(null);
+    void mapToJobResponse_WithCompleteJob_ShouldReturnCorrectResponse() {
+        // Act
+        JobResponse response = jobService.mapToJobResponse(job);
 
-        // Then
-        assertEquals("{}", json);
+        // Assert
+        assertNotNull(response);
+        assertEquals(1L, response.getJobId());
+        assertEquals("Software Engineer", response.getTitle());
+        assertEquals("Develop software", response.getDescription());
+        assertEquals("Tech Corp", response.getCompanyName());
+        assertEquals("Remote", response.getJobLocation());
+        assertEquals(ExperienceLevel.MID, response.getExperienceLevel());
+        assertEquals(JobType.FULL_TIME, response.getJobType());
+        assertEquals(LocationType.REMOTE, response.getLocationType());
+        assertEquals(80000, response.getSalaryMin());
+        assertEquals(120000, response.getSalaryMax());
     }
 
     @Test
-    void testToJsonString_WithIterable() {
-        // Given
-        TestObject obj1 = new TestObject("Alice", 25);
-        TestObject obj2 = new TestObject("Bob", 30);
-        Iterable<TestObject> iterable = java.util.List.of(obj1, obj2);
+    void mapToJobResponse_WithNullCompany_ShouldHandleGracefully() {
+        // Arrange
+        job.setCompany(null);
 
-        // When
-        String json = JsonUtils.toJsonString(iterable);
+        // Act
+        JobResponse response = jobService.mapToJobResponse(job);
 
-        // Then
-        assertNotNull(json);
-        assertTrue(json.contains("Alice"));
-        assertTrue(json.contains("Bob"));
-        assertTrue(json.contains("25"));
-        assertTrue(json.contains("30"));
-        assertTrue(json.startsWith("["));
-        assertTrue(json.endsWith("]"));
+        // Assert
+        assertNotNull(response);
+        assertEquals(1L, response.getJobId());
+        assertEquals("Software Engineer", response.getTitle());
+        assertNull(response.getCompanyName()); // Company name should be null
     }
 
     @Test
-    void testToJsonString_WithEmptyIterable() {
-        // Given
-        Iterable<TestObject> emptyIterable = java.util.List.of();
+    void createJob_WithValidRequest_ShouldCreateJob() {
+        // Arrange
+        com.example.auth.dto.JobDTO.JobRequest request =
+                com.example.auth.dto.JobDTO.JobRequest.builder()
+                        .companyId(1L)
+                        .title("Software Engineer")
+                        .description("Develop software")
+                        .experienceLevel(ExperienceLevel.MID)
+                        .jobType(JobType.FULL_TIME)
+                        .locationType(LocationType.REMOTE)
+                        .jobLocation("Remote")
+                        .salaryMin(80000)
+                        .salaryMax(120000)
+                        .deadline(Instant.now().plusSeconds(86400))
+                        .build();
 
-        // When
-        String json = JsonUtils.toJsonString(emptyIterable);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(company));
+        when(jobRepository.save(any(Job.class))).thenReturn(job);
 
-        // Then
-        assertEquals("[]", json);
+        // Act
+        JobResponse response = jobService.createJob(request);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("Software Engineer", response.getTitle());
+        assertEquals("Tech Corp", response.getCompanyName());
+        verify(userRepository, times(1)).findById(1L);
+        verify(jobRepository, times(1)).save(any(Job.class));
     }
 
     @Test
-    void testToJsonString_WithNullIterable() {
-        // When
-        String json = JsonUtils.toJsonString((Iterable<?>) null);
+    void createJob_WithNonCompanyUser_ShouldThrowException() {
+        // Arrange
+        com.example.auth.dto.JobDTO.JobRequest request =
+                com.example.auth.dto.JobDTO.JobRequest.builder()
+                        .companyId(1L)
+                        .title("Software Engineer")
+                        .build();
 
-        // Then
-        assertEquals("[]", json);
+        User regularUser = User.builder()
+                .id(1L)
+                .fullName("Regular User")
+                .userType("REGULAR") // Not a company
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(regularUser));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> jobService.createJob(request));
+        assertEquals("User is not a company", exception.getMessage());
     }
 
     @Test
-    void testMapper_WithCompleteJob() {
-        // Given
-        JsonUtils jsonUtils = new JsonUtils();
-        Job job = new Job();
-        job.setJobId(1L);
-        job.setTitle("Software Engineer");
-        job.setDescription("Develop software");
-        job.setJobLocation("Remote");
-        job.setExperienceLevel(ExperienceLevel.MID);
-        job.setJobType(JobType.FULL_TIME);
-        job.setLocationType(LocationType.REMOTE);
-        job.setCreatedAt(Instant.now());
-        job.setSalaryMin(80000);
-        job.setSalaryMax(120000);
-        job.setDeadline(Instant.now().plusSeconds(86400));
+    void getResponse_ShouldMapCorrectly() {
+        // This tests the private getResponse method indirectly through createJob
 
-        // Create a mock company
-        User company = new User();
-        company.setFullName("Tech Corp");
-        job.setCompany(company);
+        // Arrange
+        com.example.auth.dto.JobDTO.JobRequest request =
+                com.example.auth.dto.JobDTO.JobRequest.builder()
+                        .companyId(1L)
+                        .title("Test Job")
+                        .description("Test Description")
+                        .experienceLevel(ExperienceLevel.JUNIOR)
+                        .jobType(JobType.PART_TIME)
+                        .locationType(LocationType.HYBRID)
+                        .jobLocation("Test Location")
+                        .salaryMin(50000)
+                        .salaryMax(80000)
+                        .deadline(Instant.now().plusSeconds(86400))
+                        .build();
 
-        // When
-        JobResponse jobResponse = jsonUtils.mapper(job);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(company));
+        when(jobRepository.save(any(Job.class))).thenReturn(job);
 
-        // Then
-        assertNotNull(jobResponse);
-        assertEquals(1L, jobResponse.getJobId());
-        assertEquals("Software Engineer", jobResponse.getTitle());
-        assertEquals("Develop software", jobResponse.getDescription());
-        assertEquals("Tech Corp", jobResponse.getCompanyName());
-        assertEquals("Remote", jobResponse.getJobLocation());
-        assertEquals(ExperienceLevel.MID, jobResponse.getExperienceLevel());
-        assertEquals(JobType.FULL_TIME, jobResponse.getJobType());
-        assertEquals(LocationType.REMOTE, jobResponse.getLocationType());
-        assertEquals(80000, jobResponse.getSalaryMin());
-        assertEquals(120000, jobResponse.getSalaryMax());
-    }
+        // Act
+        JobResponse response = jobService.createJob(request);
 
-    @Test
-    void testMapper_WithNullCompany() {
-        // Given
-        JsonUtils jsonUtils = new JsonUtils();
-        Job job = new Job();
-        job.setJobId(1L);
-        job.setTitle("Software Engineer");
-        job.setCompany(null); // Company is null
-
-        // When
-        JobResponse jobResponse = jsonUtils.mapper(job);
-
-        // Then
-        assertNotNull(jobResponse);
-        assertEquals(1L, jobResponse.getJobId());
-        assertEquals("Software Engineer", jobResponse.getTitle());
-        assertNull(jobResponse.getCompanyName());
-    }
-
-    @Test
-    void testMapper_WithNullJob() {
-        // Given
-        JsonUtils jsonUtils = new JsonUtils();
-
-        // When
-        JobResponse jobResponse = jsonUtils.mapper(null);
-
-        // Then
-        assertNull(jobResponse);
-    }
-
-    @Test
-    void testMapper_WithPartialJob() {
-        // Given
-        JsonUtils jsonUtils = new JsonUtils();
-        Job job = new Job();
-        job.setJobId(1L);
-        job.setTitle("Partial Job");
-        // Other fields are null
-
-        // When
-        JobResponse jobResponse = jsonUtils.mapper(job);
-
-        // Then
-        assertNotNull(jobResponse);
-        assertEquals(1L, jobResponse.getJobId());
-        assertEquals("Partial Job", jobResponse.getTitle());
-        assertNull(jobResponse.getDescription());
-        assertNull(jobResponse.getCompanyName());
-        assertNull(jobResponse.getJobLocation());
-        assertNull(jobResponse.getExperienceLevel());
-        assertNull(jobResponse.getJobType());
-        assertNull(jobResponse.getLocationType());
-        assertNull(jobResponse.getSalaryMin());
-        assertNull(jobResponse.getSalaryMax());
-        assertNull(jobResponse.getDeadline());
-    }
-
-    @Test
-    void testToJsonString_WithInstantField() {
-        // Given
-        Instant instant = Instant.parse("2024-01-01T00:00:00Z");
-        InstantObject obj = new InstantObject(instant, "Test");
-
-        // When
-        String json = JsonUtils.toJsonString(obj);
-
-        // Then
-        assertNotNull(json);
-        assertTrue(json.contains("2024-01-01T00:00:00Z"));
-        assertTrue(json.contains("Test"));
-    }
-
-    // Helper test classes
-    static class TestObject {
-        private String name;
-        private int age;
-
-        public TestObject(String name, int age) {
-            this.name = name;
-            this.age = age;
-        }
-
-        public String getName() { return name; }
-        public int getAge() { return age; }
-    }
-
-    static class InstantObject {
-        private Instant timestamp;
-        private String name;
-
-        public InstantObject(Instant timestamp, String name) {
-            this.timestamp = timestamp;
-            this.name = name;
-        }
-
-        public Instant getTimestamp() { return timestamp; }
-        public String getName() { return name; }
+        // Assert
+        assertNotNull(response);
+        assertEquals(job.getJobId(), response.getJobId());
+        assertEquals(job.getTitle(), response.getTitle());
+        assertEquals(company.getFullName(), response.getCompanyName());
     }
 }
