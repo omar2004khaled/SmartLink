@@ -5,11 +5,14 @@ import Navbar from '../Navbar';
 import JobFilters from './JobFilters';
 import JobCard from './JobCard';
 import ApplicationDialog from './ApplicationDialog';
+import { useAlert } from '../../hooks/useAlert';
 
 const JobsPage = () => {
+  const { showSuccess, showError } = useAlert();
   const [showSearch, setShowSearch] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadProgress, setUploadProgress] = useState('');
   const [filters, setFilters] = useState({
     title: '',
     location: '',
@@ -37,7 +40,7 @@ const JobsPage = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    console.log('Filters from form:', filters);
+    //console.log('Filters from form:', filters);
     setLoading(true);
     const data = await fetchJobs(filters);
     setJobs(data);
@@ -51,6 +54,7 @@ const JobsPage = () => {
   const handleApply = (job) => {
     setSelectedJob(job);
     setShowApplyDialog(true);
+    setUploadProgress('');
   };
 
   const handleApplicationChange = (e) => {
@@ -58,12 +62,34 @@ const JobsPage = () => {
     setApplicationData({ ...applicationData, [name]: files ? files[0] : value });
   };
 
-  const handleSubmitApplication = (e) => {
+  const handleSubmitApplication = async (e) => {
     e.preventDefault();
-    console.log('Application submitted:', applicationData, 'for job:', selectedJob);
-    submitApplication(selectedJob.jobId, applicationData);
-    setShowApplyDialog(false);
-    setApplicationData({ name: '', email: '', cv: null, coverLetter: '' });
+    //console.log('Application submitted:', applicationData, 'for job:', selectedJob);
+
+    try {
+      setLoading(true);
+      setUploadProgress('Preparing application...');
+
+      const result = await submitApplication(selectedJob.jobId, applicationData, setUploadProgress);
+      ////console.log('Application result:', result);
+
+      setUploadProgress('Success!');
+
+      // Show success message after a brief delay
+      setTimeout(() => {
+        showSuccess('Application submitted successfully!');
+        setShowApplyDialog(false);
+        setApplicationData({ name: '', email: '', cv: null, coverLetter: '' });
+        setUploadProgress('');
+      }, 500);
+
+    } catch (error) {
+      console.error('Failed to submit application:', error);
+      setUploadProgress('');
+      showError('Failed to submit application. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -78,7 +104,7 @@ const JobsPage = () => {
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-20">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Job Listings</h1>
@@ -90,11 +116,11 @@ const JobsPage = () => {
           </button>
         </div>
 
-        <JobFilters 
-          filters={filters} 
-          handleFilterChange={handleFilterChange} 
-          handleSearch={handleSearch} 
-          showSearch={showSearch} 
+        <JobFilters
+          filters={filters}
+          handleFilterChange={handleFilterChange}
+          handleSearch={handleSearch}
+          showSearch={showSearch}
         />
 
         {loading ? (
@@ -121,6 +147,8 @@ const JobsPage = () => {
           handleApplicationChange={handleApplicationChange}
           handleSubmitApplication={handleSubmitApplication}
           setShowApplyDialog={setShowApplyDialog}
+          uploadProgress={uploadProgress}
+          loading={loading}
         />
       </div>
     </>

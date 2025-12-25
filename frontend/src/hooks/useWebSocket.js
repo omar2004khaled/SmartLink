@@ -23,7 +23,7 @@ const useWebSocket = (userId, onNotificationReceived) => {
             const stompClient = new Client({
                 webSocketFactory: () => socket,
                 debug: (str) => {
-                    console.log('STOMP Debug:', str);
+                    //console.log('STOMP Debug:', str);
                 },
                 reconnectDelay: 5000,
                 heartbeatIncoming: 10000,
@@ -31,14 +31,14 @@ const useWebSocket = (userId, onNotificationReceived) => {
             });
 
             stompClient.onConnect = () => {
-                console.log('WebSocket Connected');
+                //console.log('WebSocket Connected');
                 isConnectedRef.current = true;
 
 
                 stompClient.subscribe(`/topic/notifications/${userId}`, (message) => {
                     try {
                         const notification = JSON.parse(message.body);
-                        console.log('Received notification:', notification);
+                        //console.log('Received notification:', notification);
                         onNotificationReceived(notification);
                     } catch (error) {
                         console.error('Error parsing notification:', error);
@@ -54,7 +54,7 @@ const useWebSocket = (userId, onNotificationReceived) => {
             };
 
             stompClient.onDisconnect = () => {
-                console.log(' WebSocket Disconnected');
+                //console.log(' WebSocket Disconnected');
                 isConnectedRef.current = false;
             };
 
@@ -62,7 +62,7 @@ const useWebSocket = (userId, onNotificationReceived) => {
                 console.error('WebSocket transport error:', event);
             };
 
-            console.log('Attempting to connect to:', `${API_BASE_URL}/ws`);
+            //console.log('Attempting to connect to:', `${API_BASE_URL}/ws`);
             stompClient.activate();
             clientRef.current = stompClient;
 
@@ -78,7 +78,7 @@ const useWebSocket = (userId, onNotificationReceived) => {
             clientRef.current.deactivate();
             clientRef.current = null;
             isConnectedRef.current = false;
-            console.log('WebSocket disconnected manually');
+            //console.log('WebSocket disconnected manually');
         }
     }, []);
 

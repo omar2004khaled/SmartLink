@@ -76,7 +76,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
       }
 
       let data = await response.json();
-      // console.log('Company data received:', data);
+      // //console.log('Company data received:', data);
       setCompanyData(data);
       
       const followingStatus = data.isFollowing || false;
