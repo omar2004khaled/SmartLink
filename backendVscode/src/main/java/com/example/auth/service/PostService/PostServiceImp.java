@@ -6,6 +6,8 @@ import com.example.auth.repository.*;
 import com.example.auth.service.AttachmentService.*;
 import com.example.auth.service.NotificationService;
 import com.example.auth.service.PostAttachmentService.*;
+import com.example.auth.service.RedisService;
+import com.example.auth.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +30,15 @@ public class PostServiceImp implements PostService {
     private UserRepository userRepository;
     private NotificationService notificationService;
     private ConnectionRepository connectionRepository;
+    private RedisService redisService;
+    private CompanyFollowerRepo companyFollowerRepo;
 
     @Autowired
     public PostServiceImp(PostRepository postRepository, AttachmentService attachmentService,
             PostAttachmentService postAttachmentService, CommentRepo commentRepo,
             UserRepository userRepository, NotificationService notificationService,
-            ConnectionRepository connectionRepository) {
+            ConnectionRepository connectionRepository, RedisService redisService,
+            CompanyFollowerRepo companyFollowerRepo) {
         this.postRepository = postRepository;
         this.attachmentService = attachmentService;
         this.postAttachmentService = postAttachmentService;
@@ -41,6 +46,8 @@ public class PostServiceImp implements PostService {
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.connectionRepository = connectionRepository;
+        this.redisService = redisService;
+        this.companyFollowerRepo=companyFollowerRepo;
     }
 
     @Override
@@ -113,7 +120,9 @@ public class PostServiceImp implements PostService {
         Post post = new Post(postDTO.getUserId(), postDTO.getContent());
         List<Attachment> attachments = postDTO.getAttachments();
         List<Attachment> savedAttachments = new ArrayList<>();
+
         post = postRepository.save(post);
+
         for (Attachment attachment : attachments) {
             Attachment saved = attachmentService.save(attachment);
             savedAttachments.add(saved);
@@ -121,18 +130,23 @@ public class PostServiceImp implements PostService {
                     new PostAttachmentKey(post.getPostId(), saved.getAttachId().longValue()));
             postAttachmentService.save(postAttchment);
         }
+
         String userType = userRepository.findById(post.getUserId())
                 .map(user -> user.getUserType() != null ? user.getUserType().toString() : "JOB_SEEKER")
                 .orElse("JOB_SEEKER");
+
         PostDTO answer = new PostDTO(post.getPostId(), post.getContent(), post.getUserId(), userType, savedAttachments,
                 post.getCreatedAt());
 
-        // Notify all connected friends about the new post
         notifyConnectedFriendsAboutNewPost(post.getUserId(), post.getPostId());
+        List<Connection> connections = connectionRepository.findByUserIdAndStatus(
+                post.getUserId(),
+                Connection.ConnectionStatus.ACCEPTED);
+
+        validateConnectionsRedisCache(post.getPostId(), connections, post.getUserId());
 
         return answer;
     }
-
     private void notifyConnectedFriendsAboutNewPost(Long userId, Long postId) {
 
         try {
@@ -140,8 +154,6 @@ public class PostServiceImp implements PostService {
             if (postAuthor == null) {
                 return;
             }
-
-            // Get all accepted connections for this user
             List<Connection> connections = connectionRepository.findByUserIdAndStatus(
                     userId,
                     Connection.ConnectionStatus.ACCEPTED);
@@ -166,6 +178,49 @@ public class PostServiceImp implements PostService {
         }
     }
 
+    private void validateConnectionsRedisCache(Long postId, List<Connection> connections, Long postAuthorId) {
+        try {
+            // Get the post to compute its score
+            Optional<Post> postOpt = postRepository.findById(postId);
+            if (!postOpt.isPresent()) return;
+
+            Post post = postOpt.get();
+
+            for (Connection connection : connections) {
+                Long connectedUserId = connection.getSender().getId().equals(postAuthorId)
+                        ? connection.getReceiver().getId()
+                        : connection.getSender().getId();
+
+                String feedKey = "feed:" + connectedUserId;
+                double score = computeInitialScore(post, connectedUserId, postAuthorId, true);
+                redisService.addToSortedSet(feedKey, String.valueOf(postId), score);
+            }
+            List<User> followers = companyFollowerRepo.findAllFollowersByCompanyId(postAuthorId);
+            for (User follower : followers) {
+                String feedKey = "feed:" + follower.getId();
+                double score = computeInitialScore(post, follower.getId(), postAuthorId, false);
+
+                redisService.addToSortedSet(feedKey, String.valueOf(postId), score);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error invalidating Redis cache: " + e.getMessage());
+        }
+    }
+
+    private double computeInitialScore(Post post, Long viewerId, Long authorId, boolean isConnection) {
+        double score = 0.0;
+        score += 30.0;
+
+        if (isConnection) {
+            score += Constants.CONNECTION_SCORE;
+        } else {
+            score += Constants.FOLLOW_SCORE;
+        }
+
+        return score;
+    }
+
     @Override
     public List<Post> findByUserId(Long theId) {
 
@@ -183,18 +238,18 @@ public class PostServiceImp implements PostService {
         PostDTO savedPostDTO = findById(id);
         if (savedPostDTO == null)
             return null;
-        if (postDTO.getContent() != null) { /// update the content of the post
+        if (postDTO.getContent() != null) {
             savedPostDTO.setContent(postDTO.getContent());
             postRepository.updateContent(id, postDTO.getContent());
             answer = savedPostDTO;
-        } else if (postDTO.getAttachments() != null) { /// update the attachments of the post
+        } else if (postDTO.getAttachments() != null) {
             List<Attachment> attachments = postDTO.getAttachments();
             List<Attachment> savedAttachments = new ArrayList<>();
             for (Attachment attachment : attachments) {
                 if (attachment.getAttachId() != null) { // edit exisiting attachment
                     attachmentService.updateAttachmentById(attachment);
                     savedAttachments.add(attachment);
-                } else { // no id is added so it is a new attachment
+                } else {
                     Attachment saved = attachmentService.save(attachment);
                     savedAttachments.add(saved);
                     PostAttchment postAttchment = new PostAttchment(
@@ -207,5 +262,12 @@ public class PostServiceImp implements PostService {
                     savedAttachments, savedPostDTO.getCreatedAt());
         }
         return answer;
+    }
+
+    @Override
+    public Long findAuthorByPostId(Long postId) {
+        return postRepository.findById(postId)
+                .map(Post::getUserId)
+                .orElse(null);
     }
 }

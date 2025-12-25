@@ -5,10 +5,13 @@ import java.time.LocalDate;
 import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,6 +25,8 @@ import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepositor
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class AdminControllerTest {
 
         @Autowired

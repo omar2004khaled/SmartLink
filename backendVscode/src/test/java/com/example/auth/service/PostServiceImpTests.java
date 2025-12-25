@@ -1,4 +1,4 @@
-package com.example.auth.service.PostService;
+package com.example.auth.service;
 
 import com.example.auth.dto.PostDTO;
 import com.example.auth.entity.*;
@@ -6,6 +6,7 @@ import com.example.auth.enums.TypeofAttachments;
 import com.example.auth.repository.*;
 import com.example.auth.service.AttachmentService.AttachmentService;
 import com.example.auth.service.PostAttachmentService.PostAttachmentService;
+import com.example.auth.service.PostService.PostServiceImp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

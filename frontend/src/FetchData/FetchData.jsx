@@ -69,27 +69,29 @@ export const SavePost = async (postData) => {
   }
 }
 export const GetPosts = async (page = 0, size = 10, sortBy = 'postId', ascending = false) => {
-  try {
-    const response = await apiClient.get('/Post/all', {
-      params: {
-        page: page,
-        size: size,
-        sortBy: sortBy,
-        ascending: ascending
-      }
-    });
-    //console.log(`Posts fetched successfully (page ${page}, size ${size}):`, response.data);
-
-    const normalizedData = response.data.map(post => ({
-      ...post,
-      id: post.id || post.postId,
-    }));
-
-    return normalizedData;
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    throw error;
-  }
+    try {
+      
+        const response = await apiClient.get('/Post/all', {
+            params: {
+                page: page,
+                size: size,
+                sortBy: sortBy,
+                ascending: ascending,
+                viewerId: userIdFromLocalStorage()
+            }
+        });
+        console.log(`Posts fetched successfully (page ${page}, size ${size}):`, response.data);
+        
+        const normalizedData = response.data.map(post => ({
+            ...post,
+            id: post.id || post.postId, 
+        }));
+        
+        return normalizedData;
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        throw error;
+    }
 }
 
 // For getting all posts at once (using large page size)
