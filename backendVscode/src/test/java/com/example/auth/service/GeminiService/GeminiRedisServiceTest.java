@@ -71,8 +71,7 @@ class GeminiRedisServiceTest {
                 "}]";
 
         // Mock Jedis behavior
-        when(jedisPool.getResource()).thenReturn(jedis);
-        when(jedis.get(key)).thenReturn(jsonResponse);
+        // removed unnecessary stubbings
 
         // Create RedisService with mocked pool
         GeminiRedisService service = new GeminiRedisService() {

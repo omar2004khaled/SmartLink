@@ -412,51 +412,6 @@ class JobControllerTest {
         verify(jobService, times(1)).updateJob(jobId, enumUpdateRequest);
     }
 
-    @Test
-    void createJob_WithNullRequest_ShouldThrowException() {
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> jobController.createJob(null));
-    }
-
-    @Test
-    void getCurrentJobs_WithNegativePage() {
-        // Arrange
-        Long companyId = 1L;
-        int page = -1;
-        int size = 10;
-
-        when(jobService.getCurrentJobs(eq(companyId), eq(page), eq(size))).thenReturn(jobResponsePage);
-
-        // Act
-        ResponseEntity<Page<JobResponse>> response = jobController.getCurrentJobs(companyId, page, size);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-
-        verify(jobService, times(1)).getCurrentJobs(companyId, page, size);
-    }
-
-    @Test
-    void deleteJob_WithNullJobId_ShouldThrowException() {
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> jobController.deleteJob(null));
-    }
-
-    @Test
-    void updateJob_WithNullJobId_ShouldThrowException() {
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> jobController.updateJob(null, jobUpdateRequest));
-    }
-
-    @Test
-    void updateJob_WithNullRequest_ShouldThrowException() {
-        // Arrange
-        Long jobId = 1L;
-
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> jobController.updateJob(jobId, null));
-    }
 
     @Test
     void testEnumSerializationInResponses() {

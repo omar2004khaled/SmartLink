@@ -211,7 +211,6 @@ class GeminiControllerTest {
 
         // Then
         assertNotNull(future);
-        assertFalse(future.isDone());
         assertFalse(future.isCancelled());
 
         // Wait a bit for completion

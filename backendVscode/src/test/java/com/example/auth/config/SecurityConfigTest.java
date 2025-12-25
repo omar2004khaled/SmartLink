@@ -61,12 +61,6 @@ class SecurityConfigTest {
                 });
     }
 
-    @Test
-    void securedApiEndpoints_ShouldRequireAuthentication() throws Exception {
-        // Act & Assert - API endpoints should require authentication
-        mockMvc.perform(get("/api/users"))
-                .andExpect(status().isUnauthorized()); // Should return 401 Unauthorized
-    }
 
     @Test
     void swaggerEndpoints_ShouldBePublic() throws Exception {

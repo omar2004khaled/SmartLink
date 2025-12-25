@@ -42,6 +42,18 @@ class PostServiceImpTests {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ConnectionRepository connectionRepository;
+
+    @Mock
+    private RedisService redisService;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private CompanyFollowerRepo companyFollowerRepo;
+
     @InjectMocks
     private PostServiceImp postService;
 
@@ -52,6 +64,8 @@ class PostServiceImpTests {
 
     @BeforeEach
     void setUp() {
+        postService = new PostServiceImp(postRepository, attachmentService, postAttachmentService, commentRepository, userRepository, notificationService, connectionRepository, redisService, companyFollowerRepo);
+
         attachmentIds = Arrays.asList(1L, 2L);
 
         attachment = new Attachment();
@@ -69,7 +83,12 @@ class PostServiceImpTests {
         // Mock UserRepository for all tests
         User mockUser = new User();
         mockUser.setUserType("JOB_SEEKER");
+        mockUser.setId(100L);
+        mockUser.setFullName("Test User");
         when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
+        
+        when(connectionRepository.findByUserIdAndStatus(any(), any())).thenReturn(new ArrayList<>());
+        when(companyFollowerRepo.findAllFollowersByCompanyId(any())).thenReturn(new ArrayList<>());
     }
 
     @Test
