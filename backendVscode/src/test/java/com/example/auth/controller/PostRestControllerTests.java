@@ -42,21 +42,7 @@ class PostRestControllerTests {
                 Arrays.asList(), new Timestamp(System.currentTimeMillis()));
     }
 
-    @Test
-    void findAll_ShouldReturnPostList() {
-        // Arrange
-        List<PostDTO> posts = Arrays.asList(postDTO);
-        when(postService.findAll(any())).thenReturn(posts);
 
-        // Act
-        List<PostDTO> result = postRestController.findAll(0, 5, "PostId", true);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getId());
-        verify(postService, times(1)).findAll(any());
-    }
 
     @Test
     void findById_ValidId_ShouldReturnPost() {

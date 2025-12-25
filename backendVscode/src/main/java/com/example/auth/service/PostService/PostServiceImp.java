@@ -246,7 +246,7 @@ public class PostServiceImp implements PostService {
                 if (attachment.getAttachId() != null) { // edit exisiting attachment
                     attachmentService.updateAttachmentById(attachment);
                     savedAttachments.add(attachment);
-                } else { // no id is added so it is a new attachment
+                } else {
                     Attachment saved = attachmentService.save(attachment);
                     savedAttachments.add(saved);
                     PostAttchment postAttchment = new PostAttchment(
