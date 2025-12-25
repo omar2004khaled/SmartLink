@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import PostCard from '../PostCard/PostCard';
 import { GetPosts } from '../FetchData/FetchData';
 
-export default function Posts() {
+const Posts = forwardRef((props, ref) => {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
@@ -17,11 +17,23 @@ export default function Posts() {
     }
   }, []);
 
+  // Expose refreshPosts to parent via ref
+  useImperativeHandle(ref, () => ({
+    refreshPosts: loadInitialPosts
+  }));
+
   const loadInitialPosts = async () => {
     if (isFetchingRef.current) return;
     try {
       isFetchingRef.current = true;
       setLoading(true);
+      ////console.log('Refreshing posts...');
+
+      // Reset state for clean refresh
+      setPosts([]);
+      setCurrentPage(0);
+      setHasMore(true);
+
       const postsData = await GetPosts(0, pageSize, 'PostId', false);
 
       if (postsData !== null && Array.isArray(postsData)) {
@@ -29,6 +41,7 @@ export default function Posts() {
         setPosts(transformedPosts);
         setCurrentPage(1);
         setHasMore(postsData.length === pageSize);
+        ////console.log('Posts refreshed successfully:', transformedPosts.length, 'posts loaded');
       }
       else {
         setPosts([]);
@@ -44,7 +57,7 @@ export default function Posts() {
   };
 
   const loadMorePosts = async () => {
-    console.log('Loading more posts...');
+    ////console.log('Loading more posts...');
     if (loading || !hasMore || isFetchingRef.current) return;
 
     try {
@@ -62,13 +75,13 @@ export default function Posts() {
       const newUniquePosts = transformedPosts.filter(p => !existingPostIds.has(p.id));
       if (newUniquePosts.length === 0) {
         setHasMore(false);
-        console.log('No new unique posts found.');
+        ////console.log('No new unique posts found.');
         return;
       }
       setPosts(prevPosts => [...prevPosts, ...newUniquePosts]);
       setHasMore(postsData.length === pageSize);
       setCurrentPage(prevPage => prevPage + 1);
-      console.log(`Loaded ${newUniquePosts.length} new posts.`);
+      ////console.log(`Loaded ${newUniquePosts.length} new posts.`);
     } catch (error) {
       setHasMore(false);
       console.error('Error fetching more posts:', error);
@@ -103,7 +116,7 @@ export default function Posts() {
       }
     }
 
-    console.log(`Transformed ${postsData.length} posts to ${uniquePosts.length} unique posts`);
+    ////console.log(`Transformed ${postsData.length} posts to ${uniquePosts.length} unique posts`);
     return uniquePosts;
   };
   return (
@@ -152,4 +165,6 @@ export default function Posts() {
       )}
     </div>
   );
-}
+});
+
+export default Posts;

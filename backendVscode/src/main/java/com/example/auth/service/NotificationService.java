@@ -1,10 +1,13 @@
 package com.example.auth.service;
 
+import com.example.auth.dto.NotificationDto;
 import com.example.auth.entity.Notification;
 import com.example.auth.entity.User;
 import com.example.auth.enums.NotificationType;
 import com.example.auth.repository.NotificationRepository;
 import com.example.auth.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,6 +18,7 @@ import java.util.List;
 
 @Service
 public class NotificationService {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
@@ -165,13 +169,72 @@ public class NotificationService {
                 "COMMENT");
     }
 
+    @Transactional
+    public Notification createCompanyFollowedNotification(Long companyId, Long followerId, String followerName) {
+        return createNotification(
+                companyId,
+                NotificationType.COMPANY_FOLLOWED,
+                "New Follower",
+                followerName + " started following your company",
+                followerId,
+                "USER");
+    }
+
+    @Transactional
+    public Notification createApplicationStatusChangeNotification(Long applicantId, String jobTitle,
+            String newStatus, Long applicationId) {
+        return createNotification(
+                applicantId,
+                NotificationType.JOB_APPLICATION_STATUS_CHANGE,
+                "Application Status Updated",
+                "Your application for " + jobTitle + " has been updated to " + newStatus,
+                applicationId,
+                "JOB_APPLICATION");
+    }
+
+    @Transactional
+    public Notification createApplicationCommentNotification(Long applicantId, String companyName,
+            String jobTitle, Long applicationId) {
+        return createNotification(
+                applicantId,
+                NotificationType.APPLICATION_COMMENT,
+                "New Comment on Application",
+                companyName + " commented on your application for " + jobTitle,
+                applicationId,
+                "JOB_APPLICATION");
+    }
+
+    @Transactional
+    public Notification createNewJobPostNotification(Long followerId, String companyName,
+            String jobTitle, Long jobId) {
+        return createNotification(
+                followerId,
+                NotificationType.NEW_JOB_FROM_FOLLOWED_COMPANY,
+                "New Job Opportunity",
+                companyName + " posted a new job: " + jobTitle,
+                jobId,
+                "JOB");
+    }
+
     private void pushNotificationViaWebSocket(Long userId, Notification notification) {
         try {
+            // Convert to DTO to avoid Hibernate proxy serialization issues
+            NotificationDto dto = new NotificationDto(
+                    notification.getNotificationId(),
+                    notification.getUser().getId(),
+                    notification.getType(),
+                    notification.getTitle(),
+                    notification.getMessage(),
+                    notification.getIsRead(),
+                    notification.getRelatedEntityId(),
+                    notification.getRelatedEntityType(),
+                    notification.getCreatedAt());
+
             messagingTemplate.convertAndSend(
                     "/topic/notifications/" + userId,
-                    notification);
+                    dto);
         } catch (Exception e) {
-            System.err.println("Failed to push notification via WebSocket for user " + userId + ": " + e.getMessage());
+            logger.error("Failed to push notification via WebSocket for user {}: {}", userId, e.getMessage());
         }
     }
 }

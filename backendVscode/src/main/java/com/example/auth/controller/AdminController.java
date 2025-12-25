@@ -41,12 +41,15 @@ import com.example.auth.repository.LikeCommentRepo;
 import com.example.auth.repository.PostAttachmentRepository;
 import com.example.auth.repository.CompanyFollowerRepo;
 import com.example.auth.enums.ReportCategory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     private final UserRepository userRepository;
     private final EmailService emailService;
@@ -288,7 +291,7 @@ public class AdminController {
 
             return ResponseEntity.ok("User " + user.getEmail() + " and all associated data deleted successfully!");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error deleting user: {}", e.getMessage());
             return ResponseEntity.badRequest()
                     .body("Error deleting user: " + e.getMessage());
         }

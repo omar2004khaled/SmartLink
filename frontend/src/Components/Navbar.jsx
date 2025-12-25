@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Home, Briefcase, Users, User, LogOut, Menu, X, FileText } from 'lucide-react';
+import { Search, Home, Briefcase, Users, User, LogOut, Menu, X, MessageSquare, FileText } from 'lucide-react';
 import './Navbar.css';
 import { API_BASE_URL } from '../config';
 import Logo from '../assets/Logo.png';
@@ -48,7 +48,7 @@ const Navbar = ({ showSearch = false }) => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login-select');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path;
@@ -124,9 +124,13 @@ const Navbar = ({ showSearch = false }) => {
 
           <div className="nav-section">
             <h3 className="nav-section-title">Network</h3>
-            <button className={`sidebar-link ${location.search.includes('tab=connections') ? 'active' : ''}`} onClick={() => { navigate('/profile?tab=connections'); setSidebarOpen(false); }}>
+            <button className={`sidebar-link ${isActive('/connections') ? 'active' : ''}`} onClick={() => { navigate('/connections'); setSidebarOpen(false); }}>
               <Users size={20} />
               <span>Connections</span>
+            </button>
+            <button className={`sidebar-link ${isActive('/messages') ? 'active' : ''}`} onClick={() => { navigate('/messages'); setSidebarOpen(false); }}>
+              <MessageSquare size={20} />
+              <span>Messages</span>
             </button>
             <button className={`sidebar-link ${isActive('/job') ? 'active' : ''}`} onClick={() => { navigate('/job'); setSidebarOpen(false); }}>
               <Briefcase size={20} />
@@ -135,7 +139,7 @@ const Navbar = ({ showSearch = false }) => {
             <button className={`sidebar-link ${isActive('/cv-analysis') ? 'active' : ''}`} onClick={() => { navigate('/cv-analysis'); setSidebarOpen(false); }}>
               <FileText size={20} />
               <span>CV Analysis</span>
-             </button> 
+            </button>
 
             <button className={`sidebar-link ${isActive('/applications') ? 'active' : ''}`} onClick={() => { navigate('/applications'); setSidebarOpen(false); }}>
               <Briefcase size={20} />

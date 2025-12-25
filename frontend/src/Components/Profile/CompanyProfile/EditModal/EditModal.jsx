@@ -6,14 +6,16 @@ import OverviewForm from './OverviewForm';
 import LocationsForm from './LocationsForm';
 import './EditModal.css';
 import { CLOUDINARY_UPLOAD_URL } from '../../../../config';
+import { useAlert } from '../../../../hooks/useAlert';
 
-export default function EditModal({ 
-  isOpen, 
-  section, 
-  companyData, 
-  onClose, 
-  onSave 
+export default function EditModal({
+  isOpen,
+  section,
+  companyData,
+  onClose,
+  onSave
 }) {
+  const { showError } = useAlert();
   const [formData, setFormData] = useState({});
 
   useEffect(() => {
@@ -72,7 +74,7 @@ export default function EditModal({
   const handleImageUpload = async (e, imageType) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     try {
       const cloudinaryFormData = new FormData();
       cloudinaryFormData.append('file', file);
@@ -89,8 +91,8 @@ export default function EditModal({
 
       const cloudinaryData = await cloudinaryResponse.json();
       const imageUrl = cloudinaryData.secure_url;
-      
-      console.log('Image uploaded:', imageType, imageUrl);
+
+      //console.log('Image uploaded:', imageType, imageUrl);
 
       // FIX 1: Update BOTH logoUrl/coverUrl AND coverImageUrl for backend compatibility
       if (imageType === 'logo') {
@@ -107,7 +109,7 @@ export default function EditModal({
       }
     } catch (err) {
       console.error('Error uploading image:', err);
-      alert('Failed to upload image. Please try again.');
+      showError('Failed to upload image. Please try again.');
     }
   };
 
@@ -145,13 +147,13 @@ export default function EditModal({
           city: loc.city.trim(),
           country: loc.country.trim()
         }));
-      
+
       dataToSave = {
         locations: validLocations
       };
     }
 
-    console.log('Saving data for section:', section, dataToSave);
+    //console.log('Saving data for section:', section, dataToSave);
     onSave(dataToSave);
   };
 
@@ -214,10 +216,10 @@ export default function EditModal({
             <button type="button" onClick={onClose} className="btn-cancel">
               Cancel
             </button>
-            <button 
-              type="button" 
-              onClick={handleSubmit} 
-              className="btn-save" 
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="btn-save"
             >
               Save
             </button>

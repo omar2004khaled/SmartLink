@@ -47,7 +47,7 @@ export const fetchJobs = async (filters = {}) => {
     });
     
     const result = await response.json();
-    console.log('GraphQL Response:', result);
+    //console.log('GraphQL Response:', result);
     
     if (result.errors) {
       console.error('GraphQL Errors:', result.errors);
