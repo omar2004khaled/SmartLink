@@ -4,9 +4,12 @@ import com.example.auth.entity.CompanyFollower;
 import com.example.auth.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
-
+@ExtendWith(MockitoExtension.class)
 class CompanyFollowerTest {
 
     private User followerUser;

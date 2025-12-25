@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import com.example.auth.dto.LoginRequest;
@@ -14,7 +16,7 @@ import com.example.auth.entity.User;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.service.AuthService;
 import com.example.auth.service.PasswordResetService;
-
+@ExtendWith(MockitoExtension.class)
 class CompanyAuthUnitTest {
 
     @Test

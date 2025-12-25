@@ -6,11 +6,13 @@ import com.example.auth.dto.RegisterRequest;
 import com.example.auth.dto.UserProfileDto;
 import com.example.auth.enums.Gender;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@ExtendWith(MockitoExtension.class)
 class DtoUnitTest {
 
     @Test
