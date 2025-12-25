@@ -25,6 +25,15 @@
   outline-offset: 2px;
 }
 
+.btn-message {
+  background-color: #1976d2;
+  color: white;
+}
+
+.btn-message:hover {
+  background-color: #1565c0;
+}
+
 .btn-edit {
   background-color: #1976d2;
   color: white;
