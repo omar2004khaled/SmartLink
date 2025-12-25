@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 const EmailVerified = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('verifying'); // 'verifying', 'success', 'error'
+  const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -18,7 +19,7 @@ const EmailVerified = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8080/auth/verify-email?token=${token}`, {
+        const response = await fetch(`${API_BASE_URL}/auth/verify-email?token=${token}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json'

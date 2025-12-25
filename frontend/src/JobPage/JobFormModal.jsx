@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import JobFormField from './JobFormField';
+import { API_BASE_URL } from '../config';
 
 const JobFormModal = ({ onClose, onSuccess,companyId, editingJob = null }) => {
   const [loading, setLoading] = useState(false);
@@ -72,8 +73,8 @@ const JobFormModal = ({ onClose, onSuccess,companyId, editingJob = null }) => {
           };
 
       const url = editingJob 
-        ? `http://localhost:8080/jobs/${editingJob.jobId}`
-        : 'http://localhost:8080/jobs/create';
+        ? `${API_BASE_URL}/jobs/${editingJob.jobId}`
+        : `${API_BASE_URL}/jobs/create`;
       
       const method = editingJob ? 'PUT' : 'POST';
 

@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS comments_attach;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS post_like;
 DROP TABLE IF EXISTS post_attach;
+DROP TABLE IF EXISTS reports;
 DROP TABLE IF EXISTS attachment;
 DROP TABLE IF EXISTS posts;
 
@@ -18,6 +19,7 @@ DROP TABLE IF EXISTS education;
 DROP TABLE IF EXISTS job_seeker_profile;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS notifications;
 
 
 -- ===================================
@@ -294,3 +296,63 @@ CREATE TABLE connections (
 CREATE INDEX idx_sender ON connections(sender_id);
 CREATE INDEX idx_receiver ON connections(receiver_id);
 CREATE INDEX idx_status ON connections(status);
+
+
+-- ===================================
+-- REPORTS TABLE
+-- ===================================
+CREATE TABLE reports (
+    ReportId        BIGINT AUTO_INCREMENT PRIMARY KEY,
+    PostId          BIGINT NOT NULL,
+    ReporterId      BIGINT NOT NULL,
+    ReportCategory  ENUM(
+        'SEXUAL_HARASSMENT',
+        'HATE_SPEECH',
+        'SPAM_OR_SCAM',
+        'FALSE_INFORMATION',
+        'BULLYING_OR_HARASSMENT',
+        'INAPPROPRIATE_CONTENT',
+        'VIOLENCE_OR_THREATS',
+        'INTELLECTUAL_PROPERTY_VIOLATION',
+        'OTHER'
+    ) NOT NULL,
+    Description     VARCHAR(500),
+    Timestamp       DATETIME NOT NULL,
+    Status          ENUM('PENDING', 'REVIEWED', 'RESOLVED') NOT NULL DEFAULT 'PENDING',
+    
+    FOREIGN KEY (PostId) REFERENCES posts(PostId) ON DELETE CASCADE,
+    FOREIGN KEY (ReporterId) REFERENCES user(UserId) ON DELETE CASCADE,
+    
+    UNIQUE KEY unique_report (PostId, ReporterId)
+);
+
+CREATE INDEX ReportsByPost ON reports(PostId);
+CREATE INDEX ReportsByReporter ON reports(ReporterId);
+-- NOTIFICATIONS TABLE
+-- ===================================
+CREATE TABLE notifications (
+    notification_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id             BIGINT NOT NULL,
+    type                ENUM(
+        'CONNECTION_REQUEST',
+        'CONNECTION_ACCEPTED',
+        'POST_LIKE',
+        'POST_COMMENT',
+        'COMMENT_LIKE',
+        'JOB_APPLICATION',
+        'JOB_APPLICATION_STATUS_CHANGE',
+        'NEW_POST'
+    ) NOT NULL,
+    title               VARCHAR(255) NOT NULL,
+    message             VARCHAR(1000) NOT NULL,
+    is_read             BOOLEAN NOT NULL DEFAULT FALSE,
+    related_entity_id   BIGINT,
+    related_entity_type VARCHAR(50),
+    created_at          DATETIME NOT NULL,
+    
+    FOREIGN KEY (user_id) REFERENCES user(UserId) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_notification_user ON notifications(user_id);
+CREATE INDEX idx_notification_user_read ON notifications(user_id, is_read);
+CREATE INDEX idx_notification_created_at ON notifications(created_at DESC);

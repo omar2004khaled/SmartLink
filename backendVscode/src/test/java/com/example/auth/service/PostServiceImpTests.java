@@ -1,4 +1,4 @@
-package com.example.auth.service.PostService;
+package com.example.auth.service;
 
 import com.example.auth.dto.PostDTO;
 import com.example.auth.entity.*;
@@ -6,6 +6,7 @@ import com.example.auth.enums.TypeofAttachments;
 import com.example.auth.repository.*;
 import com.example.auth.service.AttachmentService.AttachmentService;
 import com.example.auth.service.PostAttachmentService.PostAttachmentService;
+import com.example.auth.service.PostService.PostServiceImp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class PostServiceImpTests {
 
     @Mock
@@ -37,6 +39,21 @@ class PostServiceImpTests {
     @Mock
     private CommentRepo commentRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ConnectionRepository connectionRepository;
+
+    @Mock
+    private RedisService redisService;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private CompanyFollowerRepo companyFollowerRepo;
+
     @InjectMocks
     private PostServiceImp postService;
 
@@ -47,6 +64,8 @@ class PostServiceImpTests {
 
     @BeforeEach
     void setUp() {
+        postService = new PostServiceImp(postRepository, attachmentService, postAttachmentService, commentRepository, userRepository, notificationService, connectionRepository, redisService, companyFollowerRepo);
+
         attachmentIds = Arrays.asList(1L, 2L);
 
         attachment = new Attachment();
@@ -59,7 +78,17 @@ class PostServiceImpTests {
         post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
         List<Attachment> attachments = Arrays.asList(attachment);
-        postDTO = new PostDTO(1L, "Test post content", 100L, attachments, new Timestamp(System.currentTimeMillis()));
+        postDTO = new PostDTO(1L, "Test post content", 100L, "JOB_SEEKER", attachments, new Timestamp(System.currentTimeMillis()));
+        
+        // Mock UserRepository for all tests
+        User mockUser = new User();
+        mockUser.setUserType("JOB_SEEKER");
+        mockUser.setId(100L);
+        mockUser.setFullName("Test User");
+        when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
+        
+        when(connectionRepository.findByUserIdAndStatus(any(), any())).thenReturn(new ArrayList<>());
+        when(companyFollowerRepo.findAllFollowersByCompanyId(any())).thenReturn(new ArrayList<>());
     }
 
     @Test
@@ -210,7 +239,7 @@ class PostServiceImpTests {
     @Test
     void updatePost_UpdateContent_ShouldUpdateContent() {
         // Arrange
-        PostDTO existingPostDTO = new PostDTO(1L, "Old content", 100L, new ArrayList<>(), new Timestamp(System.currentTimeMillis()));
+        PostDTO existingPostDTO = new PostDTO(1L, "Old content", 100L, "JOB_SEEKER", new ArrayList<>(), new Timestamp(System.currentTimeMillis()));
         PostDTO updateDTO = new PostDTO();
         updateDTO.setContent("New content");
         
@@ -233,7 +262,7 @@ class PostServiceImpTests {
     void updatePost_UpdateAttachments_ShouldUpdateAttachments() {
         // Arrange
         List<Attachment> attachments = Arrays.asList(attachment);
-        PostDTO existingPostDTO = new PostDTO(1L, "Content", 100L, new ArrayList<>(),new Timestamp(System.currentTimeMillis()));
+        PostDTO existingPostDTO = new PostDTO(1L, "Content", 100L, "JOB_SEEKER", new ArrayList<>(),new Timestamp(System.currentTimeMillis()));
         PostDTO updateDTO = new PostDTO();
         updateDTO.setAttachments(attachments);
 

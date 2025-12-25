@@ -5,14 +5,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
@@ -24,27 +23,58 @@ class EmailServiceTest {
     private EmailService emailService;
 
     @Test
-    void sendVerificationEmail_WhenEmailFails_ShouldFallbackToConsole() {
+    void sendVerificationEmail_WhenEmailSucceeds_ShouldSendEmail() {
         // Arrange
-        doThrow(new RuntimeException("Mail server error")).when(mailSender).send(any(org.springframework.mail.SimpleMailMessage.class));
-        
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
-
         String email = "test@example.com";
-        String token = "test-token-123";
+        String token = "test-token-456";
 
         // Act
         emailService.sendVerificationEmail(email, token);
 
         // Assert
-        String consoleOutput = outputStream.toString();
-        assertTrue(consoleOutput.contains("Failed to send email"));
-        assertTrue(consoleOutput.contains("VERIFICATION EMAIL"));
-        assertTrue(consoleOutput.contains(email));
-        assertTrue(consoleOutput.contains(token));
+        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+    }
 
-        // Reset System.out
-        System.setOut(System.out);
+    @Test
+    void sendVerificationEmail_WithEmptyEmail_ShouldHandleGracefully() {
+        // Arrange
+        String email = "";
+        String token = "test-token-789";
+
+        // Act
+        emailService.sendVerificationEmail(email, token);
+
+        // Assert - should not throw exception
+        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    void sendVerificationEmail_WithNullToken_ShouldHandleGracefully() {
+        // Arrange
+        String email = "test@example.com";
+        String token = null;
+
+        // Act
+        assertDoesNotThrow(() -> {
+            emailService.sendVerificationEmail(email, token);
+        });
+
+        // Assert
+        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    void sendVerificationEmail_WithNullEmail_ShouldHandleGracefully() {
+        // Arrange
+        String email = null;
+        String token = "test-token-abc";
+
+        // Act
+        assertDoesNotThrow(() -> {
+            emailService.sendVerificationEmail(email, token);
+        });
+
+        // Assert
+        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 }

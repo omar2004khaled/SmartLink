@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE_URL, GOOGLE_OAUTH2_AUTH_URL } from '../config';
 
 const SignUp = () => {
  const navigate = useNavigate();
@@ -24,8 +25,8 @@ const SignUp = () => {
 
    const handleGoogleSignup = (e) => {
     e.preventDefault();
-    console.log("Redirecting to Google OAuth2...");
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    //console.log("Redirecting to Google OAuth2...");
+    window.location.href = GOOGLE_OAUTH2_AUTH_URL;
   };
   
   
@@ -111,7 +112,7 @@ const SignUp = () => {
   setSuccessMessage('');
 
   try {
-    const response = await fetch("http://localhost:8080/auth/register", {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -163,7 +164,7 @@ const SignUp = () => {
     }
 
     // SUCCESS: Redirect to verification page immediately
-    console.log("Registration successful, redirecting to verification...");
+    //console.log("Registration successful, redirecting to verification...");
     navigate('/verify-email', { 
       state: { 
         email: formData.email,

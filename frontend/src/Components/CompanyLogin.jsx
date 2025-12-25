@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const CompanyLogin = () => {
   const navigate = useNavigate();
@@ -33,9 +34,9 @@ const CompanyLogin = () => {
     setError('');
 
     try {
-      const response = await fetch("http://localhost:8080/auth/company/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/company/login`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
@@ -48,7 +49,7 @@ const CompanyLogin = () => {
 
       const responseText = await response.text();
       let data;
-      
+
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         try {
@@ -62,7 +63,7 @@ const CompanyLogin = () => {
 
       if (!response.ok) {
         let errorMessage = 'Login failed. Please check your credentials.';
-        
+
         if (data && typeof data.message === 'string') {
           errorMessage = data.message;
         } else if (responseText && typeof responseText === 'string') {
@@ -88,10 +89,10 @@ const CompanyLogin = () => {
         localStorage.setItem('userEmail', data.email);
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('userType', 'COMPANY');
-        console.log("Company login successful, token stored");
+        //console.log("Company login successful, token stored");
       }
 
-      navigate('/company-profile');
+      navigate('/company-home');
     } catch (error) {
       console.error("Login Error:", error);
       if (error.message === 'Failed to fetch') {
@@ -110,8 +111,8 @@ const CompanyLogin = () => {
       <div className="hidden md:flex flex-col justify-between p-12 bg-[#FFEAEE] dark:bg-[#2C1A1D] text-center">
         <div className="self-start">
           <div className="flex items-center gap-2">
-            <img 
-              src="src/assets/Logo.png" 
+            <img
+              src="/src/assets/Logo.png"
               alt="Logo"
               className="h-12 w-auto object-contain"
             />
@@ -216,7 +217,7 @@ const CompanyLogin = () => {
               </button>
 
               <div className="text-center">
-                <Link 
+                <Link
                   to="/forgot-password"
                   className="text-sm font-medium text-primary hover:underline"
                 >
@@ -230,8 +231,8 @@ const CompanyLogin = () => {
           <div className="text-center border-t border-border pt-6">
             <p className="text-sm text-muted-foreground">
               Don't have a company account?{' '}
-              <Link 
-                to="/company/signup" 
+              <Link
+                to="/company/signup"
                 className="font-semibold text-primary hover:underline"
               >
                 Sign Up
@@ -239,8 +240,8 @@ const CompanyLogin = () => {
             </p>
             <p className="text-sm text-muted-foreground mt-2">
               Looking for job seeker login?{' '}
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="font-semibold text-primary hover:underline"
               >
                 Click here

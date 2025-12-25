@@ -1,33 +1,49 @@
 package com.example.auth.entity.CompanyTest;
 
 import com.example.auth.entity.CompanyFollower;
+import com.example.auth.entity.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
-
+@ExtendWith(MockitoExtension.class)
 class CompanyFollowerTest {
+
+    private User followerUser;
+    private User companyUser;
+
+    @BeforeEach
+    void setUp() {
+        followerUser = new User();
+        followerUser.setId(1L);
+
+        companyUser = new User();
+        companyUser.setId(100L);
+    }
 
     @Test
     void testCompanyFollowerCreation() {
         CompanyFollower follower = new CompanyFollower();
-        follower.setFollowerId(1L);
-        follower.setCompanyId(100L);
+        follower.setFollower(followerUser);
+        follower.setCompany(companyUser);
 
-        assertEquals(1L, follower.getFollowerId());
-        assertEquals(100L, follower.getCompanyId());
+        assertEquals(followerUser, follower.getFollower());
+        assertEquals(companyUser, follower.getCompany());
         assertNull(follower.getFollowedAt());
     }
 
     @Test
     void testCompanyFollowerAllArgsConstructor() {
         LocalDateTime now = LocalDateTime.now();
-        CompanyFollower follower = new CompanyFollower(1L, 100L, now);
+        CompanyFollower follower = new CompanyFollower(followerUser, companyUser, now);
 
-        assertEquals(1L, follower.getFollowerId());
-        assertEquals(100L, follower.getCompanyId());
+        assertEquals(followerUser, follower.getFollower());
+        assertEquals(companyUser, follower.getCompany());
         assertEquals(now, follower.getFollowedAt());
     }
-
 
     @Test
     void testCompanyFollowerIdEquals() {

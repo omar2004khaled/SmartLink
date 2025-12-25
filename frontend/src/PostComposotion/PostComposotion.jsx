@@ -6,14 +6,17 @@ import Upload_button from './upload_button';
 import MediaReviewer from './media_review';
 import TextEditor from './text_editor';
 import SubmitButton from './submit_button';
-import { SavePost , userIdFromLocalStorage} from '../FetchData/FetchData';
-import { Link, useNavigate } from 'react-router-dom';
+import { SavePost, userIdFromLocalStorage } from '../FetchData/FetchData';
+import { useNavigate } from 'react-router-dom';
+import { CLOUDINARY_UPLOAD_URL } from '../config';
+import { useAlert } from '../hooks/useAlert';
 
-export default function PostComposer() {
+export default function PostComposer({ onPostCreated }) {
+  const { showSuccess } = useAlert();
+  const navigate = useNavigate();
   const [postText, setPostText] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
   const [feeling, setFeeling] = useState("None");
-  const navigate = useNavigate();
 
   const fileInputRef = useRef(null);
 
@@ -23,14 +26,11 @@ export default function PostComposer() {
   };
 
   const uploadFileToCloudinary = async (file) => {
-    const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
-
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "dyk7gqqw");   // your preset name
 
-
-    const response = await fetch(url, {
+    const response = await fetch(CLOUDINARY_UPLOAD_URL, {
       method: "POST",
       body: formData,
     });
@@ -64,7 +64,7 @@ export default function PostComposer() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!postText.trim() && mediaFiles.length === 0) return;
 
     if (mediaFiles.length > 0) {
@@ -80,7 +80,8 @@ export default function PostComposer() {
 
     const uploadedUrls = mediaFiles.map((m) => m.uploadedUrl);
 
-    SavePost({
+    // Wait for post to be saved before refreshing
+    await SavePost({
       userId: userIdFromLocalStorage(),
       content: postText,
       attachments: [
@@ -90,28 +91,33 @@ export default function PostComposer() {
         }))
       ],
     });
-    alert(`
-      Post Submitted! 
-      Text: ${postText}
-      Feeling: ${feeling ?? "None"}
-      Uploaded URLs:
-      ${uploadedUrls.join("\n")}
-    `);
+
+    showSuccess('Post submitted successfully!');
 
     setPostText("");
     setMediaFiles([]);
     setFeeling(null);
-    navigate('/home');
+
+    // Small delay to ensure backend has processed the post
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Call the callback to refresh posts and close modal
+    if (onPostCreated) {
+      onPostCreated();
+    } else {
+      // If no callback (standalone route), navigate to home
+      navigate('/home');
+    }
   };
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "20px" }}>
       <div style={{ maxWidth: "600px", margin: "0 auto", background: "white", borderRadius: "8px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
         <Header />
-        
+
         <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
           <TextEditor setPostText={setPostText} postText={postText} />
-          
+
           <div style={{ display: "flex", gap: "12px" }}>
             <FeelingButton setFeeling={setFeeling} feeling={feeling} />
             <Upload_button handleFileInput={handleFileInput} fileInputRef={fileInputRef} />

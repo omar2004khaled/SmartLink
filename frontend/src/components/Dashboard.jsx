@@ -18,7 +18,7 @@ const Dashboard = () => {
         localStorage.setItem('user', JSON.stringify(userData));
       }
       
-      console.log('OAuth user logged in successfully');
+      //console.log('OAuth user logged in successfully');
     }
     
     // You can redirect to a different page if needed

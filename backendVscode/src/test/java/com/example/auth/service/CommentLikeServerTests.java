@@ -31,6 +31,9 @@ public class CommentLikeServerTests {
     @Mock
     CommentRepo commentRepo;
 
+    @Mock
+    NotificationService notificationService;
+
     @InjectMocks
     LikeService likeService;
 
@@ -55,9 +58,15 @@ public class CommentLikeServerTests {
         mockUser.setFullName("Test User");
         mockUser.setEmail("test@example.com");
 
+        // Create comment owner (different from liker)
+        User commentOwner = new User();
+        commentOwner.setId(2L);
+        commentOwner.setFullName("Comment Owner");
+
         mockComment = new Comment();
         mockComment.setCommentId(commentId);
         mockComment.setContent("Test comment");
+        mockComment.setUser(commentOwner); // Set the comment owner
     }
 
     @Test
@@ -68,12 +77,12 @@ public class CommentLikeServerTests {
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         Mockito.when(commentRepo.findById(commentId)).thenReturn(Optional.of(mockComment));
         Mockito.when(likeCommentRepo.existsById(commentsLikeId)).thenReturn(false);
+        Mockito.when(notificationService.createCommentLikeNotification(any(), any(), any(), any())).thenReturn(null);
         try {
             likeService.makeOrDeleteLike(userId, commentId);
         } catch (NotEnoughInformationException e) {
             throw new RuntimeException(e);
         }
-
 
         Mockito.verify(userRepository).findById(userId);
         Mockito.verify(commentRepo).findById(commentId);
@@ -88,7 +97,6 @@ public class CommentLikeServerTests {
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         Mockito.when(commentRepo.findById(commentId)).thenReturn(Optional.of(mockComment));
         Mockito.when(likeCommentRepo.existsById(commentsLikeId)).thenReturn(true);
-
 
         try {
             likeService.makeOrDeleteLike(userId, commentId);

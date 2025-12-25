@@ -2,24 +2,20 @@ package com.example.auth.controller;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.auth.entity.User;
 import com.example.auth.enums.Gender;
@@ -29,6 +25,8 @@ import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepositor
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class AdminControllerTest {
 
         @Autowired
@@ -43,12 +41,28 @@ class AdminControllerTest {
         @Autowired
         private JobSeekerProfileRepository jobSeekerProfileRepository;
 
+        @Autowired
+        private com.example.auth.repository.CommentRepo commentRepo;
+
+        @Autowired
+        private com.example.auth.repository.PostRepository postRepository;
+
+        @Autowired
+        private com.example.auth.repository.ConnectionRepository connectionRepository;
+
+        @Autowired
+        private com.example.auth.repository.NotificationRepository notificationRepository;
+
         private User adminUser;
         private User regularUser;
 
         @BeforeEach
         void setUp() {
                 // Delete child entities first to avoid FK constraint violations
+                commentRepo.deleteAll();
+                postRepository.deleteAll();
+                connectionRepository.deleteAll();
+                notificationRepository.deleteAll();
                 jobSeekerProfileRepository.deleteAll();
                 tokenRepository.deleteAll();
                 userRepository.deleteAll();
@@ -78,8 +92,7 @@ class AdminControllerTest {
                 userRepository.save(regularUser);
         }
 
-        // ========== DASHBOARD TESTS ==========
-
+        // ===== DASHBOARD TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void adminDashboard_WithAdminRole_ShouldReturnWelcomeMessage() throws Exception {
@@ -101,16 +114,17 @@ class AdminControllerTest {
                                 .andExpect(status().isFound()); // OAuth2 redirects instead of 403
         }
 
-        // ========== GET ALL USERS TESTS ==========
-
+        // ===== GET ALL USERS TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void getAllUsers_WithAdminRole_ShouldReturnAllUsers() throws Exception {
                 mockMvc.perform(get("/admin/users"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.users", hasSize(2)))
-                                .andExpect(jsonPath("$.users[0].email", anyOf(is("admin@test.com"), is("user@test.com"))))
-                                .andExpect(jsonPath("$.users[1].email", anyOf(is("admin@test.com"), is("user@test.com"))));
+                                .andExpect(jsonPath("$.users[0].email",
+                                                anyOf(is("admin@test.com"), is("user@test.com"))))
+                                .andExpect(jsonPath("$.users[1].email",
+                                                anyOf(is("admin@test.com"), is("user@test.com"))));
         }
 
         @Test
@@ -134,11 +148,10 @@ class AdminControllerTest {
         @Test
         void getAllUsers_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(get("/admin/users"))
-                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
+                                .andExpect(status().isFound());
         }
 
-        // ========== GET STATISTICS TESTS ==========
-
+        // ===== GET STATISTICS TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void getStats_WithAdminRole_ShouldReturnCorrectStatistics() throws Exception {
@@ -177,8 +190,7 @@ class AdminControllerTest {
                                 .andExpect(status().isForbidden());
         }
 
-        // ========== GET USER BY ID TESTS ==========
-
+        // ===== GET USER BY ID TESTS =====
         @Test
         @WithMockUser(roles = "ADMIN")
         void getUserById_WithValidId_ShouldReturnUser() throws Exception {

@@ -11,6 +11,8 @@ import com.example.auth.entity.ProfileEntities.JobSeekerProfile;
 import com.example.auth.dto.RegisterRequest;
 import com.example.auth.config.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.auth.repository.CompanyProfileRepo;
+import com.example.auth.entity.CompanyProfile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,15 +26,15 @@ public class AuthService {
     private final EmailService emailService;
     private final JwtService jwtService;
     private final JobSeekerProfileRepository profileRepo;
-    private final com.example.auth.repository.CompanyProfileRepo companyRepo;
+    private final CompanyProfileRepo companyRepo;
 
     public AuthService(UserRepository userRepo,
-                       VerificationTokenRepository tokenRepo,
-                       PasswordEncoder passwordEncoder,
-                       EmailService emailService,
-                       JwtService jwtService,
-                       JobSeekerProfileRepository profileRepo,
-                       com.example.auth.repository.CompanyProfileRepo companyRepo) {
+            VerificationTokenRepository tokenRepo,
+            PasswordEncoder passwordEncoder,
+            EmailService emailService,
+            JwtService jwtService,
+            JobSeekerProfileRepository profileRepo,
+            CompanyProfileRepo companyRepo) {
         this.userRepo = userRepo;
         this.tokenRepo = tokenRepo;
         this.passwordEncoder = passwordEncoder;
@@ -44,33 +46,31 @@ public class AuthService {
 
     @Transactional
     public Long registerCompany(com.example.auth.dto.CompanyRegisterRequest request) {
-        
+
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
 
-        
         if (userRepo.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new IllegalArgumentException("Phone number already exists");
         }
 
-        
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match");
         }
 
-        
         String password = request.getPassword();
-        if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
-            throw new IllegalArgumentException("Password must contain at least one digit, one lowercase, one uppercase, one special character, and be 8-20 characters long");
+        if (!password.matches(
+                "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
+            throw new IllegalArgumentException(
+                    "Password must contain at least one digit, one lowercase, one uppercase, one special character, and be 8-20 characters long");
         }
 
-       
         User user = new User();
         user.setFullName(request.getCompanyName().trim());
         user.setEmail(request.getEmail().toLowerCase());
         user.setPassword(passwordEncoder.encode(password));
-        user.setBirthDate(LocalDate.now()); 
+        user.setBirthDate(LocalDate.now());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setEnabled(false);
         user.setRole("USER");
@@ -78,9 +78,8 @@ public class AuthService {
 
         userRepo.save(user);
 
-        
-        com.example.auth.entity.CompanyProfile companyProfile = new com.example.auth.entity.CompanyProfile();
-        companyProfile.setUserId(user.getId());
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setUser(user);
         companyProfile.setCompanyName(request.getCompanyName());
         companyProfile.setWebsite(request.getWebsite());
         companyProfile.setIndustry(request.getIndustry());
@@ -88,13 +87,10 @@ public class AuthService {
         companyProfile.setNumberOfFollowers(0L);
         companyRepo.save(companyProfile);
 
-        
         VerificationToken verificationToken = new VerificationToken(user, LocalDateTime.now().plusDays(1));
         tokenRepo.save(verificationToken);
 
-      
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
-        
 
         return user.getId();
     }
@@ -118,8 +114,10 @@ public class AuthService {
 
         // 4. Check password complexity
         String password = request.getPassword();
-        if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
-            throw new IllegalArgumentException("Password must contain at least one digit, one lowercase, one uppercase, one special character, and be 8-20 characters long");
+        if (!password.matches(
+                "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
+            throw new IllegalArgumentException(
+                    "Password must contain at least one digit, one lowercase, one uppercase, one special character, and be 8-20 characters long");
         }
 
         // 5. Check age (must be at least 13 years old)
@@ -155,6 +153,14 @@ public class AuthService {
         } else if (request.getGender().name().equals("FEMALE")) {
             profile.setGender(JobSeekerProfile.Gender.FEMALE);
         }
+
+        // Set default profile picture URL using user's name
+        String userName = request.getFullName() != null ? request.getFullName() : "User";
+        String defaultPicUrl = "https://ui-avatars.com/api/?name=" +
+                userName.replace(" ", "+") +
+                "&background=random&size=200&bold=true";
+        profile.setProfilePicUrl(defaultPicUrl);
+
         profileRepo.save(profile);
 
         // 8. Create verification token
@@ -163,10 +169,10 @@ public class AuthService {
 
         // 9. Send verification email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
-        
 
         return user.getId();
     }
+
     public String login(String email, String password) {
         // 1. Find user by email
         var userOptional = userRepo.findByEmail(email.toLowerCase());
@@ -187,7 +193,7 @@ public class AuthService {
         }
 
         // 4. Generate JWT token
-        return jwtService.generateToken(user.getEmail(), user.getRole());
+        return jwtService.generateToken(user.getEmail(), user.getRole(), user.getUserType());
     }
 
     public String getUserRole(String email) {

@@ -1,10 +1,10 @@
 package com.example.auth.service;
 
-
 import com.example.auth.dto.JobDTO.ApplicationDTO;
 import com.example.auth.entity.Job;
 import com.example.auth.entity.JobApplication;
 import com.example.auth.entity.User;
+import com.example.auth.enums.ApplicationStatus;
 import com.example.auth.repository.JobApplicationRepository;
 import com.example.auth.repository.JobRepository;
 import com.example.auth.repository.UserRepository;
@@ -17,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +38,9 @@ class JobApplicationServiceTest {
     @Mock
     private JobApplicationRepository jobApplicationRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private JobApplicationService jobApplicationService;
 
@@ -52,10 +57,16 @@ class JobApplicationServiceTest {
         applicationDTO.setJobId(100L);
         applicationDTO.setCvURL("https://example.com/cv.pdf");
 
+        // Setup mock company user
+        User mockCompany = new User();
+        mockCompany.setId(2L);
+        mockCompany.setFullName("Test Company");
+
         // Setup mock Job
         mockJob = new Job();
         mockJob.setJobId(100L);
         mockJob.setTitle("Software Engineer");
+        mockJob.setCompany(mockCompany); // Set company to avoid null pointer
 
         // Setup mock User
         mockUser = new User();
@@ -68,7 +79,9 @@ class JobApplicationServiceTest {
                 .job(mockJob)
                 .user(mockUser)
                 .cvURL("https://example.com/cv.pdf")
+                .applicationStatus(ApplicationStatus.PENDING)
                 .createdAt(Instant.now())
+                .comments(new ArrayList<>(Arrays.asList("a","v")))
                 .build();
     }
 
@@ -80,13 +93,15 @@ class JobApplicationServiceTest {
         when(userRepository.findById(eq(1L))).thenReturn(Optional.of(mockUser));
         when(jobApplicationRepository.save(any(JobApplication.class)))
                 .thenReturn(mockJobApplication);
+        when(notificationService.createNotification(any(), any(), any(), any(), any(), any())).thenReturn(null);
 
         Long result = jobApplicationService.savePost(applicationDTO);
         assertNotNull(result);
         assertEquals(1L, result);
         verify(jobApplicationRepository, times(1)).getApplicationByUserAndJob(eq(1L), eq(100L));
-        verify(jobRepository, times(1)).findById(eq(100L));
-        verify(userRepository, times(1)).findById(eq(1L));
+        verify(jobRepository, times(2)).findById(eq(100L)); // Called twice: once in jobApplication(), once in
+                                                            // savePost()
+        verify(userRepository, times(2)).findById(eq(1L)); // Called twice: once in jobApplication(), once in savePost()
         verify(jobApplicationRepository, times(1)).save(any(JobApplication.class));
     }
 
@@ -187,4 +202,48 @@ class JobApplicationServiceTest {
         assertTrue(result.getCreatedAt().isAfter(beforeCall.minusSeconds(1)));
         assertTrue(result.getCreatedAt().isBefore(afterCall.plusSeconds(1)));
     }
+
+    @Test
+    void addCommentWithFalseJobId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.empty());
+        RuntimeException exception=assertThrows(RuntimeException.class ,()->{
+            jobApplicationService.addComment("a",1L);
+        });
+        verify(jobApplicationRepository,times(1)).findById(1L);
+        assertEquals("there is no such application",exception.getMessage());
+    }
+
+    @Test
+    void addCommentWithTrueJobId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.of(mockJobApplication));
+
+        when(jobApplicationRepository.save(mockJobApplication)).thenReturn(null);
+        ApplicationDTO result=jobApplicationService.addComment("a",1L);
+        assertEquals(100L, result.getJobId());
+        assertEquals(1L, result.getUserId());
+        assertEquals("https://example.com/cv.pdf", result.getCvURL());
+        assertNotNull(result.getCreatedAt());
+    }
+
+    @Test
+    void changeStatusWithFalseId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.empty());
+        RuntimeException exception=assertThrows(RuntimeException.class ,()->{
+            jobApplicationService.addComment("a",1L);
+        });
+        verify(jobApplicationRepository,times(1)).findById(1L);
+        assertEquals("there is no such application",exception.getMessage());
+    }
+
+    @Test
+    void changeStatusWithTrueJobId(){
+        when(jobApplicationRepository.findById(eq(1L))).thenReturn(Optional.of(mockJobApplication));
+        when(jobApplicationRepository.save(mockJobApplication)).thenReturn(null);
+        ApplicationDTO result=jobApplicationService.changeStatus("PENDING",1L);
+        assertEquals(100L, result.getJobId());
+        assertEquals(1L, result.getUserId());
+        assertEquals("https://example.com/cv.pdf", result.getCvURL());
+        assertNotNull(result.getCreatedAt());
+    }
+
 }

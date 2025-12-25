@@ -3,6 +3,8 @@ package com.example.auth.controller;
 import com.example.auth.dto.*;
 import com.example.auth.service.CompanyProfileService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,26 +15,18 @@ import java.util.List;
 @RequestMapping("/api/company")
 @RequiredArgsConstructor
 public class CompanyProfileController {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyProfileController.class);
 
     private final CompanyProfileService companyProfileService;
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId) {
+    public ResponseEntity<?> getCompanyByUserId(@PathVariable Long userId,
+            @RequestParam(required = false) Long viewerId) {
         try {
-            CompanyDTO company = companyProfileService.getCompanyByUserId(userId);
+            CompanyDTO company = companyProfileService.getCompanyByUserId(userId, viewerId);
             return ResponseEntity.ok(company);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found for user");
-        }
-    }
-
-    @GetMapping("/{companyId}")
-    public ResponseEntity<?> getCompanyProfile(@PathVariable Long companyId, @RequestParam(required = false) Long userId) {
-        try {
-            CompanyDTO company = companyProfileService.getCompanyProfile(companyId, userId);
-            return ResponseEntity.ok(company);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Company profile not found");
         }
     }
 
@@ -57,7 +51,7 @@ public class CompanyProfileController {
     @GetMapping("/{companyId}/posts")
     public ResponseEntity<?> getCompanyPosts(@PathVariable Long companyId) {
         try {
-            //Implement posts retrieval
+            // Implement posts retrieval
             return ResponseEntity.ok("");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ERROR in get posts");
@@ -76,16 +70,23 @@ public class CompanyProfileController {
 
     @PostMapping("/{companyId}/follow")
     public ResponseEntity<?> followCompany(@PathVariable Long companyId, @RequestBody FollowRequest request) {
+        if (request == null || request.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User ID is required");
+        }
         try {
             companyProfileService.followCompany(companyId, request.getUserId());
             return ResponseEntity.ok("Successfully followed company");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error in follow");
+            logger.error("Error in followCompany endpoint: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
 
     @PostMapping("/{companyId}/unfollow")
     public ResponseEntity<?> unfollowCompany(@PathVariable Long companyId, @RequestBody FollowRequest request) {
+        if (request == null || request.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User ID is required");
+        }
         try {
             companyProfileService.unfollowCompany(companyId, request.getUserId());
             return ResponseEntity.ok("Successfully unfollowed company");

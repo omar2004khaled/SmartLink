@@ -1,0 +1,13 @@
+package com.example.auth.enums;
+
+public enum ReportCategory {
+    SEXUAL_HARASSMENT,
+    HATE_SPEECH,
+    SPAM_OR_SCAM,
+    FALSE_INFORMATION,
+    BULLYING_OR_HARASSMENT,
+    INAPPROPRIATE_CONTENT,
+    VIOLENCE_OR_THREATS,
+    INTELLECTUAL_PROPERTY_VIOLATION,
+    OTHER
+}

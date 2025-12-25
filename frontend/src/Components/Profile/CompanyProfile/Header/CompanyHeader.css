@@ -1,25 +1,30 @@
 .company-header {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  padding: 14px;
+  background: #ffffff;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .company-name {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 4px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 12px 0;
   line-height: 1.2;
+  letter-spacing: -0.5px;
 }
 
 .description-wrapper {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .company-description {
-  font-size: 14px;
-  color: #666;
+  font-size: 15px;
+  color: #666666;
   margin: 0;
   line-height: 1.5;
   flex: 1;
@@ -27,39 +32,65 @@
 
 .company-meta {
   font-size: 14px;
-  color: #666;
+  color: #666666;
   margin: 0;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.company-meta > div::after {
+  content: '•';
+  margin-left: 12px;
+  color: #d0d0d0;
+}
+
+.company-meta > div:last-child::after {
+  content: '';
+  margin-left: 0;
 }
 
 .edit-btn-small {
   background: none;
   border: none;
-  color: #1976d2;
+  color: #666666;
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .edit-btn-small:hover {
-  background-color: rgba(25, 118, 210, 0.1);
-  color: #1565c0;
+  background-color: #f0f0f0;
+  color: #000000;
+  opacity: 1;
+}
+
+.edit-btn-small:active {
+  transform: scale(0.95);
 }
 
 @media (max-width: 768px) {
   .company-header {
-    padding-top: 40px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
   }
   
   .company-name {
-    font-size: 20px;
+    font-size: 24px;
   }
   
   .company-description {
+    font-size: 14px;
+  }
+  
+  .company-meta {
     font-size: 13px;
   }
 }

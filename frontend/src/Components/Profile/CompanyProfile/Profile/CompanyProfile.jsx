@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CompanyLogo from '../Logos/CompanyLogo';
 import CompanyHeader from '../Header/CompanyHeader';
 import ActionButtons from '../Buttons/ActionButtons';
@@ -8,8 +9,12 @@ import LocationsSection from '../LocationSection/LocationsSection';
 import PostsTab from '../Tabs/PostsTab';
 import EditModal from '../EditModal/EditModal';
 import './CompanyProfile.css';
+import { API_BASE_URL,CLOUDINARY_UPLOAD_URL } from '../../../../config';
 
-export default function CompanyProfile({ companyId, userId }) {
+
+
+export default function CompanyProfile({ companyId, userId, targetUserId, currentUserId }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('About');
   const [companyData, setCompanyData] = useState(null);
   const [tabData, setTabData] = useState(null);
@@ -20,13 +25,16 @@ export default function CompanyProfile({ companyId, userId }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editSection, setEditSection] = useState(null);
   const tabs = ['About', 'Posts'];
-  const API_BASE_URL ='http://localhost:8080';
+
+  const viewerId = currentUserId || userId;
+  const profileOwnerId = targetUserId;
 
   useEffect(() => {
-    if (companyId || userId) {
+    if (companyId || profileOwnerId || viewerId) {
       fetchCompanyBasicData();
     }
-  }, [companyId, userId]);
+  }, [profileOwnerId, viewerId]);
+
 
   const fetchCompanyBasicData = async () => {
     try {
@@ -34,15 +42,17 @@ export default function CompanyProfile({ companyId, userId }) {
       setError(null);
 
       let url;
-      if (companyId) {
-        url = userId 
-          ? `${API_BASE_URL}/api/company/${companyId}?userId=${userId}`
-          : `${API_BASE_URL}/api/company/${companyId}`;
+      if (profileOwnerId) {
+        url = new URL(`${API_BASE_URL}/api/company/user/${Number(profileOwnerId)}`);
+        if (viewerId) {
+          url.searchParams.append('viewerId', Number(viewerId));
+        }else{
+          return;
+        }
       } else {
-        // Use user endpoint when no companyId provided (for own profile)
-        url = `${API_BASE_URL}/api/company/user/${userId}`;
+        url = new URL(`${API_BASE_URL}/api/company/user/${Number(viewerId)}`);
       }
-      
+
       const token = localStorage.getItem('authToken');
       const headers = {
         'Content-Type': 'application/json',
@@ -50,13 +60,12 @@ export default function CompanyProfile({ companyId, userId }) {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers,
       });
 
-      
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Error response:', errorText);
@@ -67,18 +76,22 @@ export default function CompanyProfile({ companyId, userId }) {
       if (!contentType || !contentType.includes('application/json')) {
         throw new Error('Server returned non-JSON response. Check if API endpoint exists.');
       }
-      
-      const data = await response.json();
-      console.log('Company data received:', data);
+
+      let data = await response.json();
       setCompanyData(data);
-      setIsFollowing(data.isFollowing || false);
-      setIsOwner(data.userId === userId);
       
-      // Set companyId if not provided (for API calls)
-      if (!companyId && data.companyProfileId) {
-        companyId = data.companyProfileId;
+      const followingStatus = data.isFollowing || false;
+      let ownerStatus;
+      if(profileOwnerId ==undefined){
+        ownerStatus = Number(data.userId) === Number(viewerId);
+      }else{
+         ownerStatus = Number(profileOwnerId) === Number(viewerId);
       }
       
+      
+      setIsFollowing(()=>followingStatus);
+      setIsOwner(()=>ownerStatus);
+
       setTabData({
         description: data.description,
         website: data.website,
@@ -96,7 +109,7 @@ export default function CompanyProfile({ companyId, userId }) {
 
   const handleTabChange = async (tab) => {
     setActiveTab(tab);
-    
+
     if (tab === 'About') {
       setTabData({
         description: companyData.description,
@@ -112,14 +125,17 @@ export default function CompanyProfile({ companyId, userId }) {
 
   const fetchPostsData = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/company/${companyId}/posts`, {
+      const idToUse = companyData?.companyProfileId;
+      if (!idToUse) throw new Error("No company ID available");
+
+      const response = await fetch(`${API_BASE_URL}/api/company/${idToUse}/posts`, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) throw new Error('Failed to fetch posts data');
-      
+
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
@@ -144,24 +160,25 @@ export default function CompanyProfile({ companyId, userId }) {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
-      const response = await fetch(`${API_BASE_URL}/api/company/${companyId}/${op}`, {
+
+      const idToUse = companyData?.companyProfileId;
+      const response = await fetch(`${API_BASE_URL}/api/company/${idToUse}/${op}`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ userId: userId }),
+        body: JSON.stringify({ userId: viewerId }),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Follow error:', errorText);
         throw new Error(`Failed to ${op}`);
       }
-      
+
       setIsFollowing(!isFollowing);
       setCompanyData(prev => ({
         ...prev,
-        numberOfFollowers: op === "follow" 
-          ? prev.numberOfFollowers + 1 
+        numberOfFollowers: op === "follow"
+          ? prev.numberOfFollowers + 1
           : prev.numberOfFollowers - 1
       }));
     } catch (err) {
@@ -172,11 +189,24 @@ export default function CompanyProfile({ companyId, userId }) {
 
   const handleVisitWebsite = () => {
     if (companyData?.website) {
-      const url = companyData.website.startsWith('http') 
-        ? companyData.website 
+      const url = companyData.website.startsWith('http')
+        ? companyData.website
         : `https://${companyData.website}`;
       window.open(url, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  const handleMessage = () => {
+    navigate('/messages', { 
+      state: { 
+        openChatWith: {
+          otherUserId: parseInt(companyData.userId),
+          otherUserName: companyData.companyName,
+          otherUserProfilePicture: companyData.logoUrl,
+          otherUserType: 'COMPANY'
+        }
+      } 
+    });
   };
 
   const handleEditClick = (section) => {
@@ -193,32 +223,33 @@ export default function CompanyProfile({ companyId, userId }) {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
-      const currentCompanyId = companyId || companyData?.companyProfileId;
+
+      const currentCompanyId = companyData?.companyProfileId;
       const response = await fetch(`${API_BASE_URL}/api/company/${currentCompanyId}`, {
         method: 'PUT',
         headers,
-        body: JSON.stringify({ 
-          companyId: currentCompanyId, 
+        body: JSON.stringify({
+          companyId: currentCompanyId,
           ...updatedData
         }),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Update error:', errorText);
         throw new Error('Failed to update company');
       }
-      
+
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         throw new Error('Server returned non-JSON response');
       }
-      
+
       const updated = await response.json();
       setCompanyData(updated);
-      
-      if (updatedData.locations || activeTab === 'About') {
+
+      // Update tab data if on About tab
+      if (activeTab === 'About') {
         setTabData({
           description: updated.description,
           website: updated.website,
@@ -227,7 +258,7 @@ export default function CompanyProfile({ companyId, userId }) {
           locations: updated.locations || []
         });
       }
-      
+
       setShowEditModal(false);
       setEditSection(null);
 
@@ -268,15 +299,15 @@ export default function CompanyProfile({ companyId, userId }) {
   return (
     <div className="company-profile-container">
       <div className="company-profile-header">
-        <CompanyLogo 
-          logoUrl={companyData.logoUrl} 
+        <CompanyLogo
+          logoUrl={companyData.logoUrl}
           coverUrl={companyData.coverUrl}
           companyName={companyData.companyName}
           isOwner={isOwner}
           onEditCover={() => handleEditClick('cover')}
           onEditLogo={() => handleEditClick('logo')}
         />
-        
+
         <div className="company-info-wrapper">
           <CompanyHeader
             companyName={companyData.companyName}
@@ -286,19 +317,20 @@ export default function CompanyProfile({ companyId, userId }) {
             isOwner={isOwner}
             onEditDescription={() => handleEditClick('description')}
           />
-          
+
           <ActionButtons
             onFollow={isOwner ? null : handleFollow}
             onVisitWebsite={handleVisitWebsite}
+            onMessage={isOwner ? null : handleMessage}
             isFollowing={isFollowing}
             isOwner={isOwner}
           />
         </div>
       </div>
 
-      <NavigationTabs 
-        activeTab={activeTab} 
-        onTabChange={handleTabChange} 
+      <NavigationTabs
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
         tabs={tabs}
         isOwner={isOwner}
       />
@@ -314,21 +346,21 @@ export default function CompanyProfile({ companyId, userId }) {
               isOwner={isOwner}
               onEdit={() => handleEditClick('overview')}
             />
-            <LocationsSection 
-              locations={tabData.locations || []} 
+            <LocationsSection
+              locations={tabData.locations || []}
               isOwner={isOwner}
               onEdit={() => handleEditClick('locations')}
             />
           </>
         )}
-        
+
         {activeTab === 'Posts' && tabData && (
-          <PostsTab 
-            posts={tabData.posts || []} 
+          <PostsTab
+            posts={tabData.posts || []}
             isOwner={isOwner}
           />
         )}
-        
+
         {!tabData && (
           <div className="loading-message">Loading {activeTab.toLowerCase()} data...</div>
         )}

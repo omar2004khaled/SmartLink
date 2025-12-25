@@ -46,7 +46,7 @@ export default function SkillForm({ open, skill, onSave, onCancel }) {
             
             <div className="form-group">
               <label>Proficiency</label>
-              <select name="proficiency" value={form.proficiency} onChange={handleChange} className="form-input">
+              <select name="proficiency" value={form.proficiency} onChange={handleChange} required className="form-input">
                 <option value="">Select proficiency level</option>
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>

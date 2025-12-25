@@ -16,6 +16,7 @@ public class PostDTO {
     private Long id;
     private String content;
     private Long userId;
+    private String userType;
     private List<Attachment> attachments;
     private Timestamp createdAt;
 
@@ -61,7 +62,17 @@ public class PostDTO {
         this.createdAt = createdAt;
     }
 
+
+
     public void setAttachments(List<Attachment> attachments) {
         this.attachments = attachments;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 }

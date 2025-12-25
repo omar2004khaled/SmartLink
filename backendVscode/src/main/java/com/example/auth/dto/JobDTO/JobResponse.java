@@ -7,8 +7,7 @@ import lombok.*;
 
 import java.time.Instant;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -32,5 +31,6 @@ public class JobResponse {
     private Integer salaryMax;
 
     private Instant deadline;
+    private boolean isApplied;
 }
 

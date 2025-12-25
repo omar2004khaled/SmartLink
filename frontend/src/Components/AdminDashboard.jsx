@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Users, Shield, LogOut, UserCheck, FileText } from 'lucide-react';
 import UserManagement from './UserManagement';
 import AdminContentManagement from './AdminContentManagement';
+import { API_BASE_URL } from '../config';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:8080/admin/stats', {
+      const response = await fetch(`${API_BASE_URL}/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

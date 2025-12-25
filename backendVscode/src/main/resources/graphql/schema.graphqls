@@ -14,6 +14,7 @@ input JobFilter {
     jobLocation: String
     minSalary: Int
     maxSalary: Int
+    userId: Int
 }
 
 type Job {
@@ -27,6 +28,8 @@ type Job {
     salaryMin: Int
     salaryMax: Int
     deadline: String!
+    companyName: String!
+    isApplied: Boolean!
 }
 
 enum ExperienceLevel {

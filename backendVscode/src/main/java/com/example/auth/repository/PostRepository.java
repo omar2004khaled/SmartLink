@@ -27,4 +27,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("UPDATE Post p SET p.content = :content WHERE p.postId = :id")
     void updateContent(@Param("id") Long id, @Param("content") String content);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Post p WHERE p.UserId = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
+
+    @Query("Select p.UserId From Post p")
+    void getAuthor(@Param("userId") Long userId);
+
 }

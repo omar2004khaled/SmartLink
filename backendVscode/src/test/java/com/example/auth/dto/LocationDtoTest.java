@@ -3,9 +3,12 @@ package com.example.auth.dto;
 import com.example.auth.dto.ProfileDtos.LocationDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class LocationDtoTest {
 
     private LocationDto locationDto;

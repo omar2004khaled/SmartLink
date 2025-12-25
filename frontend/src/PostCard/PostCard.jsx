@@ -4,21 +4,22 @@ import Content from './Content';
 import Attachment from './Attachment';
 import Footer from './Footer';
 import CommentsPanel from './CommentsPanel';
-import { SaveComment, GetComments, GetUserInfo, userIdFromLocalStorage, UpdatePost, DeletePost } from '../FetchData/FetchData';
-import commentsSeed from '../data/commentsSeed';
+import ReportModal from './ReportModal';
+import { SaveComment, GetComments, GetUserInfo, GetUserProfilePic, userIdFromLocalStorage, UpdatePost, DeletePost } from '../FetchData/FetchData';
 import './PostCard.css';
+import { API_BASE_URL, CLOUDINARY_UPLOAD_URL } from '../config';
 
 function PostItem({ post }) {
   const [showComments, setShowComments] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [inlineVisible, setInlineVisible] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
   const [commentUsersInfo, setCommentUsersInfo] = useState({});
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [currentUserProfilePic, setCurrentUserProfilePic] = useState(null);
 
-  const initialComments = post?.comments || commentsSeed;
-  const [comments, setComments] = useState(initialComments);
+  const [comments, setComments] = useState([]);
 
   const [commentText, setCommentText] = useState('');
   const [attachedFile, setAttachedFile] = useState(null);
@@ -27,10 +28,17 @@ function PostItem({ post }) {
   const [editAttachment, setEditAttachment] = useState(null);
   const [editAttachmentUrl, setEditAttachmentUrl] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
-  useEffect(() => {
-    setComments(post?.comments || commentsSeed);
-  }, [post]);
+
+  const showError = (message) => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 5000);
+  };
+
+  // Remove the useEffect that sets comments from post.comments
 
   useEffect(() => {
     if (isEditing) {
@@ -39,16 +47,23 @@ function PostItem({ post }) {
       setEditAttachment(null);
     }
   }, [isEditing, post]);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       const userId = post?.userId;
       if (!userId) return;
-      
+
       setLoadingUserInfo(true);
       try {
+        // Fetch user info
         const info = await GetUserInfo(userId);
         if (info) {
-          setUserInfo(info);
+          // Fetch profile picture separately
+          const profilePicUrl = await GetUserProfilePic(userId);
+          setUserInfo({
+            ...info,
+            profilePicUrl: profilePicUrl
+          });
         }
       } catch (err) {
         console.error('Error fetching user info:', err);
@@ -66,14 +81,33 @@ function PostItem({ post }) {
     };
   }, [attachedFile]);
 
+  // Auto-fetch comments when post loads
+  useEffect(() => {
+    const postId = post?.id || post?.postId;
+    if (postId) {
+      fetchCommentsFromServer();
+    }
+  }, [post?.id, post?.postId]);
+
+  // Fetch current user's profile picture
+  useEffect(() => {
+    const fetchCurrentUserProfilePic = async () => {
+      const currentUserId = userIdFromLocalStorage();
+      if (currentUserId) {
+        const profilePicUrl = await GetUserProfilePic(currentUserId);
+        setCurrentUserProfilePic(profilePicUrl);
+      }
+    };
+    fetchCurrentUserProfilePic();
+  }, []);
+
   const uploadToCloudinary = async (file) => {
     try {
-      const url = `https://api.cloudinary.com/v1_1/dqhdiihx4/auto/upload`;
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', 'dyk7gqqw');
 
-      const res = await fetch(url, {
+      const res = await fetch(CLOUDINARY_UPLOAD_URL, {
         method: 'POST',
         body: formData,
       });
@@ -95,22 +129,31 @@ function PostItem({ post }) {
     setLoadingComments(true);
     try {
       const data = await GetComments(postId, 0, 10);
-      
+
       const userIds = data.map(c => c.userId).filter(Boolean);
       const uniqueUserIds = [...new Set(userIds.filter(id => id && !commentUsersInfo[id]))];
+
       const userInfoPromises = uniqueUserIds.map(userId => GetUserInfo(userId));
       const userInfoResults = await Promise.all(userInfoPromises);
+
+      const profilePicPromises = uniqueUserIds.map(userId => GetUserProfilePic(userId));
+      const profilePicResults = await Promise.all(profilePicPromises);
+
       const fetchedUserInfo = {};
       uniqueUserIds.forEach((userId, index) => {
         if (userInfoResults[index]) {
-          fetchedUserInfo[userId] = userInfoResults[index];
+          fetchedUserInfo[userId] = {
+            ...userInfoResults[index],
+            profilePicUrl: profilePicResults[index]
+          };
         }
       });
+
       if (Object.keys(fetchedUserInfo).length > 0) {
         setCommentUsersInfo(prev => ({ ...prev, ...fetchedUserInfo }));
       }
       const allUserInfo = { ...commentUsersInfo, ...fetchedUserInfo };
-      
+
       const mapped = data.map((c) => {
         const userInfo = c.userId ? allUserInfo[c.userId] : null;
         return {
@@ -118,7 +161,7 @@ function PostItem({ post }) {
           userId: c.userId,
           author: userInfo?.fullName || (c.userId ? `User${c.userId}` : 'Anonymous'),
           text: c.text,
-          avatar: '/src/PostCard/avatar.png',
+          avatar: userInfo?.profilePicUrl || '/src/PostCard/avatar.png',
           time: 'some time',
           attachment: c.url || undefined,
         };
@@ -136,7 +179,7 @@ function PostItem({ post }) {
     if (!f) return;
 
     if (attachedFile) {
-      alert('Only one attachment is allowed. Remove the current attachment first.');
+      showError('Only one attachment is allowed. Remove the current attachment first.');
       e.target.value = null;
       return;
     }
@@ -153,9 +196,9 @@ function PostItem({ post }) {
     }));
 
     if (uploadedUrl) {
-      console.log('Uploaded attachment URL:', uploadedUrl);
+      //console.log('Uploaded attachment URL:', uploadedUrl);
     } else {
-      try { alert('Attachment upload failed'); } catch(e) {}
+      showError('Attachment upload failed');
     }
   };
 
@@ -165,7 +208,7 @@ function PostItem({ post }) {
   };
 
   const saveCommentToServer = async (commentDTO) => {
-    const res = await fetch('http://localhost:8080/comment/add', {
+    const res = await fetch(`${API_BASE_URL}/comment/add`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(commentDTO),
@@ -184,7 +227,7 @@ function PostItem({ post }) {
     const postId = post?.id || post?.postId;
     if (!postId) {
       console.error('Cannot send comment: post ID is missing', { post });
-      alert('Error: Post ID is missing. Cannot send comment.');
+      showError('Error: Post ID is missing. Cannot send comment.');
       return;
     }
 
@@ -210,21 +253,19 @@ function PostItem({ post }) {
     };
 
     try {
-      console.log('Submitting comment for post:', postId, 'Comment DTO:', commentDTO);
+      //console.log('Submitting comment for post:', postId, 'Comment DTO:', commentDTO);
       const id = await SaveComment(commentDTO);
       setCommentText('');
       handleRemoveAttachment();
       await fetchCommentsFromServer();
     } catch (err) {
       console.error('Error saving comment', err);
-      alert('Failed to save comment: ' + (err.message || 'Unknown error'));
+      showError('Failed to save comment: ' + (err.message || 'Unknown error'));
     }
   };
 
-  const openComments = async (showAllFlag = false) => {
-    setShowAll(!!showAllFlag);
-    setShowComments(true);
-    await fetchCommentsFromServer();
+  const toggleComments = () => {
+    setShowComments(!showComments);
   };
 
   const closeComments = () => setShowComments(false);
@@ -236,10 +277,11 @@ function PostItem({ post }) {
       await fetchCommentsFromServer();
     }
   };
+
   const handleDeletePost = async () => {
     const postId = post?.id || post?.postId;
     if (!postId) {
-      alert('Error: Post ID is missing.');
+      showError('Error: Post ID is missing.');
       return;
     }
 
@@ -249,11 +291,11 @@ function PostItem({ post }) {
 
     try {
       await DeletePost(postId);
-      alert('Post deleted successfully!');
+      showError('Post deleted successfully!');
       window.location.reload();
     } catch (err) {
       console.error('Error deleting post:', err);
-      alert('Failed to delete post: ' + (err.message || 'Unknown error'));
+      showError('Failed to delete post: ' + (err.message || 'Unknown error'));
     }
   };
 
@@ -292,9 +334,9 @@ function PostItem({ post }) {
 
     if (uploadedUrl) {
       setEditAttachmentUrl(uploadedUrl);
-      console.log('Uploaded attachment URL:', uploadedUrl);
+      //console.log('Uploaded attachment URL:', uploadedUrl);
     } else {
-      alert('Attachment upload failed');
+      showError('Attachment upload failed');
     }
   };
 
@@ -309,12 +351,12 @@ function PostItem({ post }) {
   const handleSaveEdit = async () => {
     const postId = post?.id || post?.postId;
     if (!postId) {
-      alert('Error: Post ID is missing.');
+      showError('Error: Post ID is missing.');
       return;
     }
 
     if (!editContent.trim() && !editAttachmentUrl) {
-      alert('Please enter some content or add an attachment.');
+      showError('Please enter some content or add an attachment.');
       return;
     }
 
@@ -338,15 +380,15 @@ function PostItem({ post }) {
         const attachments = finalAttachmentUrl ? [{
           attachmentURL: finalAttachmentUrl,
           typeOfAttachment: 'Image',
-          AttachId: null 
+          AttachId: null
         }] : [];
         const attachmentDTO = {
           id: postId,
-          content: null, 
+          content: null,
           attachments: attachments.length > 0 ? attachments : null,
           createdAt: post.createdAt || null
         };
-        console.log('Updating post attachments:', attachmentDTO);
+        //console.log('Updating post attachments:', attachmentDTO);
         await UpdatePost(postId, attachmentDTO);
       }
 
@@ -355,81 +397,97 @@ function PostItem({ post }) {
           id: postId,
           content: editContent.trim() || null,
           userId: post.userId,
-          attachments: null, 
+          attachments: null,
           createdAt: post.createdAt || null
         };
-        console.log('Updating post content:', contentDTO);
+        //console.log('Updating post content:', contentDTO);
         await UpdatePost(postId, contentDTO);
       }
 
-      alert('Post updated successfully!');
+      showError('Post updated successfully!');
       setIsEditing(false);
       window.location.reload();
     } catch (err) {
       console.error('Error updating post:', err);
-      alert('Failed to update post: ' + (err.message || 'Unknown error'));
+      showError('Failed to update post: ' + (err.message || 'Unknown error'));
     } finally {
       setIsSaving(false);
     }
   };
 
   const formatRelativeTime = (dateString) => {
-  if (!dateString) return 'just now';
-  
-  try {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    // Less than a minute
-    if (diffInSeconds < 60) {
-      return 'just now';
+    if (!dateString) return 'just now';
+
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+
+      // Less than a minute
+      if (diffInSeconds < 60) {
+        return 'just now';
+      }
+      const diffInMinutes = Math.floor(diffInSeconds / 60);
+      if (diffInMinutes < 60) {
+        return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+      }
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) {
+        return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+      }
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) {
+        return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+      }
+
+      // Weeks
+      const diffInWeeks = Math.floor(diffInDays / 7);
+      if (diffInWeeks < 4) {
+        return `${diffInWeeks} ${diffInWeeks === 1 ? 'week' : 'weeks'} ago`;
+      }
+
+      // Months
+      const diffInMonths = Math.floor(diffInDays / 30);
+      if (diffInMonths < 12) {
+        return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
+      }
+
+      // Years
+      const diffInYears = Math.floor(diffInDays / 365);
+      return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
+
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'recently';
     }
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
-    }
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
-    }
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) {
-      return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
-    }
-    
-    // Weeks
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    if (diffInWeeks < 4) {
-      return `${diffInWeeks} ${diffInWeeks === 1 ? 'week' : 'weeks'} ago`;
-    }
-    
-    // Months
-    const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths < 12) {
-      return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
-    }
-    
-    // Years
-    const diffInYears = Math.floor(diffInDays / 365);
-    return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
-    
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'recently';
-  }
-};
+  };
+
   return (
     <div className="post-card" data-post-id={post?.id || post?.postId}>
-      <UserHeader 
-        username={userInfo?.fullName || post.username || 'User'} 
-        userId={post.userId} 
+      {/* Error Message Display */}
+      {errorMessage && (
+        <div className="error-message">
+          <span>{errorMessage}</span>
+          <button onClick={() => setErrorMessage(null)} className="error-close">×</button>
+        </div>
+      )}
+
+      {/* Debug: Log profile picture URL */}
+      {console.log('UserInfo for post:', userInfo)}
+      {console.log('Profile Picture URL being passed:', userInfo?.profilePicUrl)}
+
+      <UserHeader
+        username={userInfo?.fullName || post.username || 'User'}
+        userId={post.userId}
         time={post.time ? formatRelativeTime(post.time) : 'just now'}
         bio={userInfo ? (userInfo.role ? `${userInfo.role}${userInfo.email ? ` • ${userInfo.email}` : ''}` : userInfo.email || '') : ''}
-        avatarUrl={null}
+        avatarUrl={userInfo?.profilePicUrl || null}
         onDelete={handleDeletePost}
         onUpdate={handleEditPost}
+        onReport={() => setShowReportModal(true)}
         postId={post?.id || post?.postId}
+        userType={userInfo?.userType || post.userType}
+        onError={showError}
       />
       {isEditing ? (
         <div className="post-edit-mode">
@@ -445,8 +503,8 @@ function PostItem({ post }) {
             {editAttachmentUrl && !editAttachment && (
               <div className="edit-attachment-preview">
                 <img src={editAttachmentUrl} alt="current attachment" />
-                <button 
-                  className="remove-attach" 
+                <button
+                  className="remove-attach"
                   onClick={handleRemoveEditAttachment}
                   aria-label="Remove attachment"
                 >
@@ -454,13 +512,13 @@ function PostItem({ post }) {
                 </button>
               </div>
             )}
-            
+
             {editAttachment && (
               <div className="edit-attachment-preview">
                 <img src={editAttachment.preview} alt="new attachment preview" />
                 {editAttachment.uploading && <div className="uploading-indicator">Uploading…</div>}
-                <button 
-                  className="remove-attach" 
+                <button
+                  className="remove-attach"
                   onClick={handleRemoveEditAttachment}
                   aria-label="Remove attachment"
                 >
@@ -468,12 +526,12 @@ function PostItem({ post }) {
                 </button>
               </div>
             )}
-            
+
             {!editAttachmentUrl && !editAttachment && (
               <label className="attach-button" title="Attach image">
-                <input 
-                  type="file" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  accept="image/*"
                   onChange={handleEditFileChange}
                   disabled={!!editAttachment}
                 />
@@ -481,17 +539,17 @@ function PostItem({ post }) {
               </label>
             )}
           </div>
-          
+
           <div className="post-edit-actions">
-            <button 
-              className="cancel-btn" 
+            <button
+              className="cancel-btn"
               onClick={handleCancelEdit}
               disabled={isSaving}
             >
               Cancel
             </button>
-            <button 
-              className="save-btn" 
+            <button
+              className="save-btn"
               onClick={handleSaveEdit}
               disabled={isSaving || (!editContent.trim() && !editAttachmentUrl)}
             >
@@ -501,30 +559,30 @@ function PostItem({ post }) {
         </div>
       ) : (
         <>
-  <Content content={post.content ?? ''} />
-  
-  {/* Display ALL attachments */}
-  {post.attachments && post.attachments.length > 0 && (
-    <div className="post-attachments-container">
-      {post.attachments.map((attachment, index) => (
-        <Attachment 
-          key={`attachment-${post.id}-${index}`}
-          attachment={attachment}
-          index={index}
-          totalAttachments={post.attachments.length}
-        />
-      ))}
-    </div>
-  )}
-</>
+          <Content content={post.content ?? ''} />
+
+          {/* Display ALL attachments */}
+          {post.attachments && post.attachments.length > 0 && (
+            <div className="post-attachments-container">
+              {post.attachments.map((attachment, index) => (
+                <Attachment
+                  key={`attachment-${post.id}-${index}`}
+                  attachment={attachment}
+                  index={index}
+                  totalAttachments={post.attachments.length}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
-      <Footer onCommentClick={() => openComments(true)} onToggleInline={toggleInline} postId= {post?.id || post?.postId} userId={userIdFromLocalStorage()}/>
+      <Footer onCommentClick={toggleComments} postId={post?.id || post?.postId} userId={userIdFromLocalStorage()} />
 
-      {inlineVisible && (
+      {/* Show comments based on showComments state */}
+      {showComments && comments.length > 0 && (
         <div className="inline-comments">
           {loadingComments && <div className="no-comments">Loading comments…</div>}
-          {!loadingComments && comments.length === 0 && <div className="no-comments">No comments yet</div>}
           {!loadingComments && comments.map((c, i) => (
             <div key={c.commentId ?? i} className="comment-item">
               <img src={c.avatar || '/src/PostCard/avatar.png'} className="comment-avatar" alt="avatar" />
@@ -542,8 +600,40 @@ function PostItem({ post }) {
         </div>
       )}
 
+      {/* Show only 1 most recent comment when comments are hidden */}
+      {!showComments && comments.length > 0 && (
+        <div className="inline-comments">
+          {loadingComments && <div className="no-comments">Loading comments…</div>}
+          {!loadingComments && comments.slice(0, 1).map((c, i) => (
+            <div key={c.commentId ?? i} className="comment-item">
+              <img src={c.avatar || '/src/PostCard/avatar.png'} className="comment-avatar" alt="avatar" />
+              <div className="comment-body">
+                <div className="comment-author">{c.author || 'Anonymous'}</div>
+                <div className="comment-text">{c.text}</div>
+                {c.attachment && (
+                  <div style={{ marginTop: 8 }}>
+                    <img src={c.attachment} alt="attachment" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {!loadingComments && comments.length > 1 && (
+            <div className="view-all-comments" onClick={toggleComments} style={{
+              padding: '8px 12px',
+              color: '#666',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 500
+            }}>
+              View all {comments.length} comments
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="comment-composer">
-        <img src="/src/PostCard/avatar.png" alt="me" className="composer-avatar" />
+        <img src={currentUserProfilePic || "/src/PostCard/avatar.png"} alt="me" className="composer-avatar" />
         <div className="composer-body">
           <textarea
             className="composer-input"
@@ -576,8 +666,15 @@ function PostItem({ post }) {
         </div>
       </div>
 
-      {showComments && (
-        <CommentsPanel comments={comments} onClose={closeComments} showAll={showAll} />
+      {showReportModal && (
+        <ReportModal
+          postId={post?.id || post?.postId}
+          onClose={() => setShowReportModal(false)}
+          onReportSuccess={() => {
+            setShowReportModal(false);
+            // Optionally show a success message or refresh
+          }}
+        />
       )}
     </div>
   );

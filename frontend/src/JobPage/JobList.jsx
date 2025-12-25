@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Briefcase, ChevronLeft, ChevronRight } from 'lucide-react';
 import JobCard from './JobCard';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { API_BASE_URL } from '../config';
+import { useAlert } from '../hooks/useAlert';
 
 const JobList = ({ companyId, refreshTrigger, onEdit }) => {
+  const { showError, showSuccess } = useAlert();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,18 +21,18 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
   const fetchJobs = async () => {
     setLoading(true);
     setError(null);
-    console.log(companyId)
-    if(companyId===null) return;
+    //console.log(companyId)
+    if (companyId === null) return;
     try {
-      const endpoint = activeTab === 'current' 
-        ? `http://localhost:8080/jobs/company/current/${companyId}?page=${currentPage}&size=${pageSize}`
-        : `http://localhost:8080/jobs/company/ended/${companyId}?page=${currentPage}&size=${pageSize}`;
-      
+      const endpoint = activeTab === 'current'
+        ? `${API_BASE_URL}/jobs/company/current/${companyId}?page=${currentPage}&size=${pageSize}`
+        : `${API_BASE_URL}/jobs/company/ended/${companyId}?page=${currentPage}&size=${pageSize}`;
+
       const response = await fetch(endpoint);
       if (!response.ok) throw new Error('Failed to fetch jobs');
-      
+
       const data = await response.json();
-      console.log(data);
+      //console.log(data);
       setJobs(data.content);
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);
@@ -50,24 +53,25 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
 
   const handleDelete = async () => {
     if (!deleteModal) return;
-    
+
     setDeleting(true);
     try {
-      const response = await fetch(`http://localhost:8080/jobs/${deleteModal.jobId}`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/${deleteModal.jobId}`, {
         method: 'DELETE'
       });
-      
+
       if (!response.ok) throw new Error('Failed to delete job');
-      
+
       if (jobs.length === 1 && currentPage > 0) {
         setCurrentPage(currentPage - 1);
       } else {
         fetchJobs();
       }
-      
+
       setDeleteModal(null);
+      showSuccess('Job deleted successfully!');
     } catch (err) {
-      alert('Error deleting job: ' + err.message);
+      showError('Error deleting job: ' + err.message);
     } finally {
       setDeleting(false);
     }
@@ -107,21 +111,19 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
         <div className="flex gap-4 border-b border-gray-200">
           <button
             onClick={() => setActiveTab('current')}
-            className={`px-4 py-2 font-medium ${
-              activeTab === 'current'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            className={`px-4 py-2 font-medium ${activeTab === 'current'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+              }`}
           >
             Current Jobs
           </button>
           <button
             onClick={() => setActiveTab('ended')}
-            className={`px-4 py-2 font-medium ${
-              activeTab === 'ended'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            className={`px-4 py-2 font-medium ${activeTab === 'ended'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+              }`}
           >
             Ended Jobs
           </button>
@@ -158,12 +160,17 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {jobs.map(job => (
-              <JobCard
+              <div
                 key={job.jobId}
-                job={job}
-                onEdit={onEdit}
-                onDelete={setDeleteModal}
-              />
+                onDoubleClick={() => window.location.href = `/applications?jobId=${job.jobId}`}
+                style={{ cursor: 'pointer' }}
+              >
+                <JobCard
+                  job={job}
+                  onEdit={onEdit}
+                  onDelete={setDeleteModal}
+                />
+              </div>
             ))}
           </div>
           {totalPages > 1 && (
@@ -179,12 +186,12 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
 
               <div className="flex gap-1">
                 {[...Array(totalPages)].map((_, index) => {
-                  const showPage = 
-                    index === 0 || 
-                    index === totalPages - 1 || 
+                  const showPage =
+                    index === 0 ||
+                    index === totalPages - 1 ||
                     (index >= currentPage - 1 && index <= currentPage + 1);
-                  
-                  const showEllipsis = 
+
+                  const showEllipsis =
                     (index === currentPage - 2 && currentPage > 2) ||
                     (index === currentPage + 2 && currentPage < totalPages - 3);
 
@@ -202,11 +209,10 @@ const JobList = ({ companyId, refreshTrigger, onEdit }) => {
                     <button
                       key={index}
                       onClick={() => handlePageChange(index)}
-                      className={`px-4 py-2 rounded-lg border ${
-                        currentPage === index
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
+                      className={`px-4 py-2 rounded-lg border ${currentPage === index
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'border-gray-300 hover:bg-gray-50'
+                        }`}
                     >
                       {index + 1}
                     </button>

@@ -46,8 +46,8 @@ class SearchControllerTest {
         String query = "john";
         Long currentUserId = 1L;
         List<UserSearchDTO> mockResults = Arrays.asList(
-            new UserSearchDTO(2L, "John Doe", "john.doe@email.com", "123456789"),
-            new UserSearchDTO(3L, "Johnny Smith", "johnny.smith@email.com", "987654321")
+            new UserSearchDTO(2L, "John Doe", "john.doe@email.com", "123456789", "JOB_SEEKER"),
+            new UserSearchDTO(3L, "Johnny Smith", "johnny.smith@email.com", "987654321", "JOB_SEEKER")
         );
         
         when(searchService.searchUsers(query, currentUserId)).thenReturn(mockResults);
@@ -221,7 +221,7 @@ class SearchControllerTest {
         String query = "jo";
         Long currentUserId = 1L;
         List<UserSearchDTO> mockResults = Arrays.asList(
-            new UserSearchDTO(2L, "John Doe", "john.doe@email.com", "123456789")
+            new UserSearchDTO(2L, "John Doe", "john.doe@email.com", "123456789", "JOB_SEEKER")
         );
         
         when(searchService.searchUsers(query, currentUserId)).thenReturn(mockResults);

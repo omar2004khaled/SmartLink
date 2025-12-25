@@ -7,12 +7,16 @@ import com.example.auth.entity.CompanyFollower;
 import com.example.auth.entity.CompanyLocation;
 import com.example.auth.entity.CompanyProfile;
 import com.example.auth.entity.Location;
+import com.example.auth.entity.User;
 import com.example.auth.repository.CompanyFollowerRepo;
 import com.example.auth.repository.CompanyLocationRepo;
 import com.example.auth.repository.CompanyProfileRepo;
 import com.example.auth.repository.LocationRepo;
+import com.example.auth.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,26 +25,29 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CompanyProfileService {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyProfileService.class);
 
     private final CompanyProfileRepo companyProfileRepo;
     private final CompanyFollowerRepo companyFollowerRepo;
     private final CompanyLocationRepo companyLocationRepo;
     private final LocationRepo locationRepo;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-
-    private List<LocationDTO> getLocations(Long companyId){
+    private List<LocationDTO> getLocations(Long companyId) {
         List<CompanyLocation> locations = companyLocationRepo.findByCompanyId(companyId);
         List<LocationDTO> locationDTOS = new ArrayList<>();
-        for(CompanyLocation location : locations){
+        for (CompanyLocation location : locations) {
             final Long locationId = location.getLocationId();
             Location loc = locationRepo.findById(locationId).orElse(null);
-            if(loc == null) continue;
+            if (loc == null)
+                continue;
             locationDTOS.add(new LocationDTO(locationId, loc.getCity(), loc.getCountry()));
         }
         return locationDTOS;
     }
 
-    private CompanyDTO getCompanyDTO(CompanyProfile companyProfile){
+    private CompanyDTO getCompanyDTO(CompanyProfile companyProfile) {
         return CompanyDTO.builder()
                 .companyName(companyProfile.getCompanyName())
                 .founded(companyProfile.getFounded())
@@ -50,29 +57,44 @@ public class CompanyProfileService {
                 .numberOfFollowers(companyProfile.getNumberOfFollowers())
                 .logoUrl(companyProfile.getLogoUrl())
                 .coverUrl(companyProfile.getCoverImageUrl())
-                .userId(companyProfile.getUserId())
+                .userId(companyProfile.getUser().getId())
+                .companyProfileId(companyProfile.getCompanyProfileId())
                 .build();
     }
 
-    public CompanyDTO getCompanyByUserId(Long userId) {
-        CompanyProfile companyProfile = companyProfileRepo.findByUserId(userId)
+    public CompanyDTO getCompanyByUserId(Long userId, Long viewerId) {
+        CompanyProfile companyProfile = companyProfileRepo.findByUser_Id(userId)
                 .orElseThrow(() -> new RuntimeException("Company profile not found for user"));
-        
+
         CompanyDTO companyDTO = getCompanyDTO(companyProfile);
-        companyDTO.setCompanyProfileId(companyProfile.getCompanyProfileId());
         companyDTO.setLocations(getLocations(companyProfile.getCompanyProfileId()));
-        
+
+        if (viewerId != null) {
+            User viewer = userRepository.findById(viewerId)
+                    .orElseThrow(() -> new RuntimeException("Viewer not found"));
+            User company = companyProfile.getUser();
+
+            boolean isFollowing = companyFollowerRepo.existsByFollowerAndCompany(viewer, company);
+            companyDTO.setIsFollowing(isFollowing);
+        } else {
+            companyDTO.setIsFollowing(false);
+        }
         return companyDTO;
     }
 
-    public CompanyDTO getCompanyProfile(Long companyId, Long userId){
+    public CompanyDTO getCompanyProfile(Long companyId, Long userId) {
         CompanyProfile companyProfile = companyProfileRepo.findById(companyId)
-                .orElseThrow(() -> new RuntimeException("company not found"));
+                .orElseThrow(() -> new RuntimeException("Company profile not found"));
 
         CompanyDTO companyDTO = getCompanyDTO(companyProfile);
-        companyDTO.setCompanyProfileId(companyProfile.getCompanyProfileId());
         if (userId != null) {
-            companyDTO.setIsFollowing(companyFollowerRepo.existsByFollowerIdAndCompanyId(userId, companyId));
+            User followerUser = userRepository.findById(userId).orElse(null);
+            User companyUser = companyProfile.getUser();
+            if (followerUser != null && companyUser != null) {
+                companyDTO.setIsFollowing(companyFollowerRepo.existsByFollowerAndCompany(followerUser, companyUser));
+            }
+        } else {
+            companyDTO.setIsFollowing(false);
         }
         companyDTO.setLocations(getLocations(companyId));
 
@@ -84,25 +106,40 @@ public class CompanyProfileService {
         CompanyProfile company = companyProfileRepo.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        CompanyProfile updated = company.toBuilder()
-                .companyName(request.getCompanyName() != null ? request.getCompanyName() : company.getCompanyName())
-                .description(request.getDescription() != null ? request.getDescription() : company.getDescription())
-                .website(request.getWebsite() != null ? request.getWebsite() : company.getWebsite())
-                .industry(request.getIndustry() != null ? request.getIndustry() : company.getIndustry())
-                .founded(request.getFounded() != null ? request.getFounded() : company.getFounded())
-                .logoUrl(request.getLogoUrl() != null ? request.getLogoUrl() : company.getLogoUrl())
-                .coverImageUrl(request.getCoverImageUrl() != null ? request.getCoverImageUrl() : company.getCoverImageUrl())
-                .build();
+        if (request.getCompanyName() != null) {
+            company.setCompanyName(request.getCompanyName());
+        }
+        if (request.getDescription() != null) {
+            company.setDescription(request.getDescription());
+        }
+        if (request.getWebsite() != null) {
+            company.setWebsite(request.getWebsite());
+        }
+        if (request.getIndustry() != null) {
+            company.setIndustry(request.getIndustry());
+        }
+        if (request.getFounded() != null) {
+            company.setFounded(request.getFounded());
+        }
+        if (request.getLogoUrl() != null) {
+            company.setLogoUrl(request.getLogoUrl());
+        }
+        if (request.getCoverImageUrl() != null) {
+            company.setCoverImageUrl(request.getCoverImageUrl());
+        }
 
-        CompanyProfile saved = companyProfileRepo.save(updated);
+        CompanyProfile saved = companyProfileRepo.save(company);
 
         if (request.getLocations() != null) {
             updateCompanyLocations(companyId, request.getLocations());
         }
 
-        return getCompanyProfile(companyId, companyId);
+        return getCompanyProfile(companyId, null);
     }
-
+    @Transactional
+    boolean userFollowsAccount(Long userId,Long companyId){
+        return companyFollowerRepo.existsByFollowerAndCompany(userRepository.findById(userId).get(),userRepository.findById(companyId).get());
+    }
     @Transactional
     public void updateCompanyLocations(Long companyId, List<LocationDTO> locationUpdates) {
 
@@ -139,23 +176,37 @@ public class CompanyProfileService {
         }
     }
 
-
     @Transactional
     public void followCompany(Long companyId, Long userId) {
         CompanyProfile company = companyProfileRepo.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        if (companyFollowerRepo.existsByFollowerIdAndCompanyId(userId, company.getUserId())) {
+        User followerUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        User companyUser = company.getUser();
+
+        if (companyFollowerRepo.existsByFollowerAndCompany(followerUser, companyUser)) {
             throw new RuntimeException("Already following this company");
         }
 
         CompanyFollower follower = new CompanyFollower();
-        follower.setFollowerId(userId);
-        follower.setCompanyId(company.getUserId());
+        follower.setFollower(followerUser);
+        follower.setCompany(companyUser);
         companyFollowerRepo.save(follower);
 
         company.setNumberOfFollowers(company.getNumberOfFollowers() + 1);
         companyProfileRepo.save(company);
+
+        createFollowNotificationAsync(companyUser.getId(), followerUser.getId(), followerUser.getFullName());
+    }
+
+    private void createFollowNotificationAsync(Long companyUserId, Long followerUserId, String followerName) {
+        try {
+            notificationService.createCompanyFollowedNotification(companyUserId, followerUserId, followerName);
+        } catch (Exception e) {
+            logger.error("Failed to create company follow notification: {}", e.getMessage());
+        }
     }
 
     @Transactional
@@ -163,13 +214,18 @@ public class CompanyProfileService {
         CompanyProfile company = companyProfileRepo.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        if (!companyFollowerRepo.existsByFollowerIdAndCompanyId(userId, company.getUserId())) {
+        User followerUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        User companyUser = company.getUser();
+
+        if (!companyFollowerRepo.existsByFollowerAndCompany(followerUser, companyUser)) {
             throw new RuntimeException("Not following this company");
         }
 
-        companyFollowerRepo.deleteByFollowerIdAndCompanyId(userId, company.getUserId());
+        companyFollowerRepo.deleteByFollowerAndCompany(followerUser, companyUser);
 
-        company.setNumberOfFollowers(company.getNumberOfFollowers() - 1);
+        company.setNumberOfFollowers(Math.max(0, company.getNumberOfFollowers() - 1));
         companyProfileRepo.save(company);
     }
 }

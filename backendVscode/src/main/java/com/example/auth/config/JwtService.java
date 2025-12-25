@@ -25,12 +25,17 @@ public class JwtService {
     }
 
     public String generateToken(String email, String role) {
+        return generateToken(email, role, "JOB_SEEKER");
+    }
+
+    public String generateToken(String email, String role, String userType) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("userType", userType)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -66,6 +71,15 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("role", String.class);
+    }
+
+    public String extractUserType(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userType", String.class);
     }
 
     private boolean isTokenExpired(String token) {
