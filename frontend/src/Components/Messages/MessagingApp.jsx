@@ -41,7 +41,7 @@ const api = {
   }
 };
 
-const MessagingApp = ({ userId }) => {
+const MessagingApp = ({ userId,openChatWith }) => {
   const [currentUserId] = useState(() => userId);
   const [conversations, setConversations] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
@@ -52,6 +52,7 @@ const MessagingApp = ({ userId }) => {
 
   const stompClient = useRef(null);
   const messagesEndRef = useRef(null);
+  const hasOpenedChat = useRef(false);
 
   const scrollToBottom = (behavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior });
@@ -136,6 +137,7 @@ const MessagingApp = ({ userId }) => {
     } catch {
       setError('Failed to send message');
     }
+    if(openChatWith) loadConversations();
   };
 
   const handleChatSelect = (conversation) => {
@@ -152,6 +154,20 @@ const MessagingApp = ({ userId }) => {
   useEffect(() => {
     loadConversations();
   }, []);
+  useEffect(() => {
+    if (openChatWith && !hasOpenedChat.current) {
+      hasOpenedChat.current = true;
+ 
+      setSelectedChat(openChatWith.otherUserId);
+      setSelectedChatUser({
+        id: openChatWith.otherUserId,
+        name: openChatWith.otherUserName,
+        profilePicture: openChatWith.otherUserProfilePicture,
+        userType: openChatWith.otherUserType
+      });
+      loadMessages(openChatWith.otherUserId);
+    }
+  }, [openChatWith]);
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
@@ -167,16 +183,22 @@ const MessagingApp = ({ userId }) => {
 
       <div className="flex-1 flex overflow-hidden">
         <div className={`${selectedChat ? 'hidden lg:block' : ''} w-full lg:w-96 bg-white border-r`}>
-          {conversations.map((conv) => (
-            <ConversationItem
-              key={conv.id}
-              conversation={conv}
-              currentUserId={currentUserId}
-              isActive={selectedChat === conv.otherUserId}
-              onClick={() => handleChatSelect(conv)}
-              unreadCount={conv.receiverId === currentUserId && !conv.isRead ? 1 : 0}
-            />
-          ))}
+          {conversations.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              No conversations yet
+            </div>
+          ) : (
+            conversations.map((conv) => (
+              <ConversationItem
+                key={conv.id}
+                conversation={conv}
+                currentUserId={currentUserId}
+                isActive={selectedChat === conv.otherUserId}
+                onClick={() => handleChatSelect(conv)}
+                unreadCount={conv.receiverId === currentUserId && !conv.isRead ? 1 : 0}
+              />
+            ))
+          )}
         </div>
 
         <div className={`${!selectedChat ? 'hidden lg:flex' : 'flex'} flex-1 flex-col`}>
@@ -187,10 +209,16 @@ const MessagingApp = ({ userId }) => {
                 onClose={() => {
                   setSelectedChat(null);
                   setSelectedChatUser(null);
+                  hasOpenedChat.current = false;
                 }}
               />
 
               <div className="flex-1 overflow-y-auto p-4">
+                {messages.length === 0 && (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    No messages yet
+                  </div>
+                )}
                 {messages.map((msg) => (
                   <MessageBubble
                     key={msg.id}
