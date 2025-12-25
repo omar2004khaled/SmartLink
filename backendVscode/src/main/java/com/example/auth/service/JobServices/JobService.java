@@ -3,7 +3,10 @@ package com.example.auth.service.JobServices;
 import com.example.auth.dto.JobDTO.JobRequest;
 import com.example.auth.dto.JobDTO.JobResponse;
 import com.example.auth.dto.JobDTO.JobUpdateRequest;
-import com.example.auth.entity.*;
+import com.example.auth.entity.CompanyFollower;
+import com.example.auth.entity.Job;
+import com.example.auth.entity.JobApplication;
+import com.example.auth.entity.User;
 import com.example.auth.repository.CompanyFollowerRepo;
 import com.example.auth.repository.JobApplicationRepository;
 import com.example.auth.repository.JobRepository;
@@ -73,7 +76,7 @@ public class JobService {
                 .build();
     }
 
-    public JobResponse mapToJobResponse(Job job) {
+    private JobResponse mapToJobResponse(Job job) {
         return JobResponse.builder()
                 .jobId(job.getJobId())
                 .title(job.getTitle())
