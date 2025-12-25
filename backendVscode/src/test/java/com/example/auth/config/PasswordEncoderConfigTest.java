@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 class PasswordEncoderConfigTest {
 
@@ -27,5 +28,51 @@ class PasswordEncoderConfigTest {
         String encoded = encoder.encode(rawPassword);
         assertNotNull(encoded);
         assertTrue(encoder.matches(rawPassword, encoded));
+    }
+
+    @Test
+    void passwordEncoder_ShouldNotMatchWrongPassword() {
+        // Arrange
+        PasswordEncoderConfig config = new PasswordEncoderConfig();
+        PasswordEncoder encoder = config.passwordEncoder();
+
+        // Act
+        String rawPassword = "testPassword123!";
+        String wrongPassword = "wrongPassword456!";
+        String encoded = encoder.encode(rawPassword);
+
+        // Assert
+        assertFalse(encoder.matches(wrongPassword, encoded));
+    }
+
+    @Test
+    void passwordEncoder_ShouldGenerateDifferentHashes() {
+        // Arrange
+        PasswordEncoderConfig config = new PasswordEncoderConfig();
+        PasswordEncoder encoder = config.passwordEncoder();
+        String rawPassword = "testPassword123!";
+
+        // Act
+        String encoded1 = encoder.encode(rawPassword);
+        String encoded2 = encoder.encode(rawPassword);
+
+        // Assert - BCrypt should generate different hashes each time
+        assertNotEquals(encoded1, encoded2);
+
+        // But both should match the original password
+        assertTrue(encoder.matches(rawPassword, encoded1));
+        assertTrue(encoder.matches(rawPassword, encoded2));
+    }
+
+    @Test
+    void passwordEncoder_ShouldHandleNull() {
+        // Arrange
+        PasswordEncoderConfig config = new PasswordEncoderConfig();
+        PasswordEncoder encoder = config.passwordEncoder();
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> encoder.encode(null));
+        assertThrows(IllegalArgumentException.class, () -> encoder.matches(null, "hash"));
+        assertThrows(IllegalArgumentException.class, () -> encoder.matches("password", null));
     }
 }

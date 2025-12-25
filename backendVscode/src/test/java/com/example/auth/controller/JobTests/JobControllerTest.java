@@ -1,8 +1,7 @@
-package com.example.auth.controller;
+package com.example.auth.controller.JobTests;
 
-import com.example.auth.dto.JobDTO.JobRequest;
-import com.example.auth.dto.JobDTO.JobResponse;
-import com.example.auth.dto.JobDTO.JobUpdateRequest;
+import com.example.auth.controller.JobController;
+import com.example.auth.dto.JobDTO.*;
 import com.example.auth.enums.ExperienceLevel;
 import com.example.auth.enums.JobType;
 import com.example.auth.enums.LocationType;
@@ -20,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -550,5 +550,150 @@ class JobControllerTest {
 
         assertEquals(JobType.FREELANCE, content.get(2).getJobType());
         assertEquals(LocationType.HYBRID, content.get(2).getLocationType());
+    }
+
+    @Test
+    void getCurrentJobs_WithMixedEnumValues() {
+        // Arrange
+        Long companyId = 1L;
+
+        // Create jobs with different enum combinations
+        List<com.example.auth.dto.JobDTO.JobResponse> jobs = List.of(
+                com.example.auth.dto.JobDTO.JobResponse.builder()
+                        .jobId(1L)
+                        .title("Junior Developer")
+                        .experienceLevel(ExperienceLevel.JUNIOR)
+                        .jobType(JobType.FULL_TIME)
+                        .locationType(LocationType.REMOTE)
+                        .companyName("Company A")
+                        .createdAt(Instant.now())
+                        .salaryMin(40000)
+                        .salaryMax(60000)
+                        .deadline(Instant.now().plusSeconds(86400))
+                        .build(),
+                com.example.auth.dto.JobDTO.JobResponse.builder()
+                        .jobId(2L)
+                        .title("Senior Consultant")
+                        .experienceLevel(ExperienceLevel.SENIOR)
+                        .jobType(JobType.CONTRACT)
+                        .locationType(LocationType.HYBRID)
+                        .companyName("Company B")
+                        .createdAt(Instant.now())
+                        .salaryMin(120000)
+                        .salaryMax(180000)
+                        .deadline(Instant.now().plusSeconds(172800))
+                        .build(),
+                com.example.auth.dto.JobDTO.JobResponse.builder()
+                        .jobId(3L)
+                        .title("Part-time Assistant")
+                        .experienceLevel(ExperienceLevel.ENTRY)
+                        .jobType(JobType.PART_TIME)
+                        .locationType(LocationType.ONSITE)
+                        .companyName("Company C")
+                        .createdAt(Instant.now())
+                        .salaryMin(20000)
+                        .salaryMax(30000)
+                        .deadline(Instant.now().plusSeconds(259200))
+                        .build()
+        );
+
+        Page<com.example.auth.dto.JobDTO.JobResponse> page = new PageImpl<>(jobs, PageRequest.of(0, 10), jobs.size());
+        when(jobService.getCurrentJobs(eq(companyId), eq(0), eq(10))).thenReturn(page);
+
+        // Act
+        ResponseEntity<Page<com.example.auth.dto.JobDTO.JobResponse>> response = jobController.getCurrentJobs(companyId, 0, 10);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(3, response.getBody().getTotalElements());
+
+        // Verify enum values are correctly returned
+        List<com.example.auth.dto.JobDTO.JobResponse> content = response.getBody().getContent();
+        assertEquals(ExperienceLevel.JUNIOR, content.get(0).getExperienceLevel());
+        assertEquals(JobType.FULL_TIME, content.get(0).getJobType());
+        assertEquals(LocationType.REMOTE, content.get(0).getLocationType());
+
+        assertEquals(ExperienceLevel.SENIOR, content.get(1).getExperienceLevel());
+        assertEquals(JobType.CONTRACT, content.get(1).getJobType());
+        assertEquals(LocationType.HYBRID, content.get(1).getLocationType());
+
+        assertEquals(ExperienceLevel.ENTRY, content.get(2).getExperienceLevel());
+        assertEquals(JobType.PART_TIME, content.get(2).getJobType());
+        assertEquals(LocationType.ONSITE, content.get(2).getLocationType());
+    }
+
+    @Test
+    void getEndedJobs_WithNoJobs_ReturnsEmptyPage() {
+        // Arrange
+        Long companyId = 999L;
+        Page<com.example.auth.dto.JobDTO.JobResponse> emptyPage = new PageImpl<>(Collections.emptyList());
+
+        when(jobService.getEndedJobs(eq(companyId), anyInt(), anyInt())).thenReturn(emptyPage);
+
+        // Act
+        ResponseEntity<Page<com.example.auth.dto.JobDTO.JobResponse>> response = jobController.getEndedJobs(companyId, 0, 10);
+
+        // Assert
+        assertNotNull(response);
+        assertTrue(response.getBody().isEmpty());
+        assertEquals(0, response.getBody().getTotalElements());
+    }
+
+    @Test
+    void deleteJob_WithInvalidId_ShouldPropagateException() {
+        // Arrange
+        Long invalidJobId = 999L;
+        doThrow(new RuntimeException("Job not found")).when(jobService).deleteJob(invalidJobId);
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> jobController.deleteJob(invalidJobId));
+
+        verify(jobService, times(1)).deleteJob(invalidJobId);
+    }
+
+    @Test
+    void testEnumValuesInUpdateRequests() {
+        // Test that all enum values can be used in update requests
+        Long jobId = 1L;
+
+        for (ExperienceLevel expLevel : ExperienceLevel.values()) {
+            for (JobType jobType : JobType.values()) {
+                for (LocationType locType : LocationType.values()) {
+                    com.example.auth.dto.JobDTO.JobUpdateRequest updateRequest =
+                            com.example.auth.dto.JobDTO.JobUpdateRequest.builder()
+                                    .experienceLevel(expLevel)
+                                    .jobType(jobType)
+                                    .locationType(locType)
+                                    .title("Updated Title")
+                                    .build();
+
+                    com.example.auth.dto.JobDTO.JobResponse updatedResponse =
+                            com.example.auth.dto.JobDTO.JobResponse.builder()
+                                    .jobId(jobId)
+                                    .title("Updated Title")
+                                    .experienceLevel(expLevel)
+                                    .jobType(jobType)
+                                    .locationType(locType)
+                                    .companyName("Test Corp")
+                                    .createdAt(Instant.now())
+                                    .salaryMin(50000)
+                                    .salaryMax(100000)
+                                    .deadline(Instant.now().plusSeconds(86400))
+                                    .build();
+
+                    when(jobService.updateJob(eq(jobId), any(com.example.auth.dto.JobDTO.JobUpdateRequest.class)))
+                            .thenReturn(updatedResponse);
+
+                    ResponseEntity<com.example.auth.dto.JobDTO.JobResponse> response =
+                            jobController.updateJob(jobId, updateRequest);
+
+                    assertNotNull(response);
+                    assertEquals(expLevel, response.getBody().getExperienceLevel());
+                    assertEquals(jobType, response.getBody().getJobType());
+                    assertEquals(locType, response.getBody().getLocationType());
+                }
+
+            }
+        }
     }
 }

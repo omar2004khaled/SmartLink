@@ -15,6 +15,8 @@ import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+
 @ExtendWith(MockitoExtension.class)
 class JwtAuthFilterTest {
 
@@ -40,11 +42,69 @@ class JwtAuthFilterTest {
 
         FilterChain chain = new FilterChain() {
             @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
                 // At this point the filter must have set authentication
                 var auth = SecurityContextHolder.getContext().getAuthentication();
                 assertNotNull(auth, "Authentication should be set in SecurityContext");
                 assertEquals(email, auth.getPrincipal());
+                reached[0] = true;
+            }
+        };
+
+        filter.doFilterInternal(request, response, chain);
+
+        assertTrue(reached[0], "Filter chain should be executed");
+    }
+
+    @Test
+    void filter_ShouldNotSetAuthentication_WhenNoToken() throws ServletException, IOException {
+        JwtService jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "jwtSecret", "very_secret_long_key_replace_this_make_it_very_long_and_secure");
+
+        JwtAuthFilter filter = new JwtAuthFilter(jwtService);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        // No Authorization header
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        SecurityContextHolder.clearContext();
+
+        final boolean[] reached = {false};
+
+        FilterChain chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                var auth = SecurityContextHolder.getContext().getAuthentication();
+                assertNull(auth, "Authentication should not be set without token");
+                reached[0] = true;
+            }
+        };
+
+        filter.doFilterInternal(request, response, chain);
+
+        assertTrue(reached[0], "Filter chain should be executed");
+    }
+
+    @Test
+    void filter_ShouldNotSetAuthentication_WhenInvalidToken() throws ServletException, IOException {
+        JwtService jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "jwtSecret", "very_secret_long_key_replace_this_make_it_very_long_and_secure");
+
+        JwtAuthFilter filter = new JwtAuthFilter(jwtService);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer invalid.token.here");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        SecurityContextHolder.clearContext();
+
+        final boolean[] reached = {false};
+
+        FilterChain chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                var auth = SecurityContextHolder.getContext().getAuthentication();
+                assertNull(auth, "Authentication should not be set with invalid token");
                 reached[0] = true;
             }
         };
