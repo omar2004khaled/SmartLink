@@ -4,7 +4,6 @@ import CompanyNavbar from './CompanyNavbar';
 import Posts from './Posts';
 import PostComposotion from '../PostComposotion/PostComposotion';
 import RecommendJobButton from './RecommendJobButton';
-import JobRecommendationTrigger from './JobRecommendationTrigger';
 import './MainPage.css';
 
 const CompanyHome = () => {
