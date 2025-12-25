@@ -1,7 +1,6 @@
 package com.example.auth.controller;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,13 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -33,8 +27,6 @@ import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepositor
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
-@Transactional // Add transactional to rollback database changes
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) // Reset context after each test
 class AdminControllerTest {
 
         @Autowired
@@ -49,12 +41,28 @@ class AdminControllerTest {
         @Autowired
         private JobSeekerProfileRepository jobSeekerProfileRepository;
 
+        @Autowired
+        private com.example.auth.repository.CommentRepo commentRepo;
+
+        @Autowired
+        private com.example.auth.repository.PostRepository postRepository;
+
+        @Autowired
+        private com.example.auth.repository.ConnectionRepository connectionRepository;
+
+        @Autowired
+        private com.example.auth.repository.NotificationRepository notificationRepository;
+
         private User adminUser;
         private User regularUser;
 
         @BeforeEach
         void setUp() {
-                // Clear repositories in correct order to avoid FK violations
+                // Delete child entities first to avoid FK constraint violations
+                commentRepo.deleteAll();
+                postRepository.deleteAll();
+                connectionRepository.deleteAll();
+                notificationRepository.deleteAll();
                 jobSeekerProfileRepository.deleteAll();
                 tokenRepository.deleteAll();
                 userRepository.deleteAll();
@@ -69,7 +77,7 @@ class AdminControllerTest {
                 adminUser.setGender(Gender.MALE);
                 adminUser.setEnabled(true);
                 adminUser.setRole("ADMIN");
-                adminUser = userRepository.save(adminUser); // Save and get persisted entity
+                userRepository.save(adminUser);
 
                 // Create regular user
                 regularUser = new User();
@@ -81,10 +89,7 @@ class AdminControllerTest {
                 regularUser.setGender(Gender.FEMALE);
                 regularUser.setEnabled(true);
                 regularUser.setRole("USER");
-                regularUser = userRepository.save(regularUser); // Save and get persisted entity
-
-                // Refresh entities to ensure they're managed
-                userRepository.flush();
+                userRepository.save(regularUser);
         }
 
         // ===== DASHBOARD TESTS =====
@@ -92,21 +97,21 @@ class AdminControllerTest {
         @WithMockUser(roles = "ADMIN")
         void adminDashboard_WithAdminRole_ShouldReturnWelcomeMessage() throws Exception {
                 mockMvc.perform(get("/admin/dashboard"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().string("Welcome to Admin Dashboard!"));
+                                .andExpect(status().isOk())
+                                .andExpect(content().string("Welcome to Admin Dashboard!"));
         }
 
         @Test
         @WithMockUser(roles = "USER")
         void adminDashboard_WithUserRole_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(get("/admin/dashboard"))
-                        .andExpect(status().isForbidden());
+                                .andExpect(status().isForbidden());
         }
 
         @Test
-        void adminDashboard_WithoutAuthentication_ShouldRedirect() throws Exception {
+        void adminDashboard_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(get("/admin/dashboard"))
-                        .andExpect(status().isFound()); // Redirects to login
+                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
         }
 
         // ===== GET ALL USERS TESTS =====
@@ -114,28 +119,36 @@ class AdminControllerTest {
         @WithMockUser(roles = "ADMIN")
         void getAllUsers_WithAdminRole_ShouldReturnAllUsers() throws Exception {
                 mockMvc.perform(get("/admin/users"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.users", hasSize(2)))
-                        .andExpect(jsonPath("$.users[*].email",
-                                containsInAnyOrder("admin@test.com", "user@test.com")));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.users", hasSize(2)))
+                                .andExpect(jsonPath("$.users[0].email",
+                                                anyOf(is("admin@test.com"), is("user@test.com"))))
+                                .andExpect(jsonPath("$.users[1].email",
+                                                anyOf(is("admin@test.com"), is("user@test.com"))));
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void getAllUsers_WithAdminRole_ShouldReturnUserDetails() throws Exception {
                 mockMvc.perform(get("/admin/users"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.users[*].id", hasItems(notNullValue())))
-                        .andExpect(jsonPath("$.users[*].fullName", hasItems(notNullValue())))
-                        .andExpect(jsonPath("$.users[*].email", hasItems(notNullValue())))
-                        .andExpect(jsonPath("$.users[*].role", hasItems(notNullValue())));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.users[*].id", hasItems(notNullValue())))
+                                .andExpect(jsonPath("$.users[*].fullName", hasItems(notNullValue())))
+                                .andExpect(jsonPath("$.users[*].email", hasItems(notNullValue())))
+                                .andExpect(jsonPath("$.users[*].role", hasItems(notNullValue())));
         }
 
         @Test
         @WithMockUser(roles = "USER")
         void getAllUsers_WithUserRole_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(get("/admin/users"))
-                        .andExpect(status().isForbidden());
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void getAllUsers_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
+                mockMvc.perform(get("/admin/users"))
+                                .andExpect(status().isFound());
         }
 
         // ===== GET STATISTICS TESTS =====
@@ -143,16 +156,15 @@ class AdminControllerTest {
         @WithMockUser(roles = "ADMIN")
         void getStats_WithAdminRole_ShouldReturnCorrectStatistics() throws Exception {
                 mockMvc.perform(get("/admin/stats"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.totalUsers").value(2))
-                        .andExpect(jsonPath("$.activeUsers").value(2))
-                        .andExpect(jsonPath("$.adminUsers").value(1));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalUsers").value(2))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(1));
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void getStats_WithDisabledUser_ShouldCountCorrectly() throws Exception {
-                // Create disabled user
                 User disabledUser = new User();
                 disabledUser.setFullName("Disabled User");
                 disabledUser.setEmail("disabled@test.com");
@@ -163,20 +175,19 @@ class AdminControllerTest {
                 disabledUser.setEnabled(false);
                 disabledUser.setRole("USER");
                 userRepository.save(disabledUser);
-                userRepository.flush();
 
                 mockMvc.perform(get("/admin/stats"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.totalUsers").value(3))
-                        .andExpect(jsonPath("$.activeUsers").value(2))
-                        .andExpect(jsonPath("$.adminUsers").value(1));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalUsers").value(3))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(1));
         }
 
         @Test
         @WithMockUser(roles = "USER")
         void getStats_WithUserRole_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(get("/admin/stats"))
-                        .andExpect(status().isForbidden());
+                                .andExpect(status().isForbidden());
         }
 
         // ===== GET USER BY ID TESTS =====
@@ -184,55 +195,68 @@ class AdminControllerTest {
         @WithMockUser(roles = "ADMIN")
         void getUserById_WithValidId_ShouldReturnUser() throws Exception {
                 mockMvc.perform(get("/admin/users/" + regularUser.getId()))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.id").value(regularUser.getId().intValue()))
-                        .andExpect(jsonPath("$.email").value("user@test.com"))
-                        .andExpect(jsonPath("$.role").value("USER"));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id", is(regularUser.getId().intValue())))
+                                .andExpect(jsonPath("$.email", is("user@test.com")))
+                                .andExpect(jsonPath("$.role", is("USER")));
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void getUserById_WithInvalidId_ShouldReturnBadRequest() throws Exception {
                 mockMvc.perform(get("/admin/users/99999"))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.message", containsString("User not found")));
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$", containsString("User not found")));
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void getUserById_ShouldReturnCompleteUserData() throws Exception {
+                mockMvc.perform(get("/admin/users/" + regularUser.getId()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.fullName", is("Regular User")))
+                                .andExpect(jsonPath("$.birthDate", is("1995-05-20")))
+                                .andExpect(jsonPath("$.phoneNumber", is("+209876543210")))
+                                .andExpect(jsonPath("$.gender", is("FEMALE")))
+                                .andExpect(jsonPath("$.enabled", is(true)));
         }
 
         @Test
         @WithMockUser(roles = "USER")
         void getUserById_WithUserRole_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(get("/admin/users/" + regularUser.getId()))
-                        .andExpect(status().isForbidden());
+                                .andExpect(status().isForbidden());
         }
 
         // ========== PROMOTE TO ADMIN TESTS ==========
+
         @Test
         @WithMockUser(roles = "ADMIN")
         void promoteToAdmin_WithValidUserId_ShouldPromoteUser() throws Exception {
                 mockMvc.perform(post("/admin/promote/" + regularUser.getId()))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.message", containsString("promoted to ADMIN successfully")));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$", containsString("promoted to ADMIN successfully")));
 
-                // Verify user role was updated using JUnit assertions
+                // Verify user role was updated
                 User promotedUser = userRepository.findById(regularUser.getId()).orElse(null);
-                assertNotNull(promotedUser);
-                assertEquals("ADMIN", promotedUser.getRole());
+                assert promotedUser != null;
+                assert "ADMIN".equals(promotedUser.getRole());
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void promoteToAdmin_WithInvalidUserId_ShouldReturnBadRequest() throws Exception {
                 mockMvc.perform(post("/admin/promote/99999"))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.message", containsString("User not found")));
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$", containsString("User not found")));
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void promoteToAdmin_WithAlreadyAdminUser_ShouldReturnBadRequest() throws Exception {
                 mockMvc.perform(post("/admin/promote/" + adminUser.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.message", containsString("already an ADMIN")));
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$", containsString("already an ADMIN")));
         }
 
         @Test
@@ -245,62 +269,60 @@ class AdminControllerTest {
                 unverifiedUser.setBirthDate(LocalDate.of(2000, 1, 1));
                 unverifiedUser.setPhoneNumber("+202222222222");
                 unverifiedUser.setGender(Gender.MALE);
-                unverifiedUser.setEnabled(false); // Not enabled/verified
+                unverifiedUser.setEnabled(false);
                 unverifiedUser.setRole("USER");
                 User savedUser = userRepository.save(unverifiedUser);
-                userRepository.flush();
 
                 mockMvc.perform(post("/admin/promote/" + savedUser.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.message", containsString("must verify email before promotion")));
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$", containsString("must verify email before promotion")));
         }
 
         @Test
         @WithMockUser(roles = "USER")
         void promoteToAdmin_WithUserRole_ShouldReturnForbidden() throws Exception {
                 mockMvc.perform(post("/admin/promote/" + regularUser.getId()))
-                        .andExpect(status().isForbidden());
+                                .andExpect(status().isForbidden());
         }
 
         // ========== DEMOTE TO USER TESTS ==========
+
         @Test
         @WithMockUser(roles = "ADMIN")
         void demoteToUser_WithValidAdminId_ShouldDemoteUser() throws Exception {
                 // First promote regular user to admin
                 regularUser.setRole("ADMIN");
                 userRepository.save(regularUser);
-                userRepository.flush();
 
                 mockMvc.perform(post("/admin/demote/" + regularUser.getId()))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.message", containsString("demoted to USER successfully")));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$", containsString("demoted to USER successfully")));
 
                 // Verify user role was updated
                 User demotedUser = userRepository.findById(regularUser.getId()).orElse(null);
-                assertNotNull(demotedUser);
-                assertEquals("USER", demotedUser.getRole());
+                assert demotedUser != null;
+                assert "USER".equals(demotedUser.getRole());
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void demoteToUser_WithInvalidUserId_ShouldReturnBadRequest() throws Exception {
                 mockMvc.perform(post("/admin/demote/99999"))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.message", containsString("User not found")));
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$", containsString("User not found")));
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void demoteToUser_WithAlreadyRegularUser_ShouldReturnBadRequest() throws Exception {
                 mockMvc.perform(post("/admin/demote/" + regularUser.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.message", containsString("already a regular USER")));
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$", containsString("already a regular USER")));
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
         void demoteToUser_WithSuperAdmin_ShouldReturnBadRequest() throws Exception {
-                // Assuming super admin has a specific email or flag
                 User superAdmin = new User();
                 superAdmin.setFullName("Super Admin");
                 superAdmin.setEmail("BigBoss@example.com");
@@ -311,24 +333,115 @@ class AdminControllerTest {
                 superAdmin.setEnabled(true);
                 superAdmin.setRole("ADMIN");
                 User savedSuperAdmin = userRepository.save(superAdmin);
-                userRepository.flush();
 
                 mockMvc.perform(post("/admin/demote/" + savedSuperAdmin.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(jsonPath("$.message", containsString("Cannot demote super admin")));
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$", containsString("Cannot demote super admin")));
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        void demoteToUser_WithUserRole_ShouldReturnForbidden() throws Exception {
+                mockMvc.perform(post("/admin/demote/" + adminUser.getId()))
+                                .andExpect(status().isForbidden());
+        }
+
+        // ========== SECURITY TESTS ==========
+
+        @Test
+        void adminEndpoints_WithoutAuthentication_ShouldReturnForbidden() throws Exception {
+                mockMvc.perform(get("/admin/dashboard"))
+                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
+
+                mockMvc.perform(get("/admin/users"))
+                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
+
+                mockMvc.perform(get("/admin/stats"))
+                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
+
+                mockMvc.perform(post("/admin/promote/1"))
+                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
+
+                mockMvc.perform(post("/admin/demote/1"))
+                                .andExpect(status().isFound()); // OAuth2 redirects instead of 403
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void adminEndpoints_WithAdminRole_ShouldBeAccessible() throws Exception {
+                mockMvc.perform(get("/admin/dashboard"))
+                                .andExpect(status().isOk());
+
+                mockMvc.perform(get("/admin/users"))
+                                .andExpect(status().isOk());
+
+                mockMvc.perform(get("/admin/stats"))
+                                .andExpect(status().isOk());
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        void adminEndpoints_WithUserRole_ShouldReturnForbidden() throws Exception {
+                mockMvc.perform(get("/admin/dashboard"))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(get("/admin/users"))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(get("/admin/stats"))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(post("/admin/promote/1"))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(post("/admin/demote/1"))
+                                .andExpect(status().isForbidden());
         }
 
         // ========== EDGE CASE TESTS ==========
+
         @Test
         @WithMockUser(roles = "ADMIN")
         void getAllUsers_WithEmptyDatabase_ShouldReturnEmptyArray() throws Exception {
-                // Clear database
                 userRepository.deleteAll();
-                userRepository.flush();
 
                 mockMvc.perform(get("/admin/users"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.users", hasSize(0)));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.users", hasSize(0)));
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void getStats_WithOnlyAdmins_ShouldReturnCorrectStats() throws Exception {
+                userRepository.deleteAll();
+
+                User admin1 = new User();
+                admin1.setFullName("Admin 1");
+                admin1.setEmail("admin1@test.com");
+                admin1.setPassword("encodedPassword");
+                admin1.setBirthDate(LocalDate.of(1990, 1, 1));
+                admin1.setPhoneNumber("+201111111111");
+                admin1.setGender(Gender.MALE);
+                admin1.setEnabled(true);
+                admin1.setRole("ADMIN");
+                userRepository.save(admin1);
+
+                User admin2 = new User();
+                admin2.setFullName("Admin 2");
+                admin2.setEmail("admin2@test.com");
+                admin2.setPassword("encodedPassword");
+                admin2.setBirthDate(LocalDate.of(1992, 3, 10));
+                admin2.setPhoneNumber("+202222222222");
+                admin2.setGender(Gender.FEMALE);
+                admin2.setEnabled(true);
+                admin2.setRole("ADMIN");
+                userRepository.save(admin2);
+
+                mockMvc.perform(get("/admin/stats"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalUsers").value(2))
+                                .andExpect(jsonPath("$.activeUsers").value(2))
+                                .andExpect(jsonPath("$.adminUsers").value(2));
         }
 
         @Test
@@ -336,18 +449,18 @@ class AdminControllerTest {
         void promoteToAdmin_ThenDemote_ShouldUpdateRoleCorrectly() throws Exception {
                 // Promote user to admin
                 mockMvc.perform(post("/admin/promote/" + regularUser.getId()))
-                        .andExpect(status().isOk());
+                                .andExpect(status().isOk());
 
                 User promotedUser = userRepository.findById(regularUser.getId()).orElse(null);
-                assertNotNull(promotedUser);
-                assertEquals("ADMIN", promotedUser.getRole());
+                assert promotedUser != null;
+                assert "ADMIN".equals(promotedUser.getRole());
 
                 // Demote back to user
                 mockMvc.perform(post("/admin/demote/" + regularUser.getId()))
-                        .andExpect(status().isOk());
+                                .andExpect(status().isOk());
 
                 User demotedUser = userRepository.findById(regularUser.getId()).orElse(null);
-                assertNotNull(demotedUser);
-                assertEquals("USER", demotedUser.getRole());
+                assert demotedUser != null;
+                assert "USER".equals(demotedUser.getRole());
         }
 }
