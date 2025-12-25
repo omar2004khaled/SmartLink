@@ -79,7 +79,7 @@ export default function UserProfile() {
         } else {
           setError("Profile not found");
         }
-      } catch (err) {
+      } catch{
         setError("Failed to fetch profile");
       }
     }
@@ -108,7 +108,7 @@ export default function UserProfile() {
         setEducation(await eduRes.json());
         setLocations(await locRes.json());
         setError(null);
-      } catch (err) {
+      } catch{
         setError("Failed to fetch profile data");
       }
       setLoading(false);
@@ -173,7 +173,7 @@ export default function UserProfile() {
       });
       checkConnectionStatus();
       showSuccess('Connection request sent!');
-    } catch (err) {
+    } catch{
       showError('Failed to send connection request');
     }
   };
@@ -187,7 +187,7 @@ export default function UserProfile() {
       });
       checkConnectionStatus();
       showSuccess('Connection request cancelled');
-    } catch (err) {
+    } catch {
       showError('Failed to cancel connection');
     }
   };
@@ -201,7 +201,7 @@ export default function UserProfile() {
       });
       checkConnectionStatus();
       showSuccess('Connection accepted!');
-    } catch (err) {
+    } catch  {
       showError('Failed to accept connection');
     }
   };
@@ -215,7 +215,7 @@ export default function UserProfile() {
       });
       checkConnectionStatus();
       showSuccess('Connection rejected');
-    } catch (err) {
+    } catch  {
       showError('Failed to reject connection');
     }
   };
@@ -229,9 +229,22 @@ export default function UserProfile() {
       });
       checkConnectionStatus();
       showSuccess('Connection removed');
-    } catch (err) {
+    } catch {
       showError('Failed to remove connection');
     }
+  };
+
+  const handleMessage = () => {
+    navigate('/messages', { 
+      state: { 
+        openChatWith: {
+          otherUserId: parseInt(userId),
+          otherUserName: profile?.userName,
+          otherUserProfilePicture: profile?.profilePicUrl,
+          otherUserType: 'USER'
+        }
+      } 
+    });
   };
 
   const getConnectionHandler = () => {
@@ -276,18 +289,12 @@ export default function UserProfile() {
   const handleEditProfile = () => isOwnProfile && setEditProfile(true);
   const handleSaveProfile = async (form) => {
     try {
-      //console.log('Starting profile save with form:', form);
       const token = localStorage.getItem('authToken');
       let locationId = profile.locationId;
 
-      // If location changed, find or create location
       if (form.country && form.city && (form.country !== profile.country || form.city !== profile.city)) {
-        //console.log('Location changed, processing...');
-        // Try to find existing location
         let loc = locations.find(l => l.country === form.country && l.city === form.city);
         if (!loc) {
-          //console.log('Creating new location...');
-          // Create new location
           const locRes = await fetch(`${API_BASE_URL}/api/locations`, {
             method: 'POST',
             headers: {
@@ -302,8 +309,6 @@ export default function UserProfile() {
             throw new Error('Failed to create location: ' + errorText);
           }
           loc = await locRes.json();
-          //console.log('New location created:', loc);
-          // Refresh locations
           const allLocRes = await fetch(`${API_BASE_URL}/api/locations`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -312,7 +317,6 @@ export default function UserProfile() {
         locationId = loc.locationId;
       }
 
-      // Update profile with only backend-expected fields
       const profilePayload = {
         profilePicUrl: form.profilePicUrl || null,
         bio: form.bio || null,
@@ -323,9 +327,6 @@ export default function UserProfile() {
         locationId: locationId
       };
 
-      //console.log('Sending profile update:', profilePayload);
-      //console.log('URL:', `${API_BASE}/${profileId}`);
-
       const res = await fetch(`${API_BASE}/${profileId}`, {
         method: 'PUT',
         headers: {
@@ -335,9 +336,6 @@ export default function UserProfile() {
         body: JSON.stringify(profilePayload)
       });
 
-      //console.log('Response status:', res.status);
-      //console.log('Response headers:', res.headers);
-
       if (!res.ok) {
         const errorText = await res.text();
         console.error('Profile update failed:', errorText);
@@ -345,7 +343,6 @@ export default function UserProfile() {
       }
 
       const updated = await res.json();
-      //console.log('Profile updated successfully:', updated);
       setProfile(updated);
       setEditProfile(false);
       showSuccess('Profile updated successfully!');
@@ -376,7 +373,6 @@ export default function UserProfile() {
         body: JSON.stringify(form)
       });
       if (!res.ok) throw new Error('Failed to save experience');
-      // Refresh experience list
       const expRes = await fetch(`${API_BASE}/${profileId}/experience`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -466,7 +462,6 @@ export default function UserProfile() {
         url += `/${editProjectId}`;
         method = 'PUT';
       }
-      // Convert empty date strings to null
       const payload = {
         ...form,
         startDate: form.startDate ? form.startDate : null,
@@ -607,10 +602,13 @@ export default function UserProfile() {
                 </button>
               </div>
             )}
-            {!isOwnProfile && getConnectionHandler() && (
+            {!isOwnProfile && (
               <div className="connection-actions">
+                <button onClick={handleMessage} className="btn btn-primary btn-sm" style={{ marginRight: '8px' }}>
+                  💬 Message
+                </button>
                 {connectionStatus === 'NONE' && (
-                  <button onClick={getConnectionHandler()} className="btn btn-primary btn-sm">Connect</button>
+                  <button onClick={getConnectionHandler()} className="btn btn-outline btn-sm">Connect</button>
                 )}
                 {connectionStatus === 'PENDING_SENT' && (
                   <button onClick={getConnectionHandler()} className="btn btn-outline btn-sm">Cancel Request</button>

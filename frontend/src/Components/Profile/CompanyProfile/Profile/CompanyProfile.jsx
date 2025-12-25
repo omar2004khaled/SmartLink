@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CompanyLogo from '../Logos/CompanyLogo';
 import CompanyHeader from '../Header/CompanyHeader';
 import ActionButtons from '../Buttons/ActionButtons';
@@ -13,6 +14,7 @@ import { API_BASE_URL,CLOUDINARY_UPLOAD_URL } from '../../../../config';
 
 
 export default function CompanyProfile({ companyId, userId, targetUserId, currentUserId }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('About');
   const [companyData, setCompanyData] = useState(null);
   const [tabData, setTabData] = useState(null);
@@ -76,7 +78,6 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
       }
 
       let data = await response.json();
-      // //console.log('Company data received:', data);
       setCompanyData(data);
       
       const followingStatus = data.isFollowing || false;
@@ -195,6 +196,19 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
     }
   };
 
+  const handleMessage = () => {
+    navigate('/messages', { 
+      state: { 
+        openChatWith: {
+          otherUserId: parseInt(companyData.userId),
+          otherUserName: companyData.companyName,
+          otherUserProfilePicture: companyData.logoUrl,
+          otherUserType: 'COMPANY'
+        }
+      } 
+    });
+  };
+
   const handleEditClick = (section) => {
     setEditSection(section);
     setShowEditModal(true);
@@ -307,6 +321,7 @@ export default function CompanyProfile({ companyId, userId, targetUserId, curren
           <ActionButtons
             onFollow={isOwner ? null : handleFollow}
             onVisitWebsite={handleVisitWebsite}
+            onMessage={isOwner ? null : handleMessage}
             isFollowing={isFollowing}
             isOwner={isOwner}
           />
