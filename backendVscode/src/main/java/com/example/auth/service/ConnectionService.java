@@ -42,7 +42,6 @@ public class ConnectionService {
 
         Connection saved = connectionRepo.save(connection);
 
-        // Create notification for the receiver
         notificationService.createConnectionRequestNotification(
                 receiverId,
                 senderId,
@@ -122,6 +121,14 @@ public class ConnectionService {
             throw new IllegalArgumentException("this user not allowed");
 
         connectionRepo.delete(connection);
+    }
+
+    @Transactional
+    boolean areTheyConnected(Long User1Id,Long User2Id){
+        if(connectionRepo.findConnectionBetweenUsers(User1Id,User2Id).isEmpty()){
+            return false;
+        }
+        return true;
     }
 
     private ConnectionDto toDto(Connection connection) {

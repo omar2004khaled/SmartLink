@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CompanyFollowerRepo extends JpaRepository<CompanyFollower, CompanyFollower.CompanyFollowerId> {
 
@@ -28,4 +30,8 @@ public interface CompanyFollowerRepo extends JpaRepository<CompanyFollower, Comp
     @Modifying
     @org.springframework.transaction.annotation.Transactional
     void deleteByCompany_Id(Long companyId);
+
+
+    @Query("SELECT cf.follower FROM CompanyFollower cf WHERE cf.company.id = :companyId")
+    List<User> findAllFollowersByCompanyId(@Param("companyId") Long companyId);
 }

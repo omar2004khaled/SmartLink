@@ -101,6 +101,42 @@ public class RedisService {
         return redisTemplate.opsForZSet().rangeByScore(key, min, max);
     }
 
+    /**
+     * Get members from sorted set by range in descending order (highest score first)
+     * @param key the Redis key
+     * @param start start index (0-based)
+     * @param end end index inclusive
+     * @return set of members in descending score order
+     */
+    public Set<Object> getSortedSetRange(String key, long start, long end) {
+        return redisTemplate.opsForZSet().reverseRange(key, start, end);
+    }
+
+    public Double getSortedSetScore(String key, Object member) {
+        return redisTemplate.opsForZSet().score(key, member);
+    }
+
+    public Long removeSortedSetMembers(String key, Object... members) {
+        return redisTemplate.opsForZSet().remove(key, members);
+    }
+
+    /**
+     * Maintain LRU list for feed keys and set TTL
+     * @param feedKey the feed key (e.g., "feed:123")
+     * @param maxKeys max number of keys to keep in LRU list
+     * @param ttlSeconds time to live in seconds
+     */
+    public void maintainFeedKeyLRU(String feedKey, int maxKeys, long ttlSeconds) {
+        try {
+            String lruListKey = "feed_keys_lru";
+            redisTemplate.opsForList().leftPush(lruListKey, feedKey);
+            redisTemplate.opsForList().trim(lruListKey, 0, maxKeys - 1);
+            expire(feedKey, ttlSeconds, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            System.err.println("LRU maintenance error: " + e.getMessage());
+        }
+    }
+
     public Long increment(String key, long delta) {
         return redisTemplate.opsForValue().increment(key, delta);
     }

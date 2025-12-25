@@ -70,12 +70,14 @@ export const SavePost = async (postData) => {
 }
 export const GetPosts = async (page = 0, size = 10, sortBy = 'postId', ascending = false) => {
     try {
+      
         const response = await apiClient.get('/Post/all', {
             params: {
                 page: page,
                 size: size,
                 sortBy: sortBy,
-                ascending: ascending
+                ascending: ascending,
+                viewerId: userIdFromLocalStorage()
             }
         });
         console.log(`Posts fetched successfully (page ${page}, size ${size}):`, response.data);
