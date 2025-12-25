@@ -10,11 +10,11 @@ import java.util.List;
 
 
 @Component
-public class RedisService {
+public class GeminiRedisService {
     private final JedisPool jedisPool;
     private final ObjectMapper objectMapper;
 
-    public RedisService() {
+    public GeminiRedisService() {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(10);
         poolConfig.setMaxIdle(5);

@@ -34,12 +34,12 @@ public class GeminiService {
     List<SemiJobDto> semiJobs;
     List<Job> jobs;
     List<CompanyDTO> companyNames ;
-    RedisService redisService;
+    GeminiRedisService redisService;
 
     @Value("${Gemini_key}")
     private String apiKey;
     @Autowired
-    public GeminiService(SkillRepository skillRepository, EducationRepository educationRepository, JobRepository jobRepository , RedisService redisService) {
+    public GeminiService(SkillRepository skillRepository, EducationRepository educationRepository, JobRepository jobRepository , GeminiRedisService redisService) {
         this.skillRepository = skillRepository;
         this.educationRepository = educationRepository;
         this.jobRepository = jobRepository;

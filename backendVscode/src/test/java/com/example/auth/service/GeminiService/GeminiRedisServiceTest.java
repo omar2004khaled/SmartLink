@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RedisServiceTest {
+class GeminiRedisServiceTest {
 
     @Mock
     private JedisPool jedisPool;
@@ -29,14 +29,14 @@ class RedisServiceTest {
     @Mock
     private Jedis jedis;
 
-    private RedisService redisService;
+    private GeminiRedisService redisService;
 
     @BeforeEach
     void setUp() {
         // Since RedisService constructor creates its own JedisPool, we need to use reflection
         // or refactor. For now, we'll test with the real RedisService but mock the JedisPool
         // This is a simplified test - in real scenario you'd inject the JedisPool
-        redisService = new RedisService();
+        redisService = new GeminiRedisService();
     }
 
     @Test
@@ -75,7 +75,7 @@ class RedisServiceTest {
         when(jedis.get(key)).thenReturn(jsonResponse);
 
         // Create RedisService with mocked pool
-        RedisService service = new RedisService() {
+        GeminiRedisService service = new GeminiRedisService() {
             @Override
             public List<JobResponse> getRecommendedJobs(Long profileId) {
                 // Simplified test implementation
@@ -174,7 +174,7 @@ class RedisServiceTest {
     @Test
     void testRedisServiceInitialization() {
         // When
-        RedisService service = new RedisService();
+        GeminiRedisService service = new GeminiRedisService();
 
         // Then
         assertNotNull(service);
