@@ -27,6 +27,7 @@ import ApplicationsPage from './Components/job/ApplicationsPage';
 import ConnectionsTab from './Components/Profile/UserProfile/ConnectionsTab';
 import { AlertProvider } from './contexts/AlertContext';
 import AlertNotification from './components/AlertNotification/AlertNotification';
+import MessagePage from './Components/Messages/MessagePage';
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
       <Route path="/cv-analysis" element={<CVAnalysis />} />
       <Route path="/applications" element={<ApplicationsPage />} />
       <Route path="/connections" element={<ConnectionsTab />} />
+      <Route path="/messages" element={<MessagePage/>} />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />

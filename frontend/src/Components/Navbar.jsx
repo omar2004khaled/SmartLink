@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Home, Briefcase, Users, User, LogOut, Menu, X, FileText } from 'lucide-react';
+import { Search, Home, Briefcase, Users, User, LogOut, Menu, X, MessageSquare, FileText } from 'lucide-react';
 import './Navbar.css';
 import { API_BASE_URL } from '../config';
 import Logo from '../assets/Logo.png';
@@ -127,6 +127,10 @@ const Navbar = ({ showSearch = false }) => {
             <button className={`sidebar-link ${isActive('/connections') ? 'active' : ''}`} onClick={() => { navigate('/connections'); setSidebarOpen(false); }}>
               <Users size={20} />
               <span>Connections</span>
+            </button>
+            <button className={`sidebar-link ${isActive('/messages') ? 'active' : ''}`} onClick={() => { navigate('/messages'); setSidebarOpen(false); }}>
+              <MessageSquare size={20} />
+              <span>Messages</span>
             </button>
             <button className={`sidebar-link ${isActive('/job') ? 'active' : ''}`} onClick={() => { navigate('/job'); setSidebarOpen(false); }}>
               <Briefcase size={20} />
