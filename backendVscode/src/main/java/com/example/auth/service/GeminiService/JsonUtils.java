@@ -11,9 +11,11 @@ public class JsonUtils {
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .enable(SerializationFeature.INDENT_OUTPUT);
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(SerializationFeature.INDENT_OUTPUT);
 
     public static String toJsonString(Object object) {
+        if (object == null) return "{}";
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
@@ -23,6 +25,7 @@ public class JsonUtils {
     }
 
     public static String toJsonString(Iterable<?> objects) {
+        if (objects == null) return "[]";
         try {
             return objectMapper.writeValueAsString(objects);
         } catch (JsonProcessingException e) {
@@ -31,6 +34,7 @@ public class JsonUtils {
         }
     }
     public JobResponse mapper(Job job) {
+        if (job == null) return null;
         // Manually map the Job entity to JobResponse DTO
         // This avoids lazy loading issues with the company field
         return JobResponse.builder()

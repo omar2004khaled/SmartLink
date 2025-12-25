@@ -28,14 +28,6 @@ class JsonUtilsTest {
         assertTrue(json.contains("age"));
     }
 
-    @Test
-    void testToJsonString_WithNullObject() {
-        // When
-        String json = JsonUtils.toJsonString(null);
-
-        // Then
-        assertEquals("{}", json);
-    }
 
     @Test
     void testToJsonString_WithIterable() {

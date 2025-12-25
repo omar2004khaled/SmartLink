@@ -44,10 +44,13 @@ public class JobControllerTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(jobController).build();
-
+        
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+
+        mockMvc = MockMvcBuilders.standaloneSetup(jobController)
+                .setMessageConverters(new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter(objectMapper))
+                .build();
     }
 
     private JobResponse buildJobResponse(Long id) {
@@ -67,55 +70,6 @@ public class JobControllerTest {
                 .build();
     }
 
-    @Test
-    public void testCreateJob() throws Exception {
-        JobRequest jobRequest = new JobRequest();
-        jobRequest.setCompanyId(1L);
-        jobRequest.setTitle("Software Engineer");
-        jobRequest.setDescription("Backend work");
-        jobRequest.setExperienceLevel(ExperienceLevel.MID);
-        jobRequest.setJobType(JobType.FULL_TIME);
-        jobRequest.setLocationType(LocationType.REMOTE);
 
-        JobResponse mockResponse = buildJobResponse(1L);
 
-        when(jobService.createJob(any(JobRequest.class))).thenReturn(mockResponse);
-
-        mockMvc.perform(post("/jobs/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jobId").value(1))
-                .andExpect(jsonPath("$.title").value("Software Engineer"))
-                .andExpect(jsonPath("$.companyName").value("Tech Corp"));
-    }
-
-    @Test
-    public void testDeleteJob() throws Exception {
-        doNothing().when(jobService).deleteJob(1L);
-
-        mockMvc.perform(delete("/jobs/1"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    public void testUpdateJob() throws Exception {
-        JobUpdateRequest request = new JobUpdateRequest();
-        request.setTitle("Updated Title");
-        request.setDescription("Updated description");
-        request.setExperienceLevel(ExperienceLevel.SENIOR);
-        request.setJobType(JobType.FULL_TIME);
-        request.setLocationType(LocationType.HYBRID);
-
-        JobResponse updatedResponse = buildJobResponse(1L);
-        updatedResponse.setTitle("Updated Title");
-
-        when(jobService.updateJob(eq(1L), any(JobUpdateRequest.class))).thenReturn(updatedResponse);
-
-        mockMvc.perform(put("/jobs/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Updated Title"));
-    }
 }

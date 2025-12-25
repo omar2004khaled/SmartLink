@@ -24,10 +24,6 @@ public class JobsControllerQl {
 
     @QueryMapping
     public List<JobResponse> allJobs(@Argument JobFilter filter) {
-        if(filter != null) {
-            System.out.println(filter.toString());
-        }
-
         List<Job> jobs;
 
         if (filter == null || isFilterEmpty(filter)) {
@@ -44,7 +40,7 @@ public class JobsControllerQl {
             );
         }
 
-        return mapJobsToResponses(jobs,filter.getUserId());
+        return mapJobsToResponses(jobs, filter != null ? filter.getUserId() : null);
     }
 
     private List<JobResponse> mapJobsToResponses(List<Job> jobs,Long userId) {
@@ -58,7 +54,7 @@ public class JobsControllerQl {
                 .jobId(job.getJobId())
                 .title(job.getTitle())
                 .description(job.getDescription())
-                .companyName(job.getCompany().getFullName())
+                .companyName(job.getCompany() != null ? job.getCompany().getFullName() : null)
                 .jobLocation(job.getJobLocation())
                 .experienceLevel(job.getExperienceLevel())
                 .jobType(job.getJobType())
@@ -67,7 +63,7 @@ public class JobsControllerQl {
                 .salaryMin(job.getSalaryMin())
                 .salaryMax(job.getSalaryMax())
                 .deadline(job.getDeadline())
-                .isApplied(!jobApplicationRepository.getApplicationByUserAndJob(userId, job.getJobId()).isEmpty())
+                .isApplied(userId != null && !jobApplicationRepository.getApplicationByUserAndJob(userId, job.getJobId()).isEmpty())
                 .build();
     }
     private boolean isFilterEmpty(JobFilter filter) {

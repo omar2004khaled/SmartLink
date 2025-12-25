@@ -70,6 +70,9 @@ public class CompanyProfileController {
 
     @PostMapping("/{companyId}/follow")
     public ResponseEntity<?> followCompany(@PathVariable Long companyId, @RequestBody FollowRequest request) {
+        if (request == null || request.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User ID is required");
+        }
         try {
             companyProfileService.followCompany(companyId, request.getUserId());
             return ResponseEntity.ok("Successfully followed company");
@@ -81,6 +84,9 @@ public class CompanyProfileController {
 
     @PostMapping("/{companyId}/unfollow")
     public ResponseEntity<?> unfollowCompany(@PathVariable Long companyId, @RequestBody FollowRequest request) {
+        if (request == null || request.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User ID is required");
+        }
         try {
             companyProfileService.unfollowCompany(companyId, request.getUserId());
             return ResponseEntity.ok("Successfully unfollowed company");
