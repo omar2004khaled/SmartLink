@@ -9,11 +9,13 @@ import com.example.auth.repository.ProfileRepositories.JobSeekerProfileRepositor
 import com.example.auth.entity.User;
 import com.example.auth.entity.ProfileEntities.JobSeekerProfile;
 import com.example.auth.enums.Gender;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
 @SpringBootApplication
+@EnableAsync
 public class AuthApplication {
 
     public static void main(String[] args) {

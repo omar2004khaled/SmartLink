@@ -1,0 +1,242 @@
+
+.recommend-job-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgb(67, 67, 240);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recommend-job-button:hover:not(:disabled) {
+background: rgb(57, 57, 220);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.recommend-job-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.recommendations-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.recommendations-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.recommendations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.recommendations-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.recommendations-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.job-recommendation-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.job-recommendation-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.job-header h4 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.company-name {
+  background: #f3f4f6;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.job-description {
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.job-details {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.salary-badge,
+.location-badge,
+.match-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.salary-badge {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.location-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.match-badge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.job-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.apply-button,
+.save-button {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apply-button {
+  background: #667eea;
+  color: white;
+  border: none;
+}
+
+.apply-button:hover {
+  background: #5a67d8;
+}
+
+.save-button {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.save-button:hover {
+  background: #f7fafc;
+}
+
+.no-recommendations {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.no-recommendations svg {
+  margin-bottom: 16px;
+  color: #9ca3af;
+}
+
+.small-text {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.recommendations-footer {
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+}
+
+.refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-button:hover {
+  background: #e5e7eb;
+}

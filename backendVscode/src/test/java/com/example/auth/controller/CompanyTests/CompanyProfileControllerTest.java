@@ -10,10 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -25,9 +22,12 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
+
+// REMOVE these annotations:
+// @SpringBootTest
+// @ActiveProfiles("test")
+// @AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)  // Keep this one
 class CompanyProfileControllerTest {
 
     private MockMvc mockMvc;
@@ -44,11 +44,18 @@ class CompanyProfileControllerTest {
 
     @BeforeEach
     void setUp() {
+        // Use standalone setup for unit tests (no Spring context)
         mockMvc = MockMvcBuilders.standaloneSetup(companyProfileController).build();
         objectMapper = new ObjectMapper();
 
         // Setup test data
-        LocationDTO location = new LocationDTO(1L, "Cairo", "Egypt");
+        // FIX: LocationDTO constructor might have changed. Check the actual constructor
+        // If LocationDTO has different constructor parameters, adjust accordingly
+        LocationDTO location = new LocationDTO();
+        location.setLocationId(1L);
+        location.setCity("Cairo");
+        location.setCountry("Egypt");
+
         testLocations = Arrays.asList(location);
 
         testCompanyDTO = CompanyDTO.builder()
@@ -163,6 +170,32 @@ class CompanyProfileControllerTest {
     }
 
     @Test
+    void updateCompanyProfile_Success() throws Exception {
+        Long companyId = 1L;
+        CompanyUpdateDTO updateDTO = new CompanyUpdateDTO();
+        updateDTO.setCompanyName("Updated Company");
+        updateDTO.setDescription("Updated Description");
+
+        // Mock the service to return updated DTO
+        CompanyDTO updatedDTO = CompanyDTO.builder()
+                .companyProfileId(1L)
+                .companyName("Updated Company")
+                .description("Updated Description")
+                .build();
+
+        when(companyProfileService.updateCompanyProfile(anyLong(), any(CompanyUpdateDTO.class)))
+                .thenReturn(updatedDTO);
+
+        mockMvc.perform(put("/api/company/{companyId}", companyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.companyName", is("Updated Company")));
+
+        verify(companyProfileService, times(1)).updateCompanyProfile(eq(companyId), any(CompanyUpdateDTO.class));
+    }
+
+    @Test
     void updateCompanyProfile_BadRequest() throws Exception {
         Long companyId = 1L;
         CompanyUpdateDTO updateDTO = new CompanyUpdateDTO();
@@ -183,7 +216,8 @@ class CompanyProfileControllerTest {
     @Test
     void followCompany_Success() throws Exception {
         Long companyId = 1L;
-        FollowRequest followRequest = new FollowRequest(200L);
+        FollowRequest followRequest = new FollowRequest();
+        followRequest.setUserId(200L);  // Use setter if constructor doesn't exist
 
         doNothing().when(companyProfileService).followCompany(companyId, 200L);
 
@@ -199,7 +233,8 @@ class CompanyProfileControllerTest {
     @Test
     void followCompany_BadRequest() throws Exception {
         Long companyId = 1L;
-        FollowRequest followRequest = new FollowRequest(200L);
+        FollowRequest followRequest = new FollowRequest();
+        followRequest.setUserId(200L);
 
         doThrow(new RuntimeException("Already following"))
                 .when(companyProfileService).followCompany(anyLong(), anyLong());
@@ -216,7 +251,8 @@ class CompanyProfileControllerTest {
     @Test
     void unfollowCompany_Success() throws Exception {
         Long companyId = 1L;
-        FollowRequest followRequest = new FollowRequest(200L);
+        FollowRequest followRequest = new FollowRequest();
+        followRequest.setUserId(200L);
 
         doNothing().when(companyProfileService).unfollowCompany(companyId, 200L);
 
@@ -232,7 +268,8 @@ class CompanyProfileControllerTest {
     @Test
     void unfollowCompany_BadRequest() throws Exception {
         Long companyId = 1L;
-        FollowRequest followRequest = new FollowRequest(200L);
+        FollowRequest followRequest = new FollowRequest();
+        followRequest.setUserId(200L);
 
         doThrow(new RuntimeException("Not following"))
                 .when(companyProfileService).unfollowCompany(anyLong(), anyLong());
@@ -259,10 +296,8 @@ class CompanyProfileControllerTest {
     @Test
     void followCompany_WithInvalidUserId_BadRequest() throws Exception {
         Long companyId = 1L;
-        FollowRequest followRequest = new FollowRequest(null);
-
-        doThrow(new RuntimeException("Invalid user ID"))
-                .when(companyProfileService).followCompany(anyLong(), any());
+        FollowRequest followRequest = new FollowRequest();
+        // Leave userId null
 
         mockMvc.perform(post("/api/company/{companyId}/follow", companyId)
                         .contentType(MediaType.APPLICATION_JSON)

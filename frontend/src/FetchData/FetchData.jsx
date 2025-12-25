@@ -2,12 +2,12 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config';
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true, // CRITICAL: Set to true for CORS to work properly
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 second timeout
+    baseURL: API_BASE_URL,
+    withCredentials: true, // CRITICAL: Set to true for CORS to work properly
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    timeout: 120000, // 120 second timeout
 });
 
 // Request interceptor to add JWT token if available

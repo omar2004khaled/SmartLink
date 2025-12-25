@@ -34,4 +34,7 @@ public interface JobRepository extends JpaRepository<Job,Long> {
                 @Param("minSalary") Integer minSalary,
                 @Param("maxSalary") Integer maxSalary
         );
+    @Query("SELECT j FROM Job j WHERE j.deadline > :deadline")
+    List<Job> findAllCurrentJobs( @Param("deadline") Instant deadline );
+
 }

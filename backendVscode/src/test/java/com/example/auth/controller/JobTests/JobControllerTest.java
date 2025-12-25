@@ -1,39 +1,33 @@
 package com.example.auth.controller.JobTests;
 
 import com.example.auth.controller.JobController;
-import com.example.auth.dto.JobDTO.JobRequest;
-import com.example.auth.dto.JobDTO.JobResponse;
-import com.example.auth.dto.JobDTO.JobUpdateRequest;
+import com.example.auth.dto.JobDTO.*;
 import com.example.auth.enums.ExperienceLevel;
 import com.example.auth.enums.JobType;
 import com.example.auth.enums.LocationType;
 import com.example.auth.service.JobServices.JobService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-public class JobControllerTest {
-
-    private MockMvc mockMvc;
+class JobControllerTest {
 
     @Mock
     private JobService jobService;
@@ -41,85 +35,665 @@ public class JobControllerTest {
     @InjectMocks
     private JobController jobController;
 
-    private ObjectMapper objectMapper;
+    private JobRequest jobRequest;
+    private JobUpdateRequest jobUpdateRequest;
+    private JobResponse jobResponse;
+    private Page<JobResponse> jobResponsePage;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(jobController).build();
-
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-    }
-
-    private JobResponse buildJobResponse(Long id) {
-        return JobResponse.builder()
-                .jobId(id)
+    void setUp() {
+        // Setup test data using enums
+        jobRequest = JobRequest.builder()
+                .companyId(1L)
                 .title("Software Engineer")
-                .description("Develop and maintain services")
-                .companyName("Tech Corp")
-                .jobLocation("Remote")
+                .description("Develop software applications")
                 .experienceLevel(ExperienceLevel.MID)
                 .jobType(JobType.FULL_TIME)
                 .locationType(LocationType.REMOTE)
-                .salaryMin(5000)
-                .salaryMax(9000)
-                .createdAt(Instant.now())
+                .jobLocation("New York")
+                .salaryMin(80000)
+                .salaryMax(120000)
                 .deadline(Instant.now().plusSeconds(86400))
                 .build();
+
+        jobUpdateRequest = JobUpdateRequest.builder()
+                .title("Senior Software Engineer")
+                .description("Senior development role")
+                .experienceLevel(ExperienceLevel.SENIOR)
+                .jobType(JobType.FULL_TIME)
+                .locationType(LocationType.HYBRID)
+                .jobLocation("San Francisco")
+                .salaryMin(100000)
+                .salaryMax(150000)
+                .deadline(Instant.now().plusSeconds(172800))
+                .build();
+
+        jobResponse = JobResponse.builder()
+                .jobId(1L)
+                .title("Software Engineer")
+                .description("Develop software applications")
+                .companyName("Tech Corp")
+                .jobLocation("New York")
+                .experienceLevel(ExperienceLevel.MID)
+                .jobType(JobType.FULL_TIME)
+                .locationType(LocationType.REMOTE)
+                .createdAt(Instant.now())
+                .salaryMin(80000)
+                .salaryMax(120000)
+                .deadline(Instant.now().plusSeconds(86400))
+                .build();
+
+        List<JobResponse> jobResponses = List.of(jobResponse);
+        jobResponsePage = new PageImpl<>(jobResponses, PageRequest.of(0, 10), jobResponses.size());
     }
 
     @Test
-    public void testCreateJob() throws Exception {
-        JobRequest jobRequest = new JobRequest();
-        jobRequest.setCompanyId(1L);
-        jobRequest.setTitle("Software Engineer");
-        jobRequest.setDescription("Backend work");
-        jobRequest.setExperienceLevel(ExperienceLevel.MID);
-        jobRequest.setJobType(JobType.FULL_TIME);
-        jobRequest.setLocationType(LocationType.REMOTE);
+    void createJob_Success() {
+        // Arrange
+        when(jobService.createJob(any(JobRequest.class))).thenReturn(jobResponse);
 
-        JobResponse mockResponse = buildJobResponse(1L);
+        // Act
+        ResponseEntity<JobResponse> response = jobController.createJob(jobRequest);
 
-        when(jobService.createJob(any(JobRequest.class))).thenReturn(mockResponse);
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(jobResponse, response.getBody());
+        assertEquals("Software Engineer", response.getBody().getTitle());
+        assertEquals(ExperienceLevel.MID, response.getBody().getExperienceLevel());
+        assertEquals(JobType.FULL_TIME, response.getBody().getJobType());
+        assertEquals(LocationType.REMOTE, response.getBody().getLocationType());
 
-        mockMvc.perform(post("/jobs/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jobId").value(1))
-                .andExpect(jsonPath("$.title").value("Software Engineer"))
-                .andExpect(jsonPath("$.companyName").value("Tech Corp"));
-    }
-
-
-
-    @Test
-    public void testDeleteJob() throws Exception {
-        doNothing().when(jobService).deleteJob(1L);
-
-        mockMvc.perform(delete("/jobs/1"))
-                .andExpect(status().isNoContent());
+        verify(jobService, times(1)).createJob(jobRequest);
     }
 
     @Test
-    public void testUpdateJob() throws Exception {
-        JobUpdateRequest request = new JobUpdateRequest();
-        request.setTitle("Updated Title");
-        request.setDescription("Updated description");
-        request.setExperienceLevel(ExperienceLevel.SENIOR);
-        request.setJobType(JobType.FULL_TIME);
-        request.setLocationType(LocationType.HYBRID);
+    void createJob_WithDifferentEnums_Success() {
+        // Arrange
+        JobRequest contractJobRequest = JobRequest.builder()
+                .companyId(2L)
+                .title("Contract Developer")
+                .description("Contract development work")
+                .experienceLevel(ExperienceLevel.SENIOR)
+                .jobType(JobType.CONTRACT)
+                .locationType(LocationType.ONSITE)
+                .jobLocation("London")
+                .salaryMin(90000)
+                .salaryMax(130000)
+                .deadline(Instant.now().plusSeconds(259200))
+                .build();
 
-        JobResponse updatedResponse = buildJobResponse(1L);
-        updatedResponse.setTitle("Updated Title");
+        JobResponse contractJobResponse = JobResponse.builder()
+                .jobId(2L)
+                .title("Contract Developer")
+                .description("Contract development work")
+                .companyName("Contract Corp")
+                .jobLocation("London")
+                .experienceLevel(ExperienceLevel.SENIOR)
+                .jobType(JobType.CONTRACT)
+                .locationType(LocationType.ONSITE)
+                .createdAt(Instant.now())
+                .salaryMin(90000)
+                .salaryMax(130000)
+                .deadline(Instant.now().plusSeconds(259200))
+                .build();
 
-        when(jobService.updateJob(eq(1L), any(JobUpdateRequest.class))).thenReturn(updatedResponse);
+        when(jobService.createJob(any(JobRequest.class))).thenReturn(contractJobResponse);
 
-        mockMvc.perform(put("/jobs/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Updated Title"));
+        // Act
+        ResponseEntity<JobResponse> response = jobController.createJob(contractJobRequest);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(ExperienceLevel.SENIOR, response.getBody().getExperienceLevel());
+        assertEquals(JobType.CONTRACT, response.getBody().getJobType());
+        assertEquals(LocationType.ONSITE, response.getBody().getLocationType());
+
+        verify(jobService, times(1)).createJob(contractJobRequest);
+    }
+
+    @Test
+    void createJob_WithAllExperienceLevels_Success() {
+        // Test all experience levels
+        ExperienceLevel[] allLevels = ExperienceLevel.values();
+
+        for (ExperienceLevel level : allLevels) {
+            JobRequest request = JobRequest.builder()
+                    .companyId(1L)
+                    .title("Test Job - " + level)
+                    .experienceLevel(level)
+                    .jobType(JobType.FULL_TIME)
+                    .locationType(LocationType.REMOTE)
+                    .salaryMin(50000)
+                    .salaryMax(100000)
+                    .deadline(Instant.now().plusSeconds(86400))
+                    .build();
+
+            JobResponse response = JobResponse.builder()
+                    .jobId(1L)
+                    .title("Test Job - " + level)
+                    .experienceLevel(level)
+                    .jobType(JobType.FULL_TIME)
+                    .locationType(LocationType.REMOTE)
+                    .companyName("Test Corp")
+                    .createdAt(Instant.now())
+                    .salaryMin(50000)
+                    .salaryMax(100000)
+                    .deadline(Instant.now().plusSeconds(86400))
+                    .build();
+
+            when(jobService.createJob(request)).thenReturn(response);
+
+            ResponseEntity<JobResponse> result = jobController.createJob(request);
+
+            assertNotNull(result);
+            assertEquals(HttpStatus.OK, result.getStatusCode());
+            assertEquals(level, result.getBody().getExperienceLevel());
+        }
+    }
+
+    @Test
+    void createJob_WithAllJobTypes_Success() {
+        // Test all job types
+        JobType[] allTypes = JobType.values();
+
+        for (JobType type : allTypes) {
+            JobRequest request = JobRequest.builder()
+                    .companyId(1L)
+                    .title("Test Job - " + type)
+                    .experienceLevel(ExperienceLevel.MID)
+                    .jobType(type)
+                    .locationType(LocationType.REMOTE)
+                    .salaryMin(50000)
+                    .salaryMax(100000)
+                    .deadline(Instant.now().plusSeconds(86400))
+                    .build();
+
+            JobResponse response = JobResponse.builder()
+                    .jobId(1L)
+                    .title("Test Job - " + type)
+                    .experienceLevel(ExperienceLevel.MID)
+                    .jobType(type)
+                    .locationType(LocationType.REMOTE)
+                    .companyName("Test Corp")
+                    .createdAt(Instant.now())
+                    .salaryMin(50000)
+                    .salaryMax(100000)
+                    .deadline(Instant.now().plusSeconds(86400))
+                    .build();
+
+            when(jobService.createJob(request)).thenReturn(response);
+
+            ResponseEntity<JobResponse> result = jobController.createJob(request);
+
+            assertNotNull(result);
+            assertEquals(HttpStatus.OK, result.getStatusCode());
+            assertEquals(type, result.getBody().getJobType());
+        }
+    }
+
+    @Test
+    void createJob_WithAllLocationTypes_Success() {
+        // Test all location types
+        LocationType[] allLocationTypes = LocationType.values();
+
+        for (LocationType locationType : allLocationTypes) {
+            JobRequest request = JobRequest.builder()
+                    .companyId(1L)
+                    .title("Test Job - " + locationType)
+                    .experienceLevel(ExperienceLevel.MID)
+                    .jobType(JobType.FULL_TIME)
+                    .locationType(locationType)
+                    .jobLocation(locationType == LocationType.REMOTE ? "Remote" : "Office Location")
+                    .salaryMin(50000)
+                    .salaryMax(100000)
+                    .deadline(Instant.now().plusSeconds(86400))
+                    .build();
+
+            JobResponse response = JobResponse.builder()
+                    .jobId(1L)
+                    .title("Test Job - " + locationType)
+                    .experienceLevel(ExperienceLevel.MID)
+                    .jobType(JobType.FULL_TIME)
+                    .locationType(locationType)
+                    .jobLocation(locationType == LocationType.REMOTE ? "Remote" : "Office Location")
+                    .companyName("Test Corp")
+                    .createdAt(Instant.now())
+                    .salaryMin(50000)
+                    .salaryMax(100000)
+                    .deadline(Instant.now().plusSeconds(86400))
+                    .build();
+
+            when(jobService.createJob(request)).thenReturn(response);
+
+            ResponseEntity<JobResponse> result = jobController.createJob(request);
+
+            assertNotNull(result);
+            assertEquals(HttpStatus.OK, result.getStatusCode());
+            assertEquals(locationType, result.getBody().getLocationType());
+        }
+    }
+
+    @Test
+    void getCurrentJobs_Success() {
+        // Arrange
+        Long companyId = 1L;
+        int page = 0;
+        int size = 10;
+
+        when(jobService.getCurrentJobs(eq(companyId), eq(page), eq(size))).thenReturn(jobResponsePage);
+
+        // Act
+        ResponseEntity<Page<JobResponse>> response = jobController.getCurrentJobs(companyId, page, size);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getTotalElements());
+        assertEquals(ExperienceLevel.MID, response.getBody().getContent().get(0).getExperienceLevel());
+
+        verify(jobService, times(1)).getCurrentJobs(companyId, page, size);
+    }
+
+    @Test
+    void getEndedJobs_Success() {
+        // Arrange
+        Long companyId = 1L;
+        int page = 0;
+        int size = 10;
+
+        when(jobService.getEndedJobs(eq(companyId), eq(page), eq(size))).thenReturn(jobResponsePage);
+
+        // Act
+        ResponseEntity<Page<JobResponse>> response = jobController.getEndedJobs(companyId, page, size);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getTotalElements());
+        assertEquals(JobType.FULL_TIME, response.getBody().getContent().get(0).getJobType());
+
+        verify(jobService, times(1)).getEndedJobs(companyId, page, size);
+    }
+
+    @Test
+    void deleteJob_Success() {
+        // Arrange
+        Long jobId = 1L;
+        doNothing().when(jobService).deleteJob(jobId);
+
+        // Act
+        ResponseEntity<Void> response = jobController.deleteJob(jobId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+
+        verify(jobService, times(1)).deleteJob(jobId);
+    }
+
+    @Test
+    void updateJob_Success() {
+        // Arrange
+        Long jobId = 1L;
+
+        // Create an updated response with different enum values
+        JobResponse updatedResponse = JobResponse.builder()
+                .jobId(jobId)
+                .title("Senior Software Engineer")
+                .description("Senior development role")
+                .companyName("Tech Corp")
+                .jobLocation("San Francisco")
+                .experienceLevel(ExperienceLevel.SENIOR)
+                .jobType(JobType.FULL_TIME)
+                .locationType(LocationType.HYBRID)
+                .createdAt(Instant.now())
+                .salaryMin(100000)
+                .salaryMax(150000)
+                .deadline(Instant.now().plusSeconds(172800))
+                .build();
+
+        when(jobService.updateJob(eq(jobId), any(JobUpdateRequest.class))).thenReturn(updatedResponse);
+
+        // Act
+        ResponseEntity<JobResponse> response = jobController.updateJob(jobId, jobUpdateRequest);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(ExperienceLevel.SENIOR, response.getBody().getExperienceLevel());
+        assertEquals(LocationType.HYBRID, response.getBody().getLocationType());
+
+        verify(jobService, times(1)).updateJob(jobId, jobUpdateRequest);
+    }
+
+    @Test
+    void updateJob_WithEnumChangesOnly() {
+        // Arrange
+        Long jobId = 1L;
+
+        // Update only enum values
+        JobUpdateRequest enumUpdateRequest = JobUpdateRequest.builder()
+                .experienceLevel(ExperienceLevel.LEAD)
+                .jobType(JobType.PART_TIME)
+                .locationType(LocationType.ONSITE)
+                .build();
+
+        JobResponse updatedResponse = JobResponse.builder()
+                .jobId(jobId)
+                .title("Software Engineer") // Original title
+                .companyName("Tech Corp")
+                .experienceLevel(ExperienceLevel.LEAD)
+                .jobType(JobType.PART_TIME)
+                .locationType(LocationType.ONSITE)
+                .createdAt(Instant.now())
+                .salaryMin(80000)
+                .salaryMax(120000)
+                .deadline(Instant.now().plusSeconds(86400))
+                .build();
+
+        when(jobService.updateJob(eq(jobId), any(JobUpdateRequest.class))).thenReturn(updatedResponse);
+
+        // Act
+        ResponseEntity<JobResponse> response = jobController.updateJob(jobId, enumUpdateRequest);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(ExperienceLevel.LEAD, response.getBody().getExperienceLevel());
+        assertEquals(JobType.PART_TIME, response.getBody().getJobType());
+        assertEquals(LocationType.ONSITE, response.getBody().getLocationType());
+
+        verify(jobService, times(1)).updateJob(jobId, enumUpdateRequest);
+    }
+
+    @Test
+    void createJob_WithNullRequest_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> jobController.createJob(null));
+    }
+
+    @Test
+    void getCurrentJobs_WithNegativePage() {
+        // Arrange
+        Long companyId = 1L;
+        int page = -1;
+        int size = 10;
+
+        when(jobService.getCurrentJobs(eq(companyId), eq(page), eq(size))).thenReturn(jobResponsePage);
+
+        // Act
+        ResponseEntity<Page<JobResponse>> response = jobController.getCurrentJobs(companyId, page, size);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        verify(jobService, times(1)).getCurrentJobs(companyId, page, size);
+    }
+
+    @Test
+    void deleteJob_WithNullJobId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> jobController.deleteJob(null));
+    }
+
+    @Test
+    void updateJob_WithNullJobId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> jobController.updateJob(null, jobUpdateRequest));
+    }
+
+    @Test
+    void updateJob_WithNullRequest_ShouldThrowException() {
+        // Arrange
+        Long jobId = 1L;
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> jobController.updateJob(jobId, null));
+    }
+
+    @Test
+    void testEnumSerializationInResponses() {
+        // Arrange
+        JobResponse responseWithEnums = JobResponse.builder()
+                .jobId(1L)
+                .title("Test Job")
+                .experienceLevel(ExperienceLevel.EXECUTIVE)
+                .jobType(JobType.INTERNSHIP)
+                .locationType(LocationType.HYBRID)
+                .companyName("Test Corp")
+                .createdAt(Instant.now())
+                .salaryMin(50000)
+                .salaryMax(100000)
+                .deadline(Instant.now().plusSeconds(86400))
+                .build();
+
+        when(jobService.createJob(any(JobRequest.class))).thenReturn(responseWithEnums);
+
+        // Act
+        ResponseEntity<JobResponse> response = jobController.createJob(jobRequest);
+
+        // Assert
+        assertNotNull(response.getBody());
+        assertEquals(ExperienceLevel.EXECUTIVE, response.getBody().getExperienceLevel());
+        assertEquals(JobType.INTERNSHIP, response.getBody().getJobType());
+        assertEquals(LocationType.HYBRID, response.getBody().getLocationType());
+    }
+
+    @Test
+    void testMultipleJobsWithDifferentEnums() {
+        // Arrange
+        JobResponse job1 = JobResponse.builder()
+                .jobId(1L)
+                .title("Entry Level Developer")
+                .experienceLevel(ExperienceLevel.ENTRY)
+                .jobType(JobType.INTERNSHIP)
+                .locationType(LocationType.REMOTE)
+                .companyName("Startup Inc")
+                .createdAt(Instant.now())
+                .salaryMin(30000)
+                .salaryMax(50000)
+                .deadline(Instant.now().plusSeconds(86400))
+                .build();
+
+        JobResponse job2 = JobResponse.builder()
+                .jobId(2L)
+                .title("Lead Architect")
+                .experienceLevel(ExperienceLevel.LEAD)
+                .jobType(JobType.FULL_TIME)
+                .locationType(LocationType.ONSITE)
+                .companyName("Enterprise Corp")
+                .createdAt(Instant.now())
+                .salaryMin(150000)
+                .salaryMax(250000)
+                .deadline(Instant.now().plusSeconds(172800))
+                .build();
+
+        JobResponse job3 = JobResponse.builder()
+                .jobId(3L)
+                .title("Freelance Designer")
+                .experienceLevel(ExperienceLevel.SENIOR)
+                .jobType(JobType.FREELANCE)
+                .locationType(LocationType.HYBRID)
+                .companyName("Creative Agency")
+                .createdAt(Instant.now())
+                .salaryMin(80000)
+                .salaryMax(120000)
+                .deadline(Instant.now().plusSeconds(259200))
+                .build();
+
+        List<JobResponse> mixedJobs = List.of(job1, job2, job3);
+        Page<JobResponse> mixedPage = new PageImpl<>(mixedJobs, PageRequest.of(0, 10), mixedJobs.size());
+
+        Long companyId = 1L;
+        when(jobService.getCurrentJobs(eq(companyId), eq(0), eq(10))).thenReturn(mixedPage);
+
+        // Act
+        ResponseEntity<Page<JobResponse>> response = jobController.getCurrentJobs(companyId, 0, 10);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(3, response.getBody().getTotalElements());
+
+        List<JobResponse> content = response.getBody().getContent();
+        assertEquals(ExperienceLevel.ENTRY, content.get(0).getExperienceLevel());
+        assertEquals(JobType.INTERNSHIP, content.get(0).getJobType());
+
+        assertEquals(ExperienceLevel.LEAD, content.get(1).getExperienceLevel());
+        assertEquals(LocationType.ONSITE, content.get(1).getLocationType());
+
+        assertEquals(JobType.FREELANCE, content.get(2).getJobType());
+        assertEquals(LocationType.HYBRID, content.get(2).getLocationType());
+    }
+
+    @Test
+    void getCurrentJobs_WithMixedEnumValues() {
+        // Arrange
+        Long companyId = 1L;
+
+        // Create jobs with different enum combinations
+        List<com.example.auth.dto.JobDTO.JobResponse> jobs = List.of(
+                com.example.auth.dto.JobDTO.JobResponse.builder()
+                        .jobId(1L)
+                        .title("Junior Developer")
+                        .experienceLevel(ExperienceLevel.JUNIOR)
+                        .jobType(JobType.FULL_TIME)
+                        .locationType(LocationType.REMOTE)
+                        .companyName("Company A")
+                        .createdAt(Instant.now())
+                        .salaryMin(40000)
+                        .salaryMax(60000)
+                        .deadline(Instant.now().plusSeconds(86400))
+                        .build(),
+                com.example.auth.dto.JobDTO.JobResponse.builder()
+                        .jobId(2L)
+                        .title("Senior Consultant")
+                        .experienceLevel(ExperienceLevel.SENIOR)
+                        .jobType(JobType.CONTRACT)
+                        .locationType(LocationType.HYBRID)
+                        .companyName("Company B")
+                        .createdAt(Instant.now())
+                        .salaryMin(120000)
+                        .salaryMax(180000)
+                        .deadline(Instant.now().plusSeconds(172800))
+                        .build(),
+                com.example.auth.dto.JobDTO.JobResponse.builder()
+                        .jobId(3L)
+                        .title("Part-time Assistant")
+                        .experienceLevel(ExperienceLevel.ENTRY)
+                        .jobType(JobType.PART_TIME)
+                        .locationType(LocationType.ONSITE)
+                        .companyName("Company C")
+                        .createdAt(Instant.now())
+                        .salaryMin(20000)
+                        .salaryMax(30000)
+                        .deadline(Instant.now().plusSeconds(259200))
+                        .build()
+        );
+
+        Page<com.example.auth.dto.JobDTO.JobResponse> page = new PageImpl<>(jobs, PageRequest.of(0, 10), jobs.size());
+        when(jobService.getCurrentJobs(eq(companyId), eq(0), eq(10))).thenReturn(page);
+
+        // Act
+        ResponseEntity<Page<com.example.auth.dto.JobDTO.JobResponse>> response = jobController.getCurrentJobs(companyId, 0, 10);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(3, response.getBody().getTotalElements());
+
+        // Verify enum values are correctly returned
+        List<com.example.auth.dto.JobDTO.JobResponse> content = response.getBody().getContent();
+        assertEquals(ExperienceLevel.JUNIOR, content.get(0).getExperienceLevel());
+        assertEquals(JobType.FULL_TIME, content.get(0).getJobType());
+        assertEquals(LocationType.REMOTE, content.get(0).getLocationType());
+
+        assertEquals(ExperienceLevel.SENIOR, content.get(1).getExperienceLevel());
+        assertEquals(JobType.CONTRACT, content.get(1).getJobType());
+        assertEquals(LocationType.HYBRID, content.get(1).getLocationType());
+
+        assertEquals(ExperienceLevel.ENTRY, content.get(2).getExperienceLevel());
+        assertEquals(JobType.PART_TIME, content.get(2).getJobType());
+        assertEquals(LocationType.ONSITE, content.get(2).getLocationType());
+    }
+
+    @Test
+    void getEndedJobs_WithNoJobs_ReturnsEmptyPage() {
+        // Arrange
+        Long companyId = 999L;
+        Page<com.example.auth.dto.JobDTO.JobResponse> emptyPage = new PageImpl<>(Collections.emptyList());
+
+        when(jobService.getEndedJobs(eq(companyId), anyInt(), anyInt())).thenReturn(emptyPage);
+
+        // Act
+        ResponseEntity<Page<com.example.auth.dto.JobDTO.JobResponse>> response = jobController.getEndedJobs(companyId, 0, 10);
+
+        // Assert
+        assertNotNull(response);
+        assertTrue(response.getBody().isEmpty());
+        assertEquals(0, response.getBody().getTotalElements());
+    }
+
+    @Test
+    void deleteJob_WithInvalidId_ShouldPropagateException() {
+        // Arrange
+        Long invalidJobId = 999L;
+        doThrow(new RuntimeException("Job not found")).when(jobService).deleteJob(invalidJobId);
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> jobController.deleteJob(invalidJobId));
+
+        verify(jobService, times(1)).deleteJob(invalidJobId);
+    }
+
+    @Test
+    void testEnumValuesInUpdateRequests() {
+        // Test that all enum values can be used in update requests
+        Long jobId = 1L;
+
+        for (ExperienceLevel expLevel : ExperienceLevel.values()) {
+            for (JobType jobType : JobType.values()) {
+                for (LocationType locType : LocationType.values()) {
+                    com.example.auth.dto.JobDTO.JobUpdateRequest updateRequest =
+                            com.example.auth.dto.JobDTO.JobUpdateRequest.builder()
+                                    .experienceLevel(expLevel)
+                                    .jobType(jobType)
+                                    .locationType(locType)
+                                    .title("Updated Title")
+                                    .build();
+
+                    com.example.auth.dto.JobDTO.JobResponse updatedResponse =
+                            com.example.auth.dto.JobDTO.JobResponse.builder()
+                                    .jobId(jobId)
+                                    .title("Updated Title")
+                                    .experienceLevel(expLevel)
+                                    .jobType(jobType)
+                                    .locationType(locType)
+                                    .companyName("Test Corp")
+                                    .createdAt(Instant.now())
+                                    .salaryMin(50000)
+                                    .salaryMax(100000)
+                                    .deadline(Instant.now().plusSeconds(86400))
+                                    .build();
+
+                    when(jobService.updateJob(eq(jobId), any(com.example.auth.dto.JobDTO.JobUpdateRequest.class)))
+                            .thenReturn(updatedResponse);
+
+                    ResponseEntity<com.example.auth.dto.JobDTO.JobResponse> response =
+                            jobController.updateJob(jobId, updateRequest);
+
+                    assertNotNull(response);
+                    assertEquals(expLevel, response.getBody().getExperienceLevel());
+                    assertEquals(jobType, response.getBody().getJobType());
+                    assertEquals(locType, response.getBody().getLocationType());
+                }
+
+            }
+        }
     }
 }

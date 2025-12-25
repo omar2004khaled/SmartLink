@@ -50,6 +50,7 @@ public class SecurityConfig {
                                                                 "/Post/**", "/comment/**", "/jobs/**",
                                                                 "/graphql", "/apply/**", "/reactions/**",
                                                                 "/api/search/**", "/api/connections/**",
+                                                                "/gemini/**",
                                                                 "/api/notifications/**",
                                                                 "/ws/**", "/error", "/login/**","/api/messages/**")
                                                 .permitAll()

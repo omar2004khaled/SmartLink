@@ -6,6 +6,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 class JwtServiceTest {
 
@@ -40,5 +41,21 @@ class JwtServiceTest {
         Thread.sleep(100);
 
         assertFalse(jwtService.isTokenValid(token, "bob@example.com"));
+    }
+
+    @Test
+    void testNullToken() {
+        JwtService jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "jwtSecret", "very_secret_long_key_replace_this_make_it_very_long_and_secure");
+
+        assertThrows(Exception.class, () -> jwtService.extractEmail(null));
+    }
+
+    @Test
+    void testInvalidToken() {
+        JwtService jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "jwtSecret", "very_secret_long_key_replace_this_make_it_very_long_and_secure");
+
+        assertThrows(Exception.class, () -> jwtService.extractEmail("invalid.token.here"));
     }
 }

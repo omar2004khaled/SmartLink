@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { Plus } from 'lucide-react';
 import CompanyNavbar from './CompanyNavbar';
 import Posts from './Posts';
 import PostComposotion from '../PostComposotion/PostComposotion';
+import RecommendJobButton from './RecommendJobButton';
 import './MainPage.css';
 
 const CompanyHome = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
-
+  const [userId, setUserId] = useState(null);
+  useEffect(() => {
+    const id = localStorage.getItem('userId');
+    if (id) {
+      setUserId(parseInt(id));
+    }
+  }, []);
   return (
     <div className="home-page">
       <CompanyNavbar />
@@ -18,6 +25,7 @@ const CompanyHome = () => {
             <h1 className="home-title">Company Dashboard</h1>
             <p className="home-subtitle">Welcome back! Manage your company presence and connect with talent.</p>
           </div>
+          
         </div>
 
         <div className="main-content">
