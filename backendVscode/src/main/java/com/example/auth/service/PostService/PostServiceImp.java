@@ -47,7 +47,7 @@ public class PostServiceImp implements PostService {
         this.notificationService = notificationService;
         this.connectionRepository = connectionRepository;
         this.redisService = redisService;
-        this.companyFollowerRepo=companyFollowerRepo;
+        this.companyFollowerRepo = companyFollowerRepo;
     }
 
     @Override
@@ -127,7 +127,8 @@ public class PostServiceImp implements PostService {
         if (attachments != null) {
             for (Attachment attachment : attachments) {
                 // Skip attachments without a URL
-                if (attachment != null && attachment.getAttachmentURL() != null && !attachment.getAttachmentURL().isBlank()) {
+                if (attachment != null && attachment.getAttachmentURL() != null
+                        && !attachment.getAttachmentURL().isBlank()) {
                     Attachment saved = attachmentService.save(attachment);
                     savedAttachments.add(saved);
                     PostAttchment postAttchment = new PostAttchment(
@@ -153,6 +154,7 @@ public class PostServiceImp implements PostService {
 
         return answer;
     }
+
     private void notifyConnectedFriendsAboutNewPost(Long userId, Long postId) {
 
         try {
@@ -188,7 +190,8 @@ public class PostServiceImp implements PostService {
         try {
             // Get the post to compute its score
             Optional<Post> postOpt = postRepository.findById(postId);
-            if (!postOpt.isPresent()) return;
+            if (!postOpt.isPresent())
+                return;
 
             Post post = postOpt.get();
 
@@ -253,7 +256,8 @@ public class PostServiceImp implements PostService {
             List<Attachment> savedAttachments = new ArrayList<>();
             for (Attachment attachment : attachments) {
                 // Skip attachments without a URL
-                if (attachment == null || attachment.getAttachmentURL() == null || attachment.getAttachmentURL().isBlank()) {
+                if (attachment == null || attachment.getAttachmentURL() == null
+                        || attachment.getAttachmentURL().isBlank()) {
                     continue;
                 }
                 if (attachment.getAttachId() != null) { // edit exisiting attachment
