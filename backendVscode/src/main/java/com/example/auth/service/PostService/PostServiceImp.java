@@ -123,12 +123,18 @@ public class PostServiceImp implements PostService {
 
         post = postRepository.save(post);
 
-        for (Attachment attachment : attachments) {
-            Attachment saved = attachmentService.save(attachment);
-            savedAttachments.add(saved);
-            PostAttchment postAttchment = new PostAttchment(
-                    new PostAttachmentKey(post.getPostId(), saved.getAttachId().longValue()));
-            postAttachmentService.save(postAttchment);
+        // Only save attachments if they exist and have a valid URL
+        if (attachments != null) {
+            for (Attachment attachment : attachments) {
+                // Skip attachments without a URL
+                if (attachment != null && attachment.getAttachmentURL() != null && !attachment.getAttachmentURL().isBlank()) {
+                    Attachment saved = attachmentService.save(attachment);
+                    savedAttachments.add(saved);
+                    PostAttchment postAttchment = new PostAttchment(
+                            new PostAttachmentKey(post.getPostId(), saved.getAttachId().longValue()));
+                    postAttachmentService.save(postAttchment);
+                }
+            }
         }
 
         String userType = userRepository.findById(post.getUserId())
@@ -246,6 +252,10 @@ public class PostServiceImp implements PostService {
             List<Attachment> attachments = postDTO.getAttachments();
             List<Attachment> savedAttachments = new ArrayList<>();
             for (Attachment attachment : attachments) {
+                // Skip attachments without a URL
+                if (attachment == null || attachment.getAttachmentURL() == null || attachment.getAttachmentURL().isBlank()) {
+                    continue;
+                }
                 if (attachment.getAttachId() != null) { // edit exisiting attachment
                     attachmentService.updateAttachmentById(attachment);
                     savedAttachments.add(attachment);
